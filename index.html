@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Game Sound Effect Generator — Eastern &amp; Retro SFX | Lingyin</title>
+<meta name="description" content="Generate royalty-free game sound effects in your browser: sword qi, guqin, temple bells, thunder, coins, jumps, explosions. Export WAV, a 10-sound pack, or drop-in JavaScript. No sign-up, free for commercial use.">
+<link rel="canonical" href="https://2365836149-sketch.github.io/lingyin-sfx/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lingyin SFX — free game sound effect generator">
+<meta property="og:description" content="Sword qi, guqin, temple bells, thunder, coins, hits, explosions. Export WAV or drop-in JavaScript, or let your AI agent generate them via MCP. Free for commercial use.">
+<meta property="og:url" content="https://2365836149-sketch.github.io/lingyin-sfx/">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="seal" aria-hidden="true">灵</span>
+    <div>
+      <div class="name">Lingyin SFX</div>
+      <div class="tag" data-t="tagline"></div>
+    </div>
+  </div>
+  <button id="lang" class="link"></button>
+</header>
+
+<main class="app">
+  <aside class="presets">
+    <h2 data-t="east"></h2>
+    <div id="group-east" class="grid"></div>
+    <h2 data-t="general"></h2>
+    <div id="group-general" class="grid"></div>
+  </aside>
+
+  <section class="stage">
+    <div class="title-row">
+      <h1 id="sound-name"></h1>
+      <span id="dur" class="muted"></span>
+    </div>
+    <canvas id="wave" title="Play"></canvas>
+    <div class="actions">
+      <button id="btn-play" class="primary" data-t="play"></button>
+      <button id="btn-mutate" data-t="mutate"></button>
+      <button id="btn-new" data-t="fresh"></button>
+      <span class="sep"></span>
+      <button id="btn-wav" data-t="wav"></button>
+      <button id="btn-pack" data-t="pack"></button>
+      <button id="btn-code" class="accent" data-t="code"></button>
+      <button id="btn-share" class="link" data-t="share"></button>
+    </div>
+    <p class="muted small" data-t="keys"></p>
+
+    <div id="history-wrap" class="history" hidden>
+      <span class="muted small" data-t="history"></span>
+      <div id="history"></div>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <h3 data-t="layers"></h3>
+        <div id="layer-tabs" class="tabs"></div>
+        <div id="layer-fields" class="fields"></div>
+      </div>
+      <div class="panel">
+        <h3 data-t="effects"></h3>
+        <div id="fx-fields" class="fields"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<section class="about">
+  <p class="license" data-t="license"></p>
+  <div class="i18n" data-lang="en">
+    <h2>How it works</h2>
+    <p>Every sound is synthesized live in your browser with the Web Audio API. Nothing is recorded or sampled, so there is nothing to license. Pick a preset, press <b>Mutate</b> until it fits, then fine-tune the layers.</p>
+    <h2>Made for AI-assisted game development</h2>
+    <p><b>Copy JS</b> gives you a small, dependency-free snippet that plays the exact same sound. Paste it into a game written with Claude, Cursor or by hand: no audio files to load or host.</p>
+    <h2>Let your AI agent make the sounds</h2>
+    <p>The same engine runs as a local MCP server: no API key, no network, no cost per sound. In Claude Code:</p>
+    <pre class="cmd">claude mcp add lingyin-sfx -- npx -y -p lingyin-sfx lingyin-sfx-mcp</pre>
+    <p>Then ask "add a coin sound and a hit sound to my game". Prefer the command line? <code>npx lingyin-sfx coin --out assets/sfx/coin.wav</code>. Details for agents: <a href="llms.txt">llms.txt</a>.</p>
+    <h2>Eastern sounds</h2>
+    <p>Wuxia and xianxia games need sounds that stock libraries rarely have: sword qi, guqin plucks, temple bells, gongs, talismans and heavenly tribulation thunder. Melodic presets use the pentatonic scale, so every combination stays in tune.</p>
+  </div>
+  <div class="i18n" data-lang="zh" hidden>
+    <h2>原理</h2>
+    <p>所有声音都在你的浏览器里用 Web Audio 实时合成，没有录音也没有采样，不存在版权问题。选一个预设，点「变体」直到满意，再细调各个音层。</p>
+    <h2>为 AI 写游戏而做</h2>
+    <p>「复制 JS」会给你一小段不依赖任何库的代码，播放出来和这里听到的完全一样。粘进用 Claude、Cursor 或手写的游戏里就能用，不用加载或托管音频文件。</p>
+    <h2>让 AI agent 直接生成音效</h2>
+    <p>同一个合成引擎也能作为本地 MCP 服务运行：不需要 API key、不联网、每个声音零成本。在 Claude Code 里：</p>
+    <pre class="cmd">claude mcp add lingyin-sfx -- npx -y -p lingyin-sfx lingyin-sfx-mcp</pre>
+    <p>然后说"给我的游戏加一个金币音效和一个受击音效"就行。也可以用命令行：<code>npx lingyin-sfx coin --out assets/sfx/coin.wav</code>。给 agent 看的说明：<a href="llms.txt">llms.txt</a>。</p>
+    <h2>东方音效</h2>
+    <p>武侠、修仙游戏需要的剑气、古琴、寺钟、铜锣、符箓、天雷，在普通音效库里很难找到。有旋律的预设都用五声音阶，怎么组合都不会走调。</p>
+  </div>
+</section>
+
+<dialog id="code-dlg">
+  <h3 data-t="codeTitle"></h3>
+  <p class="muted small" data-t="codeHint"></p>
+  <textarea id="code-text" readonly spellcheck="false"></textarea>
+  <div class="actions">
+    <button id="code-copy" class="primary" data-t="copy"></button>
+    <button id="code-close" data-t="close"></button>
+  </div>
+</dialog>
+
+<script src="engine.js"></script>
+<script src="presets.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

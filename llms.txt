@@ -1,0 +1,25 @@
+# Lingyin SFX
+
+> Free procedural game sound effect generator. Eastern (wuxia/xianxia) and general game sounds, synthesized with Web Audio in the browser or locally in Node. Output is WAV or a dependency-free JavaScript snippet. Generated sounds are free for commercial use, no attribution required. No sign-up, no API key.
+
+## Use it from an AI coding agent
+
+- MCP server (local, stdio, no network): `npx -y -p lingyin-sfx lingyin-sfx-mcp`
+  - Claude Code: `claude mcp add lingyin-sfx -- npx -y -p lingyin-sfx lingyin-sfx-mcp`
+  - Tools: `list_presets`, `generate_sfx` (writes WAV files, returns seeds and patch JSON), `render_patch` (custom patch to WAV), `get_js_code` (one JS snippet with playX() functions)
+- CLI: `npx lingyin-sfx <preset> --out assets/sfx/name.wav [--count n] [--seed n] [--js src/sfx.js]`; `npx lingyin-sfx list`
+
+## Presets
+
+Eastern: swordQi, guqin, bell, gong, spell, thunder, breakthrough, talisman, alchemy, chime, flute, qiGather
+General: coin, pickup, click, confirm, error, jump, hit, explosion, laser, powerUp, levelUp, whoosh
+
+Each call gives a new variation. Pass the returned seed to reproduce a sound exactly.
+
+## Web editor links
+
+The editor URL fragment holds the sound: `/#<presetId>.<base64url(JSON patch)>`. Opening it loads that exact sound with sliders for fine-tuning. `/#<presetId>` alone opens a fresh random sound from that preset.
+
+## Patch format
+
+`{ layers: [...], reverb 0-1, echo 0-0.9, echoTime s, drive 0-1, crush 0|1-16 bits, gain 0-1 }`. Layer: `type` tone|fm|pluck|bell|noise, `wave`, `freq`→`freqEnd` Hz over `slideTime` s, `start`, `attack`, `decay` s, `vol`, `filter` none|lowpass|highpass|bandpass with `cutoff`→`cutoffEnd` over `sweepTime`, `q`, `vib` cents, `vibRate`, `rep`/`repGap`/`repStep`/`scale` penta|chromatic, `unison`/`detune`, `fmRatio`/`fmIndex`/`fmDecay`.

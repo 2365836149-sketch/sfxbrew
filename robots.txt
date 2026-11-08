@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /node/
+
+Sitemap: https://2365836149-sketch.github.io/lingyin-sfx/sitemap.xml
