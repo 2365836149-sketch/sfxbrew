@@ -16,17 +16,27 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand">
-    <img class="seal" src="favicon.svg" alt="" width="38" height="38">
-    <div>
-      <div class="name">SFX Brew</div>
-      <div class="tag" data-t="tagline"></div>
-    </div>
-  </div>
+  <a class="brand" href="/"><img class="seal" src="favicon.svg" alt="" width="38" height="38"><span class="name">SFX Brew</span></a>
+  <nav class="nav">
+    <a href="/" class="on" aria-current="page" data-t="navEditor"></a>
+    <a href="/sounds/" data-t="navLibrary"></a>
+    <a href="/packs/xianxia-game-sound-pack/" data-t="navPacks"></a>
+    <a href="#agents" data-t="navAgents"></a>
+  </nav>
   <button id="lang" class="link"></button>
 </header>
 
-<main class="app">
+<section class="hero">
+  <h1 data-t="heroTitle"></h1>
+  <p data-t="heroSub"></p>
+  <div class="cta">
+    <a class="btn primary" href="/sounds/" data-t="heroLibrary"></a>
+    <a class="btn" href="/packs/xianxia-game-sound-pack/" data-t="heroPack"></a>
+    <a class="link" href="#agents" data-t="heroAgents"></a>
+  </div>
+</section>
+
+<main class="app" id="editor">
   <aside class="presets">
     <h2 data-t="east"></h2>
     <div id="group-east" class="grid"></div>
@@ -36,7 +46,7 @@
 
   <section class="stage">
     <div class="title-row">
-      <h1 id="sound-name"></h1>
+      <h2 id="sound-name" class="sound-title"></h2>
       <span id="dur" class="muted"></span>
     </div>
     <canvas id="wave" title="Play"></canvas>
@@ -71,7 +81,7 @@
   </section>
 </main>
 
-<section class="about">
+<section class="about" id="agents">
   <p class="license" data-t="license"></p>
   <div class="i18n" data-lang="en">
     <h2>How it works</h2>
@@ -111,6 +121,7 @@
 
 <script src="engine.js"></script>
 <script src="presets.js"></script>
+<script src="shared.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

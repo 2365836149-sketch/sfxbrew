@@ -16,6 +16,10 @@
   const T = {
     en: {
       tagline: 'Free game sound effect generator · Eastern & retro',
+      navEditor: 'Editor', navLibrary: 'Sound Library', navPacks: 'Packs', navAgents: 'For AI Agents',
+      heroTitle: 'Game sound effects, brewed in your browser',
+      heroSub: 'Free, royalty-free SFX for indie and AI-built games: sword qi, guqin and temple bells next to coins, clicks, jumps and explosions. Every press brews a new variation. Download WAV, or copy a few lines of JavaScript that play the sound with no audio files at all.',
+      heroLibrary: 'Browse the sound library', heroPack: 'Xianxia sound pack', heroAgents: 'Use it from Claude Code / Cursor →',
       east: 'Eastern', general: 'General',
       play: 'Play', mutate: 'Mutate', fresh: 'New', wav: 'WAV', code: 'Copy JS', pack: 'Pack ×10', share: 'Share link',
       copied: 'Copied!', linkCopied: 'Link copied', packing: 'Rendering…',
@@ -40,6 +44,10 @@
     },
     zh: {
       tagline: '免费游戏音效生成器 · 东方风格与复古音效',
+      navEditor: '编辑器', navLibrary: '音效库', navPacks: '音效包', navAgents: '给 AI agent 用',
+      heroTitle: '在浏览器里熬制游戏音效',
+      heroSub: '给独立游戏和 AI 写的游戏用的免费、可商用音效：剑气、古琴、寺钟，也有金币、点击、跳跃、爆炸。每按一次都会生成一个新的变体。可以下载 WAV，也可以复制几行 JavaScript，不用任何音频文件就能播放。',
+      heroLibrary: '浏览音效库', heroPack: '修仙音效包', heroAgents: '在 Claude Code / Cursor 里用 →',
       east: '东方', general: '通用',
       play: '播放', mutate: '变体', fresh: '重新生成', wav: '下载 WAV', code: '复制 JS', pack: '打包 10 个', share: '分享链接',
       copied: '已复制！', linkCopied: '链接已复制', packing: '渲染中…',
@@ -207,29 +215,9 @@
     drawWave(buf.getChannelData(0), trimLength(buf.getChannelData(0), 22050));
   }
 
-  function trimLength(d, sr) {
-    let end = d.length - 1;
-    while (end > 0 && Math.abs(d[end]) < 0.0008) end--;
-    return Math.min(d.length, end + Math.floor(sr * 0.02));
-  }
-
+  const trimLength = SFXB.trimLength;
   function drawWave(d, n) {
-    const cv = $('#wave'), dpr = window.devicePixelRatio || 1;
-    const w = cv.clientWidth, h = cv.clientHeight;
-    cv.width = w * dpr; cv.height = h * dpr;
-    const g = cv.getContext('2d');
-    g.scale(dpr, dpr);
-    g.clearRect(0, 0, w, h);
-    const css = getComputedStyle(document.documentElement);
-    g.fillStyle = css.getPropertyValue('--wave').trim();
-    const mid = h / 2, per = Math.max(1, n / w);
-    for (let x = 0; x < w; x++) {
-      let lo = 0, hi = 0;
-      const a = Math.floor(x * per), b = Math.min(n, Math.floor((x + 1) * per));
-      for (let i = a; i < b; i++) { const v = d[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
-      const y1 = mid - hi * mid * 0.95, y2 = mid - lo * mid * 0.95;
-      g.fillRect(x, y1, 1, Math.max(1, y2 - y1));
-    }
+    SFXB.drawWave($('#wave'), d, n);
     $('#dur').textContent = (n / 22050).toFixed(2) + ' s';
   }
 
@@ -264,57 +252,15 @@
   }
 
   /* ==================== 导出：WAV ==================== */
-  function wavBytes(buf) {
-    const sr = buf.sampleRate, src = buf.getChannelData(0), n = trimLength(src, sr);
-    let peak = 0;
-    for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(src[i]));
-    const k = peak > 0.98 ? 0.98 / peak : 1;
-    const out = new DataView(new ArrayBuffer(44 + n * 2));
-    const str = (o, s) => { for (let i = 0; i < s.length; i++) out.setUint8(o + i, s.charCodeAt(i)); };
-    str(0, 'RIFF'); out.setUint32(4, 36 + n * 2, true); str(8, 'WAVE'); str(12, 'fmt ');
-    out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 1, true);
-    out.setUint32(24, sr, true); out.setUint32(28, sr * 2, true); out.setUint16(32, 2, true); out.setUint16(34, 16, true);
-    str(36, 'data'); out.setUint32(40, n * 2, true);
-    for (let i = 0; i < n; i++) out.setInt16(44 + i * 2, Math.max(-1, Math.min(1, src[i] * k)) * 0x7fff, true);
-    return new Uint8Array(out.buffer);
-  }
+  const wavBytes = SFXB.wavBytes, download = SFXB.download;
   const slug = () => T.en.p[presetId].toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  function download(bytes, name, type) {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([bytes], { type }));
-    a.download = name;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-  }
   async function exportWav() {
     const buf = await SFX.render(patch, 44100);
     download(wavBytes(buf), 'sfxbrew-' + slug() + '.wav', 'audio/wav');
   }
 
   /* ==================== 导出：zip（不压缩，够用） ==================== */
-  const CRC = (() => { const tb = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; tb[n] = c >>> 0; } return tb; })();
-  const crc32 = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
-  function zip(files) {
-    const enc = new TextEncoder(), parts = [], central = [];
-    let off = 0;
-    files.forEach(f => {
-      const name = enc.encode(f.name), crc = crc32(f.data), sz = f.data.length;
-      const h = new DataView(new ArrayBuffer(30));
-      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint32(14, crc, true);
-      h.setUint32(18, sz, true); h.setUint32(22, sz, true); h.setUint16(26, name.length, true);
-      parts.push(new Uint8Array(h.buffer), name, f.data);
-      const c = new DataView(new ArrayBuffer(46));
-      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint32(16, crc, true);
-      c.setUint32(20, sz, true); c.setUint32(24, sz, true); c.setUint16(28, name.length, true); c.setUint32(42, off, true);
-      central.push(new Uint8Array(c.buffer), name);
-      off += 30 + name.length + sz;
-    });
-    const cSize = central.reduce((s, b) => s + b.length, 0);
-    const e = new DataView(new ArrayBuffer(22));
-    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
-    e.setUint32(12, cSize, true); e.setUint32(16, off, true);
-    return new Blob([...parts, ...central, new Uint8Array(e.buffer)], { type: 'application/zip' });
-  }
+  const zip = SFXB.zip;
   async function exportPack() {
     const btn = $('#btn-pack'), label = btn.textContent;
     btn.disabled = true; btn.textContent = t('packing');
@@ -323,41 +269,28 @@
       const p = i === 1 ? patch : gen();
       files.push({ name: slug() + '-' + String(i).padStart(2, '0') + '.wav', data: wavBytes(await SFX.render(p, 44100)) });
     }
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(zip(files));
-    a.download = 'sfxbrew-' + slug() + '-pack.zip';
-    document.body.appendChild(a); a.click(); a.remove();
+    SFXB.downloadBlob(zip(files), 'sfxbrew-' + slug() + '-pack.zip');
     btn.disabled = false; btn.textContent = label;
   }
 
   /* ==================== 导出：JS 代码 ==================== */
-  function round(p) {
-    return JSON.parse(JSON.stringify(p, (k, v) => typeof v === 'number' ? +v.toPrecision(4) : v));
-  }
+  const round = SFXB.round;
   function codeFor() {
-    const name = T.en.p[presetId].replace(/[^A-Za-z0-9]+/g, '');
-    const fn = 'play' + name;
-    const engine = makeSfx.toString().split('\n').map(s => s.replace(/\s+$/, '')).join('\n');
-    return '// ' + T.en.p[presetId] + ' sound — made with SFX Brew (free for commercial use)\n' +
-      '// Call ' + fn + '() after a user click/tap.\n' +
-      'const sfxBrew = (' + engine + ')();\n' +
-      'const SOUND_' + name.toUpperCase() + ' = ' + JSON.stringify(round(patch)) + ';\n' +
-      'function ' + fn + '() { sfxBrew.play(SOUND_' + name.toUpperCase() + '); }\n';
+    return SFXB.jsCode([{ name: T.en.p[presetId], patch }]);
   }
   function showCode() {
     $('#code-text').value = codeFor();
     $('#code-dlg').showModal();
   }
   async function copy(text, btn, msg) {
-    try { await navigator.clipboard.writeText(text); } catch (e) { const ta = $('#code-text'); ta.select(); document.execCommand('copy'); }
+    await SFXB.copyText(text);
     const old = btn.textContent; btn.textContent = msg; setTimeout(() => btn.textContent = old, 1200);
   }
 
   /* ==================== 网址分享 ==================== */
   function writeHash() {
     try {
-      const s = btoa(unescape(encodeURIComponent(JSON.stringify(round(patch))))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      window.history.replaceState(null, '', '#' + presetId + '.' + s);
+      window.history.replaceState(null, '', SFXB.hashFor(presetId, patch));
     } catch (e) { /* ignore */ }
   }
   function readHash() {

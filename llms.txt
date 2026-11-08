@@ -16,6 +16,11 @@ General: coin, pickup, click, confirm, error, jump, hit, explosion, laser, power
 
 Each call gives a new variation. Pass the returned seed to reproduce a sound exactly.
 
+## Sound library pages
+
+- https://sfxbrew.com/sounds/ — all categories; each category page (e.g. /sounds/coin-sound-effect/) has 12 fixed variations to play, download as WAV, zip, or copy as JavaScript
+- Packs: https://sfxbrew.com/packs/xianxia-game-sound-pack/ and https://sfxbrew.com/packs/game-ui-sound-pack/
+
 ## Web editor links
 
 The editor URL fragment holds the sound: `/#<presetId>.<base64url(JSON patch)>`. Opening it loads that exact sound with sliders for fine-tuning. `/#<presetId>` alone opens a fresh random sound from that preset.
