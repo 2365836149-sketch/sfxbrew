@@ -36,6 +36,10 @@ Tools:
 
 Then just ask: *"add a coin sound and a hit sound to my game"*.
 
+## Agent skill
+
+A free SKILL.md that teaches your agent when and how to use SFX Brew: [skills/sfxbrew/SKILL.md](skills/sfxbrew/SKILL.md), also installable from [Agensi](https://www.agensi.io/skills/sfx-brew-game-sound-effects).
+
 ## CLI
 
 ```bash

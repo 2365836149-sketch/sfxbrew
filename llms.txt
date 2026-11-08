@@ -8,6 +8,7 @@
   - Claude Code: `claude mcp add sfxbrew -- npx -y -p sfxbrew sfxbrew-mcp`
   - Tools: `list_presets`, `generate_sfx` (writes WAV files, returns seeds and patch JSON), `render_patch` (custom patch to WAV), `get_js_code` (one JS snippet with playX() functions)
 - CLI: `npx sfxbrew <preset> --out assets/sfx/name.wav [--count n] [--seed n] [--js src/sfx.js]`; `npx sfxbrew list`
+- Agent skill (SKILL.md): https://github.com/2365836149-sketch/sfxbrew/tree/main/skills/sfxbrew , also on Agensi: https://www.agensi.io/skills/sfx-brew-game-sound-effects
 
 ## Presets
 

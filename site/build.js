@@ -142,6 +142,7 @@ ${cards(lang, items)}
     <pre class="cmd">npx sfxbrew ${id} --count 5 --out assets/sfx/${fileBase(id)}.wav</pre>
     <p>${esc(u.agentP2(t.name))}</p>
     <pre class="cmd">claude mcp add sfxbrew -- npx -y -p sfxbrew sfxbrew-mcp</pre>
+    <p>${esc(u.skillP)} <a href="https://www.agensi.io/skills/sfx-brew-game-sound-effects">Agensi</a> · <a href="https://github.com/2365836149-sketch/sfxbrew/tree/main/skills/sfxbrew">GitHub</a></p>
     <h2>${esc(u.licenseH)}</h2>
     <p>${esc(u.licenseP)}</p>
   </div>
