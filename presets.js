@@ -365,6 +365,53 @@
     return q;
   }
 
-  if (typeof window !== 'undefined') { window.SFX_PRESETS = PRESETS; window.SFX_MUTATE = mutate; window.SFX_SAMPLES = SAMPLES; }
-  if (typeof module !== 'undefined' && module.exports) module.exports = { PRESETS, mutate, SAMPLES };
+  /* ==================== 调整词 ====================
+     在当前声音上做一次有方向的整体调整（可以连点叠加）。每个函数返回新的 patch，不改原对象。
+     音高类参数：freq/freqEnd/freqPeak 乘系数，录音层改 pitch（半音）；滤波类：cutoff/cutoffEnd/cutoffPeak 乘系数。 */
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  function eachLayer(p, fn) { const q = JSON.parse(JSON.stringify(p)); q.layers.forEach(l => fn(l, q)); return q; }
+  const pitchBy = (l, ratio) => {
+    if (l.type === 'sample') { l.pitch = (l.pitch || 0) + 12 * Math.log2(ratio); if (l.pitchEnd != null) l.pitchEnd += 12 * Math.log2(ratio); return; }
+    if (l.type === 'noise') return;
+    l.freq = clamp(l.freq * ratio, 20, 12000); l.freqEnd = clamp(l.freqEnd * ratio, 20, 12000);
+    if (l.freqPeak) l.freqPeak = clamp(l.freqPeak * ratio, 20, 12000);
+  };
+  const cutoffBy = (l, ratio) => {
+    if (!l.filter || l.filter === 'none') return;
+    l.cutoff = clamp(l.cutoff * ratio, 40, 18000); l.cutoffEnd = clamp(l.cutoffEnd * ratio, 40, 18000);
+    if (l.cutoffPeak) l.cutoffPeak = clamp(l.cutoffPeak * ratio, 40, 18000);
+  };
+  const lengthBy = (l, ratio) => { l.decay = clamp(l.decay * ratio, 0.005, 10); if (l.hold) l.hold = clamp(l.hold * ratio, 0, 10); };
+  const TWEAKS = {
+    heavier: p => eachLayer(p, l => { pitchBy(l, 0.82); lengthBy(l, 1.2); cutoffBy(l, 0.85); }),
+    lighter: p => eachLayer(p, l => { pitchBy(l, 1.22); lengthBy(l, 0.85); cutoffBy(l, 1.15); }),
+    farther: p => { const q = eachLayer(p, l => { cutoffBy(l, 0.6); l.attack = clamp(l.attack * 1.5, 0.0005, 2); l.bright = clamp((l.bright == null ? 0.5 : l.bright) - 0.15, 0, 1); }); q.reverb = clamp(q.reverb + 0.2, 0, 0.9); q.gain = clamp(q.gain * 0.8, 0.05, 2); return q; },
+    closer: p => { const q = eachLayer(p, l => { cutoffBy(l, 1.25); l.attack = clamp(l.attack * 0.7, 0.0005, 2); }); q.reverb = clamp(q.reverb * 0.5, 0, 1); q.gain = clamp(q.gain * 1.12, 0.05, 2); return q; },
+    brighter: p => eachLayer(p, l => { cutoffBy(l, 1.5); if (l.type === 'string') l.bright = clamp((l.bright == null ? 0.5 : l.bright) + 0.2, 0, 1); }),
+    darker: p => eachLayer(p, l => { cutoffBy(l, 0.65); if (l.type === 'string') l.bright = clamp((l.bright == null ? 0.5 : l.bright) - 0.2, 0, 1); }),
+    longer: p => { const q = eachLayer(p, l => lengthBy(l, 1.4)); q.reverb = clamp(q.reverb + 0.08, 0, 0.9); return q; },
+    shorter: p => { const q = eachLayer(p, l => lengthBy(l, 0.65)); q.reverb = clamp(q.reverb * 0.7, 0, 1); return q; },
+    punchier: p => { const q = eachLayer(p, l => { l.attack = clamp(l.attack * 0.5, 0.0005, 2); }); q.drive = clamp((q.drive || 0) + 0.2, 0, 1); q.gain = clamp(q.gain * 0.8, 0.05, 2); return q; },
+    softer: p => { const q = eachLayer(p, l => { l.attack = clamp(l.attack * 1.6 + 0.004, 0.0005, 2); cutoffBy(l, 0.8); }); q.drive = clamp((q.drive || 0) - 0.25, 0, 1); q.crush = 0; q.gain = clamp(q.gain * 0.9, 0.05, 2); return q; },
+    magical: p => { const q = eachLayer(p, l => { if (l.type !== 'noise' && l.type !== 'sample') l.vib = clamp((l.vib || 0) + 8, 0, 100); }); q.reverb = clamp(q.reverb + 0.2, 0, 0.9); q.echo = clamp((q.echo || 0) + 0.15, 0, 0.6); q.echoTime = q.echoTime || 0.18; return q; },
+    retro: p => { const q = JSON.parse(JSON.stringify(p)); q.crush = q.crush ? clamp(q.crush - 1, 3, 16) : 7; q.reverb = q.reverb * 0.3; q.echo = 0; return q; }
+  };
+
+  /* 搜索用的关键词：中英文名 + 同义词 */
+  const KEYWORDS = {
+    swordQi: '剑 剑气 刀 挥剑 斩 sword slash blade qi katana', guqin: '古琴 琴 拨弦 弦 guqin zither pluck harp', bell: '钟 寺钟 铜钟 梵钟 铃 bell temple chime notification',
+    gong: '锣 铜锣 大锣 京剧 gong tam', spell: '施法 法术 魔法 技能 spell magic cast skill', thunder: '雷 天雷 雷声 渡劫 thunder storm rumble',
+    lightning: '霹雳 闪电 雷击 电 lightning strike electric zap', breakthrough: '突破 境界 渡劫 升级 飞升 breakthrough ascend realm prestige',
+    talisman: '符 符箓 燃烧 火 火焰 talisman fire burn crackle', alchemy: '丹 炼丹 药水 冒泡 气泡 potion bubble brew alchemy',
+    chime: '风铃 铃 发现 chime wind sparkle discover', flute: '笛 竹笛 笛子 flute dizi', qiGather: '聚气 蓄力 充能 气 charge energy qi',
+    pipa: '琵琶 拨弦 pipa lute', erhu: '二胡 胡琴 拉弦 悲伤 erhu fiddle sad', woodfish: '木鱼 敲 寺庙 点击 wooden fish block temple tok',
+    drum: '鼓 战鼓 擂鼓 打仗 drum war battle taiko', coin: '金币 钱 硬币 金钱 收入 coin money gold cash', pickup: '拾取 捡 道具 宝石 pickup item collect gem',
+    click: '点击 按钮 咔哒 click button tap ui', confirm: '确认 成功 好的 confirm ok success', error: '错误 失败 不行 error wrong fail deny',
+    jump: '跳 跳跃 弹跳 jump bounce hop', hit: '打 受击 打击 拳 伤害 hit punch impact damage', explosion: '爆炸 爆 炸弹 boom explosion bomb blast',
+    laser: '激光 枪 射击 激光枪 laser gun shoot blaster pew', powerUp: '强化 增益 变强 power up buff upgrade', levelUp: '升级 等级 成就 奖励 level up achievement reward',
+    whoosh: '挥动 风 呼 冲刺 whoosh swoosh swing dash wind'
+  };
+
+  if (typeof window !== 'undefined') { window.SFX_PRESETS = PRESETS; window.SFX_MUTATE = mutate; window.SFX_SAMPLES = SAMPLES; window.SFX_TWEAKS = TWEAKS; window.SFX_KEYWORDS = KEYWORDS; }
+  if (typeof module !== 'undefined' && module.exports) module.exports = { PRESETS, mutate, SAMPLES, TWEAKS, KEYWORDS };
 })();

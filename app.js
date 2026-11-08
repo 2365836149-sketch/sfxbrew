@@ -16,6 +16,13 @@
   const T = {
     en: {
       tagline: 'Free game sound effect generator · Eastern & retro',
+      search: 'Search sounds: sword, coin, gong…', noMatch: 'No preset matches. Try another word.',
+      tweakLabel: 'Adjust this sound:', undo: 'Undo',
+      tryNow: 'Click to hear', advanced: 'Fine-tune layers and effects',
+      prop1h: 'Free for commercial use', prop1: 'No sign-up, no attribution. Use the sounds in any game you sell.',
+      prop2h: 'Made in your browser', prop2: 'Every sound is generated on your device. Each click brews a new variation.',
+      prop3h: 'Built for AI coding agents', prop3: 'Claude Code, Cursor and others can generate and wire in sounds via MCP.',
+      tw: { heavier: 'Heavier', lighter: 'Lighter', farther: 'Farther', closer: 'Closer', brighter: 'Brighter', darker: 'Darker', longer: 'Longer', shorter: 'Shorter', punchier: 'Punchier', softer: 'Softer', magical: 'More magical', retro: 'More retro' },
       navEditor: 'Editor', navLibrary: 'Sound Library', navPacks: 'Packs', navAgents: 'For AI Agents',
       heroTitle: 'Game sound effects, brewed in your browser',
       heroSub: 'Free, royalty-free SFX for indie and AI-built games: sword qi, guqin and temple bells next to coins, clicks, jumps and explosions. Every press brews a new variation. Download WAV, or copy a few lines of JavaScript that play the sound with no audio files at all.',
@@ -44,6 +51,13 @@
     },
     zh: {
       tagline: '免费游戏音效生成器 · 东方风格与复古音效',
+      search: '搜索音效：剑、金币、锣……', noMatch: '没有匹配的预设，换个词试试。',
+      tweakLabel: '调整当前声音：', undo: '撤销',
+      tryNow: '点一下试听', advanced: '精细调节（音层和效果）',
+      prop1h: '免费可商用', prop1: '不用注册、不用署名，卖钱的游戏也能用。',
+      prop2h: '在浏览器里生成', prop2: '声音在你的设备上实时生成，每点一次都是新的变体。',
+      prop3h: '为 AI 写代码而做', prop3: 'Claude Code、Cursor 等可以通过 MCP 直接生成并接入音效。',
+      tw: { heavier: '更重', lighter: '更轻', farther: '更远', closer: '更近', brighter: '更亮', darker: '更暗', longer: '更长', shorter: '更短', punchier: '更有力', softer: '更柔和', magical: '更魔幻', retro: '更复古' },
       navEditor: '编辑器', navLibrary: '音效库', navPacks: '音效包', navAgents: '给 AI agent 用',
       heroTitle: '在浏览器里熬制游戏音效',
       heroSub: '给独立游戏和 AI 写的游戏用的免费、可商用音效：剑气、古琴、寺钟，也有金币、点击、跳跃、爆炸。每按一次都会生成一个新的变体。可以下载 WAV，也可以复制几行 JavaScript，不用任何音频文件就能播放。',
@@ -113,11 +127,13 @@
       PRESETS.filter(p => p.group === g).forEach(p => {
         const b = document.createElement('button');
         b.className = 'preset' + (p.id === presetId ? ' on' : '');
+        b.dataset.id = p.id;
         b.textContent = T[lang].p[p.id];
         b.onclick = () => { presetId = p.id; fresh(); };
         box.appendChild(b);
       });
     });
+    if ($('#preset-search') && $('#preset-search').value) filterPresets();
   }
 
   /* ==================== 滑杆 ==================== */
@@ -247,7 +263,7 @@
     recent = recent.slice(0, 10);
     renderHistory();
   }
-  function fresh() { remember(); setPatch(PRESETS.find(p => p.id === presetId).gen(), true); }
+  function fresh() { remember(); undoStack.length = 0; setPatch(PRESETS.find(p => p.id === presetId).gen(), true); renderTweaks(); }
   function mutate() { remember(); setPatch(window.SFX_MUTATE(patch), true); }
 
   function renderHistory() {
@@ -299,6 +315,70 @@
     const old = btn.textContent; btn.textContent = msg; setTimeout(() => btn.textContent = old, 1200);
   }
 
+  /* ==================== 首页精选音效 ==================== */
+  const FEATURED = ['swordQi', 'guqin', 'drum', 'lightning', 'coin', 'explosion', 'levelUp', 'click'];
+  function renderFeatured() {
+    const box = $('#featured');
+    box.innerHTML = '';
+    FEATURED.forEach(id => {
+      const b = document.createElement('button');
+      b.className = 'feat';
+      b.innerHTML = '<span class="feat-play">▶</span><span class="feat-name"></span>';
+      b.querySelector('.feat-name').textContent = T[lang].p[id];
+      b.onclick = () => {
+        presetId = id; remember(); undoStack.length = 0;
+        setPatch(PRESETS.find(p => p.id === id).gen(), true);
+        renderTweaks();
+        b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 600);
+      };
+      box.appendChild(b);
+    });
+  }
+
+  /* ==================== 调整词 / 撤销 / 搜索 ==================== */
+  const TWEAK_ORDER = ['heavier', 'lighter', 'farther', 'closer', 'brighter', 'darker', 'longer', 'shorter', 'punchier', 'softer', 'magical', 'retro'];
+  const undoStack = [];
+  function renderTweaks() {
+    const box = $('#tweak-buttons');
+    box.innerHTML = '';
+    TWEAK_ORDER.forEach(k => {
+      const b = document.createElement('button');
+      b.className = 'tweak';
+      b.textContent = T[lang].tw[k];
+      b.onclick = () => applyTweak(k);
+      box.appendChild(b);
+    });
+    $('#btn-undo').disabled = !undoStack.length;
+  }
+  function applyTweak(k) {
+    undoStack.push(JSON.parse(JSON.stringify(patch)));
+    if (undoStack.length > 30) undoStack.shift();
+    patch = window.SFX_TWEAKS[k](patch);
+    renderControls();
+    changed(true);
+    $('#btn-undo').disabled = false;
+  }
+  function undo() {
+    if (!undoStack.length) return;
+    patch = undoStack.pop();
+    renderControls();
+    changed(true);
+    $('#btn-undo').disabled = !undoStack.length;
+  }
+  function filterPresets() {
+    const q = $('#preset-search').value.trim().toLowerCase();
+    let shown = 0;
+    document.querySelectorAll('.preset').forEach(b => {
+      const id = b.dataset.id;
+      const hay = (window.SFX_KEYWORDS[id] + ' ' + T.en.p[id] + ' ' + T.zh.p[id] + ' ' + id).toLowerCase();
+      const ok = !q || q.split(/\s+/).every(w => hay.includes(w));
+      b.hidden = !ok;
+      if (ok) shown++;
+    });
+    document.querySelectorAll('.presets h2').forEach(h => { h.hidden = !!q; });
+    $('#search-empty').hidden = shown > 0;
+  }
+
   /* ==================== 网址分享 ==================== */
   function writeHash() {
     try {
@@ -328,11 +408,18 @@
       if (!el.dataset.hrefEn) el.dataset.hrefEn = el.getAttribute('href');
       el.setAttribute('href', lang === 'zh' ? el.dataset.hrefZh : el.dataset.hrefEn);
     });
-    if (patch) { renderPresets(); renderControls(); renderHistory(); $('#sound-name').textContent = T[lang].p[presetId]; }
+    $('#preset-search').placeholder = t('search');
+    if (patch) { renderPresets(); renderControls(); renderHistory(); renderTweaks(); renderFeatured(); $('#sound-name').textContent = T[lang].p[presetId]; }
   }
 
   /* ==================== 启动 ==================== */
   $('#btn-play').onclick = () => SFX.play(patch);
+  $('#btn-undo').onclick = undo;
+  $('#preset-search').addEventListener('input', filterPresets);
+  $('#preset-search').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { const b = [...document.querySelectorAll('.preset')].find(x => !x.hidden); if (b) b.click(); }
+    if (e.key === 'Escape') { e.target.value = ''; filterPresets(); }
+  });
   $('#btn-mutate').onclick = mutate;
   $('#btn-new').onclick = fresh;
   $('#btn-wav').onclick = exportWav;
@@ -355,4 +442,9 @@
   const fromUrl = readHash();
   applyLang();
   setPatch(fromUrl || PRESETS.find(p => p.id === presetId).gen(), false);
+  renderTweaks();
+  renderFeatured();
+  /* 精细调节默认收起；记住访客自己的选择 */
+  try { if (localStorage.getItem('sfxbrew-advanced') === '1') $('#advanced').open = true; } catch (e) { /* ignore */ }
+  $('#advanced').addEventListener('toggle', () => { try { localStorage.setItem('sfxbrew-advanced', $('#advanced').open ? '1' : '0'); } catch (e) { /* ignore */ } });
 })();

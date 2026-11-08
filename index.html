@@ -27,17 +27,30 @@
 </header>
 
 <section class="hero">
-  <h1 data-t="heroTitle"></h1>
-  <p data-t="heroSub"></p>
-  <div class="cta">
-    <a class="btn primary" href="/sounds/" data-href-zh="/zh/sounds/" data-t="heroLibrary"></a>
-    <a class="btn" href="/packs/xianxia-game-sound-pack/" data-href-zh="/zh/packs/xianxia-game-sound-pack/" data-t="heroPack"></a>
-    <a class="link" href="#agents" data-t="heroAgents"></a>
+  <div class="hero-text">
+    <h1 data-t="heroTitle"></h1>
+    <p data-t="heroSub"></p>
+    <div class="cta">
+      <a class="btn primary" href="/sounds/" data-href-zh="/zh/sounds/" data-t="heroLibrary"></a>
+      <a class="btn" href="/packs/xianxia-game-sound-pack/" data-href-zh="/zh/packs/xianxia-game-sound-pack/" data-t="heroPack"></a>
+      <a class="link" href="#agents" data-t="heroAgents"></a>
+    </div>
   </div>
+  <div class="featured">
+    <div class="featured-label" data-t="tryNow"></div>
+    <div id="featured" class="featured-grid"></div>
+  </div>
+</section>
+<section class="props">
+  <div><b data-t="prop1h"></b><span data-t="prop1"></span></div>
+  <div><b data-t="prop2h"></b><span data-t="prop2"></span></div>
+  <div><b data-t="prop3h"></b><span data-t="prop3"></span></div>
 </section>
 
 <main class="app" id="editor">
   <aside class="presets">
+    <input id="preset-search" class="search" type="search" autocomplete="off">
+    <p id="search-empty" class="muted small" hidden data-t="noMatch"></p>
     <h2 data-t="east"></h2>
     <div id="group-east" class="grid"></div>
     <h2 data-t="general"></h2>
@@ -62,11 +75,19 @@
     </div>
     <p class="muted small" data-t="keys"></p>
 
+    <div class="tweaks">
+      <span class="tweaks-label" data-t="tweakLabel"></span>
+      <div id="tweak-buttons" class="tweak-grid"></div>
+      <button id="btn-undo" class="link" data-t="undo" disabled></button>
+    </div>
+
     <div id="history-wrap" class="history" hidden>
       <span class="muted small" data-t="history"></span>
       <div id="history"></div>
     </div>
 
+    <details id="advanced" class="advanced">
+    <summary data-t="advanced"></summary>
     <div class="panels">
       <div class="panel">
         <h3 data-t="layers"></h3>
@@ -78,6 +99,7 @@
         <div id="fx-fields" class="fields"></div>
       </div>
     </div>
+    </details>
   </section>
 </main>
 
