@@ -479,7 +479,7 @@ const PRIVACY = {
       ['Hosting', 'The site is hosted on GitHub Pages. Like any web server, GitHub receives your IP address when you load a page and may keep it in its logs for security. See the GitHub Privacy Statement.'],
       ['Recordings and fonts', 'A few sounds play short CC0 recordings served from this site. No third-party fonts or embeds are loaded.'],
       ['Advertising', 'There are no ads on the site right now. If we add them, this page will be updated first and you will be asked for consent before any advertising cookies are used.'],
-      ['Contact', 'Questions about this policy: open an issue on GitHub (github.com/2365836149-sketch/sfxbrew).']
+      ['Contact', 'Questions about this policy or your data: email contact@sfxbrew.com, or open an issue on GitHub (github.com/2365836149-sketch/sfxbrew).']
     ] },
   zh: { h: '隐私政策', title: '隐私政策 | SFX Brew', desc: 'SFX Brew 存什么、收集什么：没有账号，没有追踪 cookie，声音都在你的浏览器里生成。', updated: '最后更新',
     body: [
@@ -489,7 +489,7 @@ const PRIVACY = {
       ['托管', '网站托管在 GitHub Pages。和所有网站服务器一样，你打开页面时 GitHub 会收到你的 IP 地址，并可能出于安全原因记录在日志里，详见 GitHub 隐私声明。'],
       ['录音和字体', '少数音效会播放本站提供的简短 CC0 录音。网站不加载任何第三方字体或嵌入内容。'],
       ['广告', '网站目前没有广告。如果以后加广告，会先更新本页，并在使用任何广告 cookie 之前征得你的同意。'],
-      ['联系', '对本政策有疑问，可以在 GitHub 上提 issue（github.com/2365836149-sketch/sfxbrew）。']
+      ['联系', '对本政策或你的数据有疑问，可以发邮件到 contact@sfxbrew.com，或者在 GitHub 上提 issue（github.com/2365836149-sketch/sfxbrew）。']
     ] }
 };
 function privacyPage(lang) {
