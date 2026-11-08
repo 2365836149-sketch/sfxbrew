@@ -17,6 +17,10 @@ General: coin, pickup, click, confirm, error, jump, hit, explosion, laser, power
 
 Each call gives a new variation. Pass the returned seed to reproduce a sound exactly.
 
+## Music lab
+
+- https://sfxbrew.com/lab/ (Chinese: /zh/lab/) — browser music studio for game soundtracks: multitrack timeline, piano roll, drum grid, mute/solo/volume/pan/reverb per track, cycle range, undo, autosave. "Generate from a mood" (calm, battle, mystery, sad) writes a full editable arrangement on the pentatonic scale with guqin, pipa, bamboo flute, erhu, bass, pads, bells, chimes and Eastern percussion. Exports: whole song WAV, seamless cycle-range loop WAV, stems (one WAV per track, ZIP) and a project JSON file.
+
 ## Sound library pages
 
 - https://sfxbrew.com/sounds/ — all categories; each category page (e.g. /sounds/coin-sound-effect/) has 12 fixed variations to play, download as WAV, zip, or copy as JavaScript
@@ -24,7 +28,7 @@ Each call gives a new variation. Pass the returned seed to reproduce a sound exa
 
 ## Web editor links
 
-The editor URL fragment holds the sound: `/#<presetId>.<base64url(JSON patch)>`. Opening it loads that exact sound with sliders for fine-tuning. `/#<presetId>` alone opens a fresh random sound from that preset.
+The editor is at https://sfxbrew.com/editor/ and its URL fragment holds the sound: `/editor/#<presetId>.<base64url(JSON patch)>`. Opening it loads that exact sound with sliders for fine-tuning. `/editor/#<presetId>` alone opens a fresh random sound from that preset.
 
 ## Patch format
 

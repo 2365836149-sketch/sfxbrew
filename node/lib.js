@@ -12,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const makeSfx = require('../engine.js');
 const { PRESETS, mutate, SAMPLES } = require('../presets.js');
+const CATALOG = require('../catalog.js');
 const { OfflineAudioContext } = require('node-web-audio-api');
 
 const SAMPLE_DIR = path.join(__dirname, '..', 'samples');
@@ -57,11 +58,36 @@ const META = {
   laser: ['Laser', 'Falling zappy pew. Gun shot, laser, projectile fire.'],
   powerUp: ['Power-up', 'Rising arpeggio or swelling sweep. Power-up collected, upgrade, buff gained.'],
   levelUp: ['Level Up', 'Bright arpeggio with a chord and bell. Level up, achievement, reward.'],
-  whoosh: ['Whoosh', 'Airy swoosh. Swing, dash, UI slide, transition.']
+  whoosh: ['Whoosh', 'Airy swoosh. Swing, dash, UI slide, transition.'],
+  arrow: ['Arrow', 'Bowstring twang and the hiss of the arrow; about half the variations end with a wooden thud on the target. Archery, ranged attack.'],
+  swordClash: ['Sword Clash', 'Metal-on-metal clang with a ringing, slightly beating tail and a short scrape; sometimes two quick hits. Parry, block, duel.'],
+  footstepStone: ['Footstep (Stone)', 'One footstep on stone: heel thud, sole scuff and a little grit. Generate a few and alternate them for walking.'],
+  rain: ['Rain', 'About 4 seconds of rain (light, medium or heavy) with random drops; fades in and out so it can loop. Weather, ambience.'],
+  notify: ['Notification', 'Two soft marimba-like dings going up. Message, toast, quest update.'],
+  footstepGrass: ['Footstep (Grass)', 'One real footstep on grass and leaves (8 recordings). Walking or running outdoors.'],
+  land: ['Land', 'Real recording of landing after a jump (hard floor, ground, sticks), sometimes with a heavier low thump.'],
+  shieldBlock: ['Shield Block', 'Metal impact from a real recording plus a synthesized shield-body thud. Block, guard, parry.'],
+  wind: ['Wind', 'About 4 seconds of wind: a gust that swells and fades, with a thin whistle on top. Light, gusty or strong.'],
+  campfire: ['Campfire', 'Five seconds of a real campfire crackling, seamless loop, sometimes with extra pops. Camp, rest point, hearth.'],
+  stream: ['Stream', 'Five seconds of a real babbling stream, seamless loop. River, forest, peaceful areas.'],
+  caveDrip: ['Cave Drip', 'Water drops falling into a pool with long cave reverb and echo. Caves, dungeons, mysterious places.'],
+  pageTurn: ['Page Turn', 'Real page turns of thin and thick books (7 recordings). Menus, journals, spell books.'],
+  typing: ['Typing', 'Burst of 3-8 real typewriter keystrokes, sometimes ending with the bell. Dialogue text, terminals.'],
+  chestOpen: ['Chest Open', 'Real recordings of a wooden chest or trunk opening, sometimes followed by a treasure sparkle. Loot, rewards.'],
+  monsterGrowl: ['Monster Growl', 'Real growls and roars, pitched lower or higher, with a low chest rumble. Monsters, beasts, dragons, bosses.']
 };
 
-function listPresets() {
-  return PRESETS.map(p => ({ id: p.id, name: META[p.id][0], group: p.group, description: META[p.id][1] }));
+/* 预设列表，带 catalog.js 的大类和标签。opts.category 只列这一类，opts.query 按名称、描述、关键词、标签搜索 */
+function listPresets(opts) {
+  opts = opts || {};
+  const words = String(opts.query || '').toLowerCase().split(/\s+/).filter(Boolean);
+  return PRESETS.map(p => {
+    const e = CATALOG.ENTRIES[p.id];
+    const tags = [].concat(...['style', 'material', 'mood'].map(d => e.tags[d] || []));
+    return { id: p.id, name: META[p.id][0], group: p.group, category: e.cat, categories: CATALOG.catsOf(p.id), tags, description: META[p.id][1], _kw: e.kw };
+  }).filter(x => (!opts.category || x.categories.includes(opts.category)) &&
+    words.every(w => [x.id, x.name, x.description, x._kw, x.categories.join(' '), x.tags.join(' ')].join(' ').toLowerCase().includes(w)))
+    .map(x => { delete x._kw; return x; });
 }
 
 function rng(seed) {
@@ -203,4 +229,4 @@ function writeFile(file, bytes) {
   return path.resolve(file);
 }
 
-module.exports = { PRESETS, META, PATCH_DOC, listPresets, generate, validatePatch, renderWav, jsCode, editorLink, writeFile, SITE_URL };
+module.exports = { PRESETS, CATALOG, META, PATCH_DOC, listPresets, generate, validatePatch, renderWav, jsCode, editorLink, writeFile, SITE_URL };

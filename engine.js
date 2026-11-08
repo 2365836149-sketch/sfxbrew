@@ -68,10 +68,26 @@ function makeSfx(env) {
         return r.arrayBuffer();
       });
       pending[name] = get.then(function (ab) { return c.decodeAudioData(ab); }).then(function (b) {
-        samples[name] = b; return b;
+        /* keep raw PCM, not the AudioBuffer: each context gets its own buffer copy (see bufferFor) */
+        var data = [], ch;
+        for (ch = 0; ch < b.numberOfChannels; ch++) data.push(new Float32Array(b.getChannelData(ch)));
+        samples[name] = { sr: b.sampleRate, data: data }; return samples[name];
       }, function (e) { delete pending[name]; throw e; });
     }
     return pending[name];
+  }
+  var perCtx = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
+  function bufferFor(c, name) {
+    var raw = samples[name];
+    if (!raw) return null;
+    var m = perCtx && perCtx.get(c);
+    if (!m) { m = {}; if (perCtx) perCtx.set(c, m); }
+    if (!m[name]) {
+      var buf = c.createBuffer(raw.data.length, raw.data[0].length, raw.sr), ch;
+      for (ch = 0; ch < raw.data.length; ch++) buf.getChannelData(ch).set(raw.data[ch]);
+      m[name] = buf;
+    }
+    return m[name];
   }
   function ensure(c, p) {
     return Promise.all(sampleNames(p).map(function (n) { return fetchSample(c, n); }));
@@ -126,7 +142,20 @@ function makeSfx(env) {
     return c;
   }
 
+  /* Plucked-string buffers are expensive to compute; cache them (bounded) so busy multi-track music stays smooth. */
+  var strCaches = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
   function stringBuffer(c, f, L, k) {
+    var cc = strCaches && strCaches.get(c);
+    if (!cc) { cc = { map: {}, keys: [] }; if (strCaches) strCaches.set(c, cc); }
+    var key = f.toFixed(2) + '|' + (L.attack + (L.hold || 0) + L.decay).toFixed(2) + '|' + (L.bright == null ? 0.5 : L.bright).toFixed(2) + '|' + (k % 2);
+    var hit = cc.map[key];
+    if (hit) return hit;
+    var b = stringBufferRaw(c, f, L, k);
+    cc.map[key] = b; cc.keys.push(key);
+    if (cc.keys.length > 400) delete cc.map[cc.keys.shift()];
+    return b;
+  }
+  function stringBufferRaw(c, f, L, k) {
     var sr = c.sampleRate, len = Math.ceil(sr * (L.attack + (L.hold || 0) + L.decay + 0.05));
     var bright = L.bright == null ? 0.5 : Math.max(0, Math.min(1, L.bright));
     var blend = 0.5 * (1 - bright), w = 2 * Math.PI * f / sr;
@@ -198,7 +227,7 @@ function makeSfx(env) {
       return;
     }
     if (L.type === 'sample') {
-      var sb = samples[L.sample];
+      var sb = bufferFor(c, L.sample);
       if (!sb) return;
       var sp = c.createBufferSource(), semi = stepSemis(L, k);
       var p0 = L.pitch || 0, p1 = L.pitchEnd == null ? p0 : L.pitchEnd;
@@ -322,6 +351,20 @@ function makeSfx(env) {
       return ensure(ctx, p);
     },
     setSampleBase: function (url) { sampleBase = url; },
+    /* For the music engine: schedule a patch on any context at an exact time, load its samples, share the live context. */
+    schedule: function (c, dest, p, when) { return build(c, dest, p, when); },
+    load: function (c, p) { return ensure(c, p); },
+    context: function () {
+      if (!ctx) {
+        var AC = W.AudioContext || W.webkitAudioContext;
+        if (AC) ctx = new AC();
+      }
+      return ctx;
+    },
+    offlineContext: function (channels, length, sr) {
+      var OC = W.OfflineAudioContext || W.webkitOfflineAudioContext;
+      return new OC(channels, length, sr);
+    },
     sampleNames: sampleNames,
     render: function (p, sampleRate) {
       var sr = sampleRate || 44100;

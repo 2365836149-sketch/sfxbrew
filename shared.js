@@ -121,5 +121,29 @@
     }
   }
 
-  window.SFXB = { trimLength, wavBytes, download, downloadBlob, zip, round, jsCode, drawWave, hashFor, copyText };
+  /** 多声道 → 16 位 WAV。normalize: 峰值标准化到 -1 dBFS（整曲用）；false 时只在超过 0.99 时压一下（分轨保持相对音量） */
+  function wavMulti(channels, sr, normalize) {
+    const n = channels[0].length, ch = channels.length;
+    let peak = 0;
+    channels.forEach(c => { for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(c[i])); });
+    const k = peak > 0 && (normalize !== false || peak > 0.99) ? (normalize !== false ? 0.89 : 0.99) / peak : 1;
+    const out = new DataView(new ArrayBuffer(44 + n * ch * 2));
+    const str = (o, s) => { for (let i = 0; i < s.length; i++) out.setUint8(o + i, s.charCodeAt(i)); };
+    str(0, 'RIFF'); out.setUint32(4, 36 + n * ch * 2, true); str(8, 'WAVE'); str(12, 'fmt ');
+    out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, ch, true);
+    out.setUint32(24, sr, true); out.setUint32(28, sr * ch * 2, true); out.setUint16(32, ch * 2, true); out.setUint16(34, 16, true);
+    str(36, 'data'); out.setUint32(40, n * ch * 2, true);
+    let o = 44;
+    for (let i = 0; i < n; i++) for (let c = 0; c < ch; c++) { out.setInt16(o, Math.max(-1, Math.min(1, channels[c][i] * k)) * 0x7fff, true); o += 2; }
+    return new Uint8Array(out.buffer);
+  }
+  /** 去掉多声道末尾的静音（留 50ms） */
+  function trimChannels(channels, sr) {
+    let end = channels[0].length - 1;
+    while (end > 0 && channels.every(c => Math.abs(c[end]) < 0.0006)) end--;
+    end = Math.min(channels[0].length, end + Math.floor(sr * 0.05));
+    return channels.map(c => c.slice(0, end));
+  }
+
+  window.SFXB = { wavMulti, trimChannels, trimLength, wavBytes, download, downloadBlob, zip, round, jsCode, drawWave, hashFor, copyText };
 })();

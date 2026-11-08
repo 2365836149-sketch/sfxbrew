@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://sfxbrew.com/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/editor/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/sounds/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/c/combat/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/c/magic/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/c/eastern-instruments/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/c/ui/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/c/items-rewards/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/c/character/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/c/ambience/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/c/creatures/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/lab/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/sounds/sword-slash-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/sounds/guqin-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/sounds/pipa-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
@@ -31,9 +41,34 @@
   <url><loc>https://sfxbrew.com/sounds/power-up-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/sounds/level-up-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/sounds/whoosh-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/arrow-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/sword-clash-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/footstep-stone-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/rain-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/notification-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/footstep-grass-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/landing-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/shield-block-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/wind-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/campfire-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/stream-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/cave-drip-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/page-turn-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/typing-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/chest-open-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/sounds/monster-growl-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/packs/xianxia-game-sound-pack/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/packs/game-ui-sound-pack/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/zh/sounds/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/c/combat/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/c/magic/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/c/eastern-instruments/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/c/ui/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/c/items-rewards/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/c/character/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/c/ambience/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/c/creatures/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/lab/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/zh/sounds/sword-slash-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/zh/sounds/guqin-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/zh/sounds/pipa-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
@@ -63,6 +98,22 @@
   <url><loc>https://sfxbrew.com/zh/sounds/power-up-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/zh/sounds/level-up-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/zh/sounds/whoosh-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/arrow-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/sword-clash-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/footstep-stone-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/rain-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/notification-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/footstep-grass-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/landing-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/shield-block-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/wind-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/campfire-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/stream-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/cave-drip-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/page-turn-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/typing-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/chest-open-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
+  <url><loc>https://sfxbrew.com/zh/sounds/monster-growl-sound-effect/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/zh/packs/xianxia-game-sound-pack/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/zh/packs/game-ui-sound-pack/</loc><lastmod>2026-11-08</lastmod></url>
   <url><loc>https://sfxbrew.com/llms.txt</loc><lastmod>2026-11-08</lastmod></url>

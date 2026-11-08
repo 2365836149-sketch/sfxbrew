@@ -28,10 +28,15 @@ const presetIds = lib.PRESETS.map(p => p.id);
 
 server.registerTool('list_presets', {
   title: 'List sound presets',
-  description: 'List the procedural sound effect presets (Eastern wuxia/xianxia sounds and general game sounds) with what each is good for. Every call to generate_sfx with a preset gives a new random variation; pass a seed to reproduce one.',
-  inputSchema: {},
+  description: 'List the procedural sound effect presets (Eastern wuxia/xianxia sounds and general game sounds) with category, tags and what each is good for. ' +
+    'Optionally filter by category (' + lib.CATALOG.CATEGORIES.map(c => c.id).join(', ') + ') or a search query such as "metal", "calm" or "sword". ' +
+    'Every call to generate_sfx with a preset gives a new random variation; pass a seed to reproduce one.',
+  inputSchema: {
+    category: z.enum(lib.CATALOG.CATEGORIES.map(c => c.id)).optional().describe('Only presets in this category'),
+    query: z.string().optional().describe('Words that must all match the name, description, keywords or tags')
+  },
   annotations: { readOnlyHint: true }
-}, async () => ok(lib.listPresets()));
+}, async ({ category, query }) => ok(lib.listPresets({ category, query })));
 
 server.registerTool('generate_sfx', {
   title: 'Generate sound effect WAV files',

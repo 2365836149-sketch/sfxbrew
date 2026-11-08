@@ -16,21 +16,26 @@
   const T = {
     en: {
       tagline: 'Free game sound effect generator · Eastern & retro',
-      search: 'Search sounds: sword, coin, gong…', noMatch: 'No preset matches. Try another word.',
-      tweakLabel: 'Adjust this sound:', undo: 'Undo',
+      search: 'Search: sword, coin, metal, calm…', noMatch: 'No preset matches. Try another word.',
+      tweakLabel: 'Adjust', undo: 'Undo',
       tryNow: 'Click to hear', advanced: 'Fine-tune layers and effects',
       prop1h: 'Free for commercial use', prop1: 'No sign-up, no attribution. Use the sounds in any game you sell.',
       prop2h: 'Made in your browser', prop2: 'Every sound is generated on your device. Each click brews a new variation.',
       prop3h: 'Built for AI coding agents', prop3: 'Claude Code, Cursor and others can generate and wire in sounds via MCP.',
       tw: { heavier: 'Heavier', lighter: 'Lighter', farther: 'Farther', closer: 'Closer', brighter: 'Brighter', darker: 'Darker', longer: 'Longer', shorter: 'Shorter', punchier: 'Punchier', softer: 'Softer', magical: 'More magical', retro: 'More retro' },
-      navEditor: 'Editor', navLibrary: 'Sound Library', navPacks: 'Packs', navAgents: 'For AI Agents',
-      heroTitle: 'Game sound effects, brewed in your browser',
-      heroSub: 'Free, royalty-free SFX for indie and AI-built games: sword qi, guqin and temple bells next to coins, clicks, jumps and explosions. Every press brews a new variation. Download WAV, or copy a few lines of JavaScript that play the sound with no audio files at all.',
+      navEditor: 'SFX Editor', navLibrary: 'Sound Library', navLab: 'Lab', navAgents: 'For AI agents', docTitle: 'Sound Effect Editor — Free Game SFX Generator | SFX Brew',
+      heroTitle: 'Game sound effects, made on the spot.',
+      heroTry: 'Hear one', heroOpen: 'Open the editor',
+      editorTitle: 'Make it yours.', editorSub: 'Pick a sound, press Mutate until it fits, nudge it heavier or farther, then download.',
+      musicTitle: 'Music that writes itself.', musicSub: 'Eastern background music composed live in your browser. Loop it, or let it play forever without repeating.', musicCta: 'Open the music generator',
+      moodCalm: 'Calm landscape', moodBattle: 'Battle', moodMystery: 'Mysterious cave', moodSad: 'Sorrow',
+      agentsTitle: 'Or let your AI add them.', agentsSub: 'One command gives Claude Code, Cursor and other agents a free, local sound generator.',
+      heroSub: 'Free for commercial use. Generated in your browser. Press one and listen.',
       heroLibrary: 'Browse the sound library', heroPack: 'Xianxia sound pack', heroAgents: 'Use it from Claude Code / Cursor →',
-      east: 'Eastern', general: 'General',
+      east: 'Eastern', general: 'General', allCats: 'All categories',
       play: 'Play', mutate: 'Mutate', fresh: 'New', wav: 'WAV', code: 'Copy JS', pack: 'Pack ×10', share: 'Share link',
       copied: 'Copied!', linkCopied: 'Link copied', packing: 'Rendering…',
-      layers: 'Layers', addLayer: '+ Layer', delLayer: 'Remove', effects: 'Effects', advanced: 'Fine-tune',
+      layers: 'Layers', addLayer: '+ Layer', delLayer: 'Remove this layer', effects: 'Effects', advanced: 'Fine-tune',
       codeTitle: 'Drop-in JavaScript', codeHint: 'Zero dependencies. Paste into your game and call the play function after a click or tap (browsers block audio before the first user gesture).',
       close: 'Close', copy: 'Copy', history: 'Recent', keys: 'Space play · M mutate · N new',
       license: 'Every sound you make here is yours: free for commercial use, no attribution required.',
@@ -41,31 +46,38 @@
         rep: 'Repeats', repGap: 'Repeat gap', repStep: 'Repeat step', scale: 'Scale',
         reverb: 'Reverb', echo: 'Echo', echoTime: 'Echo time', drive: 'Drive', crush: 'Bit crush', gain: 'Master'
       },
-      opt: { sample: 'Recording', 'drum-center-loud': 'Dagu · center, loud', 'drum-center-soft': 'Dagu · center, soft', 'drum-edge-loud': 'Dagu · edge, loud', 'drum-rim': 'Dagu · rim shot', 'lightning-1': 'Lightning strike 1', 'lightning-2': 'Lightning strike 2', 'gong-1': 'Gong hit', 'gong-2': 'Gong roll', 'erhu-d3': 'Erhu D4', 'erhu-f5': 'Erhu F5', white: 'White', pink: 'Pink', brown: 'Brown', string: 'String', fm: 'FM', full: 'whole', tone: 'Tone', pluck: 'Pluck', bell: 'Bell', noise: 'Noise', none: 'None', lowpass: 'Low-pass', highpass: 'High-pass', bandpass: 'Band-pass', penta: 'Pentatonic', chromatic: 'Chromatic', sine: 'Sine', triangle: 'Triangle', square: 'Square', sawtooth: 'Saw', off: 'off' },
+      opt: { sample: 'Recording', 'drum-center-loud': 'Dagu · center, loud', 'drum-center-soft': 'Dagu · center, soft', 'drum-edge-loud': 'Dagu · edge, loud', 'drum-rim': 'Dagu · rim shot', 'lightning-1': 'Lightning strike 1', 'lightning-2': 'Lightning strike 2', 'gong-1': 'Gong hit', 'gong-2': 'Gong roll', 'erhu-d3': 'Erhu D4', 'erhu-f5': 'Erhu F5', 'sword-clash': 'Sword clashes (8 hits)', 'footstep-stone': 'Stone footsteps (12)', 'arrow': 'Arrow (shots and hits)', 'footstep-grass': 'Grass footsteps (8)', 'land': 'Landings (3)', 'shield-block': 'Shield hits (6)', 'page-turn': 'Page turns (7)', 'typewriter': 'Typewriter keys (12 + bell)', 'chest-open': 'Chest opening (3)', 'monster-growl': 'Monster growls (4)', 'campfire': 'Campfire loops (2)', 'stream': 'Stream loops (2)', white: 'White', pink: 'Pink', brown: 'Brown', string: 'String', fm: 'FM', full: 'whole', tone: 'Tone', pluck: 'Pluck', bell: 'Bell', noise: 'Noise', none: 'None', lowpass: 'Low-pass', highpass: 'High-pass', bandpass: 'Band-pass', penta: 'Pentatonic', chromatic: 'Chromatic', sine: 'Sine', triangle: 'Triangle', square: 'Square', sawtooth: 'Saw', off: 'off' },
       p: {
         swordQi: 'Sword Qi', guqin: 'Guqin', bell: 'Temple Bell', gong: 'Gong', spell: 'Spell Cast', thunder: 'Heavenly Thunder',
         breakthrough: 'Breakthrough', talisman: 'Talisman Burn', alchemy: 'Alchemy Bubble', chime: 'Wind Chime', flute: 'Bamboo Flute', qiGather: 'Qi Gathering', pipa: 'Pipa', erhu: 'Erhu', woodfish: 'Wooden Fish', drum: 'War Drum', lightning: 'Lightning',
         coin: 'Coin', pickup: 'Pickup', click: 'Click', confirm: 'Confirm', error: 'Error', jump: 'Jump', hit: 'Hit', explosion: 'Explosion',
-        laser: 'Laser', powerUp: 'Power-up', levelUp: 'Level Up', whoosh: 'Whoosh'
+        laser: 'Laser', powerUp: 'Power-up', levelUp: 'Level Up', whoosh: 'Whoosh',
+        arrow: 'Arrow', swordClash: 'Sword Clash', footstepStone: 'Footstep (Stone)', rain: 'Rain', notify: 'Notification',
+        footstepGrass: 'Footstep (Grass)', land: 'Land', shieldBlock: 'Shield Block', wind: 'Wind', campfire: 'Campfire', stream: 'Stream', caveDrip: 'Cave Drip', pageTurn: 'Page Turn', typing: 'Typing', chestOpen: 'Chest Open', monsterGrowl: 'Monster Growl'
       }
     },
     zh: {
       tagline: '免费游戏音效生成器 · 东方风格与复古音效',
-      search: '搜索音效：剑、金币、锣……', noMatch: '没有匹配的预设，换个词试试。',
-      tweakLabel: '调整当前声音：', undo: '撤销',
+      search: '搜索：剑、金币、金属、平静……', noMatch: '没有匹配的预设，换个词试试。',
+      tweakLabel: '调整', undo: '撤销',
       tryNow: '点一下试听', advanced: '精细调节（音层和效果）',
       prop1h: '免费可商用', prop1: '不用注册、不用署名，卖钱的游戏也能用。',
       prop2h: '在浏览器里生成', prop2: '声音在你的设备上实时生成，每点一次都是新的变体。',
       prop3h: '为 AI 写代码而做', prop3: 'Claude Code、Cursor 等可以通过 MCP 直接生成并接入音效。',
       tw: { heavier: '更重', lighter: '更轻', farther: '更远', closer: '更近', brighter: '更亮', darker: '更暗', longer: '更长', shorter: '更短', punchier: '更有力', softer: '更柔和', magical: '更魔幻', retro: '更复古' },
-      navEditor: '编辑器', navLibrary: '音效库', navPacks: '音效包', navAgents: '给 AI agent 用',
-      heroTitle: '在浏览器里熬制游戏音效',
-      heroSub: '给独立游戏和 AI 写的游戏用的免费、可商用音效：剑气、古琴、寺钟，也有金币、点击、跳跃、爆炸。每按一次都会生成一个新的变体。可以下载 WAV，也可以复制几行 JavaScript，不用任何音频文件就能播放。',
+      navEditor: '音效编辑器', navLibrary: '音效库', navLab: '实验室', navAgents: '给 AI 用', docTitle: '音效编辑器：免费游戏音效生成 | SFX Brew',
+      heroTitle: '游戏音效，现做现用。',
+      heroTry: '试听一下', heroOpen: '打开编辑器',
+      editorTitle: '调成你想要的样子。', editorSub: '选一个声音，点"变体"直到顺耳，再调得更重、更远，然后下载。',
+      musicTitle: '自己会作曲的配乐。', musicSub: '在浏览器里实时创作的东方背景音乐。可以导出循环，也可以让它一直放、永不重复。', musicCta: '打开配乐生成器',
+      moodCalm: '宁静山水', moodBattle: '战斗', moodMystery: '神秘洞府', moodSad: '悲伤抒情',
+      agentsTitle: '或者，让 AI 帮你加。', agentsSub: '一条命令，Claude Code、Cursor 等 agent 就有了一个免费、本地的音效生成器。',
+      heroSub: '免费可商用，在浏览器里生成。点一个，听听看。',
       heroLibrary: '浏览音效库', heroPack: '修仙音效包', heroAgents: '在 Claude Code / Cursor 里用 →',
-      east: '东方', general: '通用',
+      east: '东方', general: '通用', allCats: '全部大类',
       play: '播放', mutate: '变体', fresh: '重新生成', wav: '下载 WAV', code: '复制 JS', pack: '打包 10 个', share: '分享链接',
       copied: '已复制！', linkCopied: '链接已复制', packing: '渲染中…',
-      layers: '音层', addLayer: '+ 音层', delLayer: '删除', effects: '效果', advanced: '精细调节',
+      layers: '音层', addLayer: '+ 音层', delLayer: '删除这一层', effects: '效果', advanced: '精细调节',
       codeTitle: '可直接粘贴的 JavaScript', codeHint: '不依赖任何库。粘贴进你的游戏，在用户点击或触摸之后调用播放函数（浏览器不允许在第一次操作前出声）。',
       close: '关闭', copy: '复制', history: '最近', keys: '空格 播放 · M 变体 · N 重新生成',
       license: '在这里生成的所有音效都归你：可以免费商用，不需要署名。',
@@ -76,12 +88,14 @@
         rep: '重复次数', repGap: '重复间隔', repStep: '每次升降', scale: '音阶',
         reverb: '混响', echo: '回声', echoTime: '回声间隔', drive: '失真', crush: '降位（8-bit）', gain: '总音量'
       },
-      opt: { sample: '录音', 'drum-center-loud': '大鼓·鼓心重击', 'drum-center-soft': '大鼓·鼓心轻击', 'drum-edge-loud': '大鼓·鼓边重击', 'drum-rim': '大鼓·鼓框', 'lightning-1': '雷击实录 1', 'lightning-2': '雷击实录 2', 'gong-1': '锣·重击', 'gong-2': '锣·滚奏', 'erhu-d3': '二胡 D4', 'erhu-f5': '二胡 F5', white: '白噪声', pink: '粉红噪声', brown: '棕色噪声', string: '弦', fm: '调频', full: '全程', tone: '音调', pluck: '拨弦', bell: '钟', noise: '噪声', none: '无', lowpass: '低通', highpass: '高通', bandpass: '带通', penta: '五声音阶', chromatic: '半音', sine: '正弦', triangle: '三角', square: '方波', sawtooth: '锯齿', off: '关' },
+      opt: { sample: '录音', 'drum-center-loud': '大鼓·鼓心重击', 'drum-center-soft': '大鼓·鼓心轻击', 'drum-edge-loud': '大鼓·鼓边重击', 'drum-rim': '大鼓·鼓框', 'lightning-1': '雷击实录 1', 'lightning-2': '雷击实录 2', 'gong-1': '锣·重击', 'gong-2': '锣·滚奏', 'erhu-d3': '二胡 D4', 'erhu-f5': '二胡 F5', 'sword-clash': '刀剑相击（8 下）', 'footstep-stone': '石地脚步（12 步）', 'arrow': '射箭（射出和中靶）', 'footstep-grass': '草地脚步（8 步）', 'land': '落地（3 段）', 'shield-block': '盾牌撞击（6 下）', 'page-turn': '翻页（7 段）', 'typewriter': '打字机按键（12 键 + 铃）', 'chest-open': '开箱（3 段）', 'monster-growl': '怪物低吼（4 段）', 'campfire': '篝火（2 段循环）', 'stream': '流水（2 段循环）', white: '白噪声', pink: '粉红噪声', brown: '棕色噪声', string: '弦', fm: '调频', full: '全程', tone: '音调', pluck: '拨弦', bell: '钟', noise: '噪声', none: '无', lowpass: '低通', highpass: '高通', bandpass: '带通', penta: '五声音阶', chromatic: '半音', sine: '正弦', triangle: '三角', square: '方波', sawtooth: '锯齿', off: '关' },
       p: {
         swordQi: '剑气', guqin: '古琴', bell: '寺钟', gong: '铜锣', spell: '施法', thunder: '天雷',
         breakthrough: '突破', talisman: '符箓燃烧', alchemy: '丹炉冒泡', chime: '风铃', flute: '竹笛', qiGather: '聚气', pipa: '琵琶', erhu: '二胡', woodfish: '木鱼', drum: '战鼓', lightning: '霹雳',
         coin: '金币', pickup: '拾取', click: '点击', confirm: '确认', error: '错误', jump: '跳跃', hit: '受击', explosion: '爆炸',
-        laser: '激光', powerUp: '强化', levelUp: '升级', whoosh: '挥动'
+        laser: '激光', powerUp: '强化', levelUp: '升级', whoosh: '挥动',
+        arrow: '射箭', swordClash: '刀剑相击', footstepStone: '脚步（石地）', rain: '雨', notify: '通知',
+        footstepGrass: '脚步（草地）', land: '落地', shieldBlock: '格挡', wind: '风', campfire: '篝火', stream: '流水', caveDrip: '洞穴滴水', pageTurn: '翻页', typing: '打字', chestOpen: '开宝箱', monsterGrowl: '怪物低吼'
       }
     }
   };
@@ -119,22 +133,54 @@
   /* ==================== 状态 ==================== */
   let presetId = 'swordQi', patch = null, layerIdx = 0, recent = [], buffer = null;
 
-  /* ==================== 预设列表 ==================== */
+  /* ==================== 预设列表：按 catalog.js 的大类分组 ==================== */
+  const CAT = window.SFX_CATALOG;
+  /* 大类折叠：记住展开了哪些；默认只展开当前音效所在的大类 */
+  let openCats = null;
+  try { openCats = JSON.parse(localStorage.getItem('sfxbrew-open-cats')); } catch (e) { /* ignore */ }
+  const saveOpen = () => { try { localStorage.setItem('sfxbrew-open-cats', JSON.stringify([...openCats])); } catch (e) { /* ignore */ } };
   function renderPresets() {
-    ['east', 'general'].forEach(g => {
-      const box = $('#group-' + g);
-      box.innerHTML = '';
-      PRESETS.filter(p => p.group === g).forEach(p => {
+    if (!Array.isArray(openCats)) openCats = [CAT.ENTRIES[presetId] ? CAT.ENTRIES[presetId].cat : ''];
+    if (!(openCats instanceof Set)) openCats = new Set(openCats);
+    const box = $('#preset-groups'), sel = $('#preset-cat');
+    if (!sel.options.length || sel.dataset.lang !== lang) {
+      sel.innerHTML = '<option value="">' + t('allCats') + '</option>' + CAT.CATEGORIES.filter(c => PRESETS.some(p => CAT.ENTRIES[p.id] && CAT.ENTRIES[p.id].cat === c.id))
+        .map(c => '<option value="' + c.id + '">' + c[lang] + '</option>').join('');
+      sel.dataset.lang = lang;
+    }
+    box.innerHTML = '';
+    CAT.CATEGORIES.forEach(c => {
+      const ps = PRESETS.filter(p => CAT.ENTRIES[p.id] && CAT.ENTRIES[p.id].cat === c.id);
+      if (!ps.length) return;
+      const g = document.createElement('div');
+      g.className = 'pgroup' + (openCats.has(c.id) ? '' : ' closed'); g.dataset.cat = c.id;
+      g.innerHTML = '<h2 class="sec-h"><button type="button" class="pgroup-h" aria-expanded="' + openCats.has(c.id) + '">'
+        + '<span class="chev" aria-hidden="true">▸</span>' + c[lang] + ' <span class="pgroup-n">' + ps.length + '</span></button></h2><div class="grid"></div>';
+      g.querySelector('.pgroup-h').onclick = e => {
+        const open = g.classList.toggle('closed') === false;
+        e.currentTarget.setAttribute('aria-expanded', open);
+        open ? openCats.add(c.id) : openCats.delete(c.id);
+        saveOpen();
+      };
+      ps.forEach(p => {
         const b = document.createElement('button');
         b.className = 'preset' + (p.id === presetId ? ' on' : '');
         b.dataset.id = p.id;
         b.textContent = T[lang].p[p.id];
         b.onclick = () => { presetId = p.id; fresh(); };
-        box.appendChild(b);
+        g.querySelector('.grid').appendChild(b);
       });
+      box.appendChild(g);
     });
-    if ($('#preset-search') && $('#preset-search').value) filterPresets();
+    filterPresets();
   }
+  /* 搜索：中英文名 + 目录关键词 + 大类名 + 标签名 */
+  const hayOf = id => {
+    const e = CAT.ENTRIES[id] || { tags: {}, kw: '' };
+    const tags = Object.keys(e.tags).flatMap(d => (e.tags[d] || []).map(v => { const x = CAT.TAGS[d].values.find(y => y.id === v); return x ? x.en + ' ' + x.zh : ''; }));
+    const cats = CAT.catsOf(id).map(c => { const x = CAT.CATEGORIES.find(y => y.id === c); return x.en + ' ' + x.zh; });
+    return [e.kw, T.en.p[id], T.zh.p[id], id].concat(tags, cats).join(' ').toLowerCase();
+  };
 
   /* ==================== 滑杆 ==================== */
   const toSlider = (f, v) => f[1] === 'logoff' ? (v > 0 ? 1 + Math.log(v / f[2]) / Math.log(f[3] / f[2]) * 999 : 0)
@@ -315,26 +361,6 @@
     const old = btn.textContent; btn.textContent = msg; setTimeout(() => btn.textContent = old, 1200);
   }
 
-  /* ==================== 首页精选音效 ==================== */
-  const FEATURED = ['swordQi', 'guqin', 'drum', 'lightning', 'coin', 'explosion', 'levelUp', 'click'];
-  function renderFeatured() {
-    const box = $('#featured');
-    box.innerHTML = '';
-    FEATURED.forEach(id => {
-      const b = document.createElement('button');
-      b.className = 'feat';
-      b.innerHTML = '<span class="feat-play">▶</span><span class="feat-name"></span>';
-      b.querySelector('.feat-name').textContent = T[lang].p[id];
-      b.onclick = () => {
-        presetId = id; remember(); undoStack.length = 0;
-        setPatch(PRESETS.find(p => p.id === id).gen(), true);
-        renderTweaks();
-        b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 600);
-      };
-      box.appendChild(b);
-    });
-  }
-
   /* ==================== 调整词 / 撤销 / 搜索 ==================== */
   const TWEAK_ORDER = ['heavier', 'lighter', 'farther', 'closer', 'brighter', 'darker', 'longer', 'shorter', 'punchier', 'softer', 'magical', 'retro'];
   const undoStack = [];
@@ -366,17 +392,21 @@
     $('#btn-undo').disabled = !undoStack.length;
   }
   function filterPresets() {
-    const q = $('#preset-search').value.trim().toLowerCase();
+    const q = $('#preset-search').value.trim().toLowerCase(), cat = $('#preset-cat').value;
+    const words = q.split(/\s+/).filter(Boolean);
     let shown = 0;
-    document.querySelectorAll('.preset').forEach(b => {
-      const id = b.dataset.id;
-      const hay = (window.SFX_KEYWORDS[id] + ' ' + T.en.p[id] + ' ' + T.zh.p[id] + ' ' + id).toLowerCase();
-      const ok = !q || q.split(/\s+/).every(w => hay.includes(w));
-      b.hidden = !ok;
-      if (ok) shown++;
+    document.querySelectorAll('.pgroup').forEach(g => {
+      let n = 0;
+      g.querySelectorAll('.preset').forEach(b => {
+        const id = b.dataset.id;
+        const ok = (!cat || CAT.catsOf(id).includes(cat)) && words.every(w => hayOf(id).includes(w));
+        b.hidden = !ok; if (ok) n++;
+      });
+      g.hidden = !n; shown += n;
     });
-    document.querySelectorAll('.presets h2').forEach(h => { h.hidden = !!q; });
     $('#search-empty').hidden = shown > 0;
+    /* 搜索或筛选时把有结果的大类全部展开 */
+    $('#preset-groups').classList.toggle('filtering', !!(words.length || cat));
   }
 
   /* ==================== 网址分享 ==================== */
@@ -401,21 +431,22 @@
   /* ==================== 语言 ==================== */
   function applyLang() {
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-    document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
-    $('#lang').textContent = lang === 'zh' ? 'EN' : '中文';
+      document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+    $('#lang').textContent = lang === 'zh' ? 'English' : '中文';
     document.querySelectorAll('.i18n').forEach(el => { el.hidden = el.dataset.lang !== lang; });
     document.querySelectorAll('[data-href-zh]').forEach(el => {
       if (!el.dataset.hrefEn) el.dataset.hrefEn = el.getAttribute('href');
       el.setAttribute('href', lang === 'zh' ? el.dataset.hrefZh : el.dataset.hrefEn);
     });
     $('#preset-search').placeholder = t('search');
-    if (patch) { renderPresets(); renderControls(); renderHistory(); renderTweaks(); renderFeatured(); $('#sound-name').textContent = T[lang].p[presetId]; }
+    if (patch) { renderPresets(); renderControls(); renderHistory(); renderTweaks(); $('#sound-name').textContent = T[lang].p[presetId]; }
   }
 
   /* ==================== 启动 ==================== */
   $('#btn-play').onclick = () => SFX.play(patch);
   $('#btn-undo').onclick = undo;
   $('#preset-search').addEventListener('input', filterPresets);
+  $('#preset-cat').addEventListener('change', filterPresets);
   $('#preset-search').addEventListener('keydown', e => {
     if (e.key === 'Enter') { const b = [...document.querySelectorAll('.preset')].find(x => !x.hidden); if (b) b.click(); }
     if (e.key === 'Escape') { e.target.value = ''; filterPresets(); }
@@ -443,8 +474,5 @@
   applyLang();
   setPatch(fromUrl || PRESETS.find(p => p.id === presetId).gen(), false);
   renderTweaks();
-  renderFeatured();
-  /* 精细调节默认收起；记住访客自己的选择 */
-  try { if (localStorage.getItem('sfxbrew-advanced') === '1') $('#advanced').open = true; } catch (e) { /* ignore */ }
-  $('#advanced').addEventListener('toggle', () => { try { localStorage.setItem('sfxbrew-advanced', $('#advanced').open ? '1' : '0'); } catch (e) { /* ignore */ } });
+  document.title = t('docTitle');
 })();

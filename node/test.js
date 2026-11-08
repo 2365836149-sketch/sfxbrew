@@ -7,6 +7,7 @@ const path = require('path');
 const assert = require('assert');
 const { Client } = require('@modelcontextprotocol/sdk/client/index.js');
 const { StdioClientTransport } = require('@modelcontextprotocol/sdk/client/stdio.js');
+const lib = require('./lib.js');
 
 (async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sfxbrew-test-'));
@@ -18,7 +19,12 @@ const { StdioClientTransport } = require('@modelcontextprotocol/sdk/client/stdio
   assert.deepStrictEqual(tools, ['generate_sfx', 'get_js_code', 'list_presets', 'render_patch']);
 
   const presets = json(await client.callTool({ name: 'list_presets', arguments: {} }));
-  assert.strictEqual(presets.length, 29);
+  assert.strictEqual(presets.length, lib.PRESETS.length);
+  assert.ok(presets.every(p => p.category && Array.isArray(p.tags)), 'presets carry category and tags');
+  const ui = json(await client.callTool({ name: 'list_presets', arguments: { category: 'ui' } }));
+  assert.ok(ui.length > 0 && ui.every(p => p.categories.includes('ui')), 'category filter');
+  const metal = json(await client.callTool({ name: 'list_presets', arguments: { query: 'metal' } }));
+  assert.ok(metal.some(p => p.id === 'gong') && !metal.some(p => p.id === 'jump'), 'query filter');
 
   const g = json(await client.callTool({ name: 'generate_sfx', arguments: { preset: 'hit', out_path: 'sfx/hit.wav', count: 3, seed: 7, js_path: 'src/sfx.js' } }));
   assert.strictEqual(g.sounds.length, 3);

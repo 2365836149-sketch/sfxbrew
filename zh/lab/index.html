@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SFX Brew 实验室：免费在线编曲工作室（游戏配乐 / 民乐音色） | SFX Brew</title>
+<meta name="description" content="在浏览器里免费做游戏配乐的编曲工作室：多轨时间线、钢琴卷帘、鼓网格、混音，音色有古琴、琵琶、竹笛、二胡、钟磬和战鼓。按情绪一键生成完整编曲，每个音都能改，导出 WAV、无缝循环和分轨，免费商用。">
+<link rel="canonical" href="https://sfxbrew.com/zh/lab/">
+<link rel="alternate" hreflang="en" href="https://sfxbrew.com/lab/">
+<link rel="alternate" hreflang="zh-Hans" href="https://sfxbrew.com/zh/lab/">
+<link rel="alternate" hreflang="x-default" href="https://sfxbrew.com/lab/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SFX Brew 实验室：免费在线编曲工作室（游戏配乐 / 民乐音色）">
+<meta property="og:description" content="在浏览器里免费做游戏配乐的编曲工作室：多轨时间线、钢琴卷帘、鼓网格、混音，音色有古琴、琵琶、竹笛、二胡、钟磬和战鼓。按情绪一键生成完整编曲，每个音都能改，导出 WAV、无缝循环和分轨，免费商用。">
+<meta property="og:url" content="https://sfxbrew.com/zh/lab/">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/studio/studio.css">
+</head>
+<body class="st-page">
+<header class="bar">
+  <a class="bar-brand" href="/?lang=zh"><img src="/favicon.svg" alt=""><span>SFX Brew</span></a>
+  <nav class="bar-tabs"><a href="/editor/?lang=zh">音效编辑器</a><a href="/zh/sounds/">音效库</a><a href="/zh/lab/" class="on" aria-current="page">实验室</a></nav>
+  <span class="bar-spacer"></span>
+  <a class="bar-link hide-sm" href="/?lang=zh#agents">给 AI 用</a>
+  <a class="bar-link" href="/lab/" hreflang="en" lang="en">English</a>
+</header>
+<div class="st-app">
+<header class="st-top">
+  <select id="st-exp" class="st-exp" aria-label="实验室"><option>编曲工作室</option><option disabled>文字作曲（即将推出）</option></select>
+  <input id="st-title" class="st-title" placeholder="未命名" spellcheck="false" aria-label="未命名">
+  <div class="st-group"><button id="st-home" class="st-ib" title="回到开头" aria-label="回到开头"><svg viewBox="0 0 16 16"><path d="M3 3v10M13 3 6 8l7 5z"/></svg></button><button id="st-play" class="st-ib st-playbtn" title="播放" aria-label="播放"><svg viewBox="0 0 16 16" class="i-play"><path d="M4 2.5v11l9-5.5z"/></svg><svg viewBox="0 0 16 16" class="i-stop"><rect x="3.5" y="3.5" width="9" height="9" rx="1"/></svg></button><button id="st-loop" class="st-ib" title="循环（C）" aria-label="循环（C）"><svg viewBox="0 0 16 16"><path d="M3 7V6a2 2 0 0 1 2-2h7l-2-2M13 9v1a2 2 0 0 1-2 2H4l2 2" fill="none"/></svg></button><button id="st-metro" class="st-ib" title="节拍器（K）" aria-label="节拍器（K）"><svg viewBox="0 0 16 16"><path d="M6 2h4l3 12H3zM8 10l4-6" fill="none"/></svg></button></div>
+  <div class="st-lcd" aria-live="off"><b id="st-bar">1.1</b><span id="st-time">0:00.0</span></div>
+  <div class="st-group st-proj">
+    <label class="st-mini"><span>速度</span><input id="st-tempo" type="number" min="30" max="240" step="1"></label>
+    <label class="st-mini"><span>主音</span><select id="st-root"></select></label>
+    <label class="st-mini"><span>调式</span><select id="st-mode"></select></label>
+    <button id="st-lock" class="st-tb" title="钢琴卷帘里只显示五声音阶内的音">五声锁定</button>
+  </div>
+  <div class="st-group"><button id="st-undo" class="st-ib" title="撤销（⌘Z）" aria-label="撤销（⌘Z）"><svg viewBox="0 0 16 16"><path d="M5 3 2 6l3 3M2 6h8a4 4 0 0 1 0 8H7" fill="none"/></svg></button><button id="st-redo" class="st-ib" title="重做（⇧⌘Z）" aria-label="重做（⇧⌘Z）"><svg viewBox="0 0 16 16"><path d="m11 3 3 3-3 3M14 6H6a4 4 0 0 0 0 8h3" fill="none"/></svg></button></div>
+  <div class="st-group st-zoomg"><button id="st-zout" class="st-ib" title="缩小" aria-label="缩小"><svg viewBox="0 0 16 16"><path d="M3 8h10" fill="none"/></svg></button><button id="st-zin" class="st-ib" title="放大" aria-label="放大"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" fill="none"/></svg></button></div>
+  <div class="st-spacer"></div>
+  <button id="st-new" class="st-tb">新建</button>
+  <button id="st-export" class="st-tb primary" data-pop>导出 ▾</button>
+</header>
+<p class="st-mobile">精细编辑建议用电脑。手机上可以生成、试听和导出。</p>
+<main class="st-main">
+  <aside id="st-heads" class="st-heads">
+    <div id="st-heads-in">
+      <div class="st-lanes"><span style="height:14px">循环</span><span style="height:20px">小节</span><span style="height:18px">段落</span><span style="height:20px">和弦</span></div>
+      <div id="st-heads-list"></div>
+      <div class="st-addrow"><button id="st-add" class="st-tb" data-pop>+ 音轨</button></div>
+    </div>
+  </aside>
+  <section class="st-tl-wrap"><div id="st-tl" class="st-scroll"><div id="st-tl-sizer"></div></div><canvas id="st-tl-cv" aria-hidden="true"></canvas></section>
+  <aside id="st-insp" class="st-insp"></aside>
+</main>
+<section id="st-roll" class="st-roll">
+  <div id="st-roll-grip" class="st-grip" aria-hidden="true"></div>
+  <div class="st-roll-bar">
+    <b id="st-roll-title"></b>
+    <label class="st-mini"><span>网格</span><select id="st-roll-q"><option value="1">1/4</option><option value="0.5">1/8</option><option value="0.3333">1/8 三连音</option><option value="0.25">1/16</option></select></label>
+    <button id="st-roll-quant" class="st-tb">量化（Q）</button>
+    <button id="st-roll-loop" class="st-tb">循环这一段</button>
+    <button id="st-roll-zout" class="st-ib" title="缩小" aria-label="缩小"><svg viewBox="0 0 16 16"><path d="M3 8h10" fill="none"/></svg></button><button id="st-roll-zin" class="st-ib" title="放大" aria-label="放大"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" fill="none"/></svg></button>
+    <span class="st-roll-hint">点击加音符，往右拖拉长 · 拖动移动 · 拖右边缘改长度 · 双击或 ⌥ 点击删除 · ⇧ 拖动框选 · ↑↓ 移调</span>
+    <button id="st-roll-close" class="st-ib" title="收起编辑器（E）" aria-label="收起编辑器（E）">✕</button>
+  </div>
+  <div class="st-roll-body"><div id="st-roll-scroll" class="st-scroll"><div id="st-roll-sizer"></div></div><canvas id="st-roll-cv" aria-hidden="true"></canvas></div>
+</section>
+<footer class="st-status"><span id="st-status-msg" role="status"></span></footer>
+</div>
+
+<div id="st-add-menu" class="st-pop" hidden></div>
+<div id="st-export-menu" class="st-pop" hidden>
+  <button id="x-song">整首（WAV）</button><button id="x-loop">循环区间，无缝循环（WAV）</button><button id="x-stems">分轨，每轨一个 WAV（ZIP）</button>
+  <hr><button id="x-save">保存项目文件</button><button id="x-open">打开项目文件…</button>
+</div>
+<input id="st-file" type="file" accept=".json,application/json" hidden>
+
+<div id="st-start" class="st-start" hidden>
+  <div class="st-start-box" role="dialog" aria-labelledby="st-start-h">
+    <button id="st-start-close" class="st-ib st-x" aria-label="收起编辑器（E）">✕</button>
+    <h2 id="st-start-h">新建一首曲子</h2>
+    <p>选一种情绪，直接得到一份可以随便改的完整编曲；或者从空白音轨开始。</p>
+    <h3>按情绪生成</h3>
+    <div class="st-moods"><button class="st-mood" data-mood="calm"><b>宁静山水</b><span>古琴和竹笛，底下一层柔和的长音。打坐修炼、村庄、放置挂机。</span></button><button class="st-mood" data-mood="battle"><b>战斗</b><span>大鼓擂动、琵琶轮指、低音推进，每八小节一声锣。战斗、Boss、攻城。</span></button><button class="st-mood" data-mood="mystery"><b>神秘洞府</b><span>幽暗的低音、远处的钟声、风铃和古琴泛音。探索、洞府、秘境。</span></button><button class="st-mood" data-mood="sad"><b>悲伤抒情</b><span>二胡旋律配柔和的古琴和弦。离别、失败、感人剧情。</span></button></div>
+    <div class="st-start-row">
+      <button id="st-blank" class="st-mood"><b>空白项目</b><span>一条古琴轨，里面什么都没有。</span></button>
+      <button id="st-start-open" class="st-tb">打开项目文件</button>
+      <button id="st-start-resume" class="st-tb primary" hidden>回到我的曲子</button>
+    </div>
+  </div>
+</div>
+
+<section class="st-about">
+  <h1>给游戏配乐用的编曲工作室</h1>
+  <p>SFX Brew 工作室是一个在浏览器里运行的小型编曲软件。一首曲子由多条音轨组成，每条轨上有若干片段，每个片段里的音符都能在钢琴卷帘或鼓网格里修改。不上传任何东西，声音都在你的电脑上实时合成。</p>
+  <p>按情绪（宁静山水、战斗、神秘洞府、悲伤抒情）生成一首，作曲引擎会写出主题、和声、段落、低音和打击乐，各占一条轨。可以换乐器、挪片段、重画旋律、静音独奏、设定循环区间，再导出无缝循环或分轨，放进游戏引擎里。</p>
+  <p>在这里做的所有内容都可以免费商用，不需要署名。用到的少量录音（鼓、锣、二胡）都是 CC0。</p>
+  <p class="foot-meta"><a href="/zh/sounds/">音效库</a><a href="/samples/CREDITS.md">录音素材来源</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
+</section>
+<script type="application/json" id="studio-data">{"lang":"zh","i18n":{"play":"播放","stop":"停止","saved":"已自动保存在本浏览器","saveFailed":"保存失败（存储空间满了或被禁用）","restored":"已恢复上次的曲子","sections":{"intro":"引子","outro":"尾声","A":"A 段","B":"B 段"},"trackName":"音轨名","mute":"静音","solo":"独奏","volume":"音量","pan":"声像","reverb":"混响","instrument":"乐器","project":"曲子","songBars":"长度（小节）","inspEmpty":"选中一条音轨或一个片段来修改。在音轨的空白处双击可以新建片段。","shortcuts":"快捷键","keys":[["空格","播放 / 停止"],["回车","回到开头"],["C","开关循环"],["K","节拍器"],["E","显示 / 收起编辑器"],["⌘Z / ⇧⌘Z","撤销 / 重做"],["⌘D","复制片段"],["⌫","删除选中的内容"],["⌥ 拖动","复制片段"],["⌘ 滚轮","缩放"]],"trackInfo":"{regions} 个片段，{notes} 个音符","dupTrack":"复制音轨","delTrack":"删除音轨","region":"片段","regionStart":"起始小节","regionLen":"长度（小节）","regionInfo":"{notes} 个音符","dupRegion":"复制","loopRegion":"循环它","delRegion":"删除","center":"居中","left":"左","right":"右","modes":{"gong":"宫调（明亮）","shang":"商调","jue":"角调","zhi":"徵调","yu":"羽调（哀婉）"},"rendering":"渲染中…","renderingStem":"正在渲染第 {i} / {n} 轨…","exported":"已下载","exportFailed":"还没有可以导出的音符","opened":"已打开 {name}","openFailed":"这不是 SFX Brew 的项目文件","rollEmpty":"选中一个片段来编辑音符（在音轨空白处双击可以新建片段）","regionAt":"第 {bar} 小节起，{len} 小节","velocity":"力度"}}</script>
+<script src="/engine.js"></script>
+<script src="/shared.js"></script>
+<script src="/music.js"></script>
+<script src="/studio/project.js"></script>
+<script src="/studio/instruments.js"></script>
+<script src="/studio/player.js"></script>
+<script src="/studio/smart.js"></script>
+<script src="/studio/roll.js"></script>
+<script src="/studio/app.js"></script>
+</body>
+</html>

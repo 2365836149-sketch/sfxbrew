@@ -3,149 +3,141 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Game Sound Effect Generator — Eastern &amp; Retro SFX | SFX Brew</title>
-<meta name="description" content="Generate royalty-free game sound effects in your browser: sword qi, guqin, temple bells, thunder, coins, jumps, explosions. Export WAV, a 10-sound pack, or drop-in JavaScript. No sign-up, free for commercial use.">
+<script>
+/* 旧的分享链接是 sfxbrew.com/#预设.参数，编辑器搬到 /editor/ 后在这里转过去 */
+if (/^#[A-Za-z]+(\.|$)/.test(location.hash) && location.hash !== '#agents') location.replace('/editor/' + location.search + location.hash);
+</script>
+<title>SFX Brew — Free Game Sound Effects, Music Lab and AI Agent Tools</title>
+<meta name="description" content="Free tools for game audio: a sound effect editor, a library of ready-made sounds and a music lab with a multitrack studio. Eastern and classic game sounds, WAV or drop-in JavaScript, and an MCP server for AI coding agents. Free for commercial use.">
 <link rel="canonical" href="https://sfxbrew.com/">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
-<meta property="og:title" content="SFX Brew — free game sound effect generator">
-<meta property="og:description" content="Sword qi, guqin, temple bells, thunder, coins, hits, explosions. Export WAV or drop-in JavaScript, or let your AI agent generate them via MCP. Free for commercial use.">
+<meta property="og:title" content="SFX Brew — free game sound effects and music tools">
+<meta property="og:description" content="Sound effect editor, sound library and a music lab, all in your browser. Or let your AI agent generate sounds via MCP. Free for commercial use.">
 <meta property="og:url" content="https://sfxbrew.com/">
 <meta name="twitter:card" content="summary">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="/style.css">
 </head>
 <body>
-<header class="top">
-  <a class="brand" href="/"><img class="seal" src="favicon.svg" alt="" width="38" height="38"><span class="name">SFX Brew</span></a>
-  <nav class="nav">
-    <a href="/" class="on" aria-current="page" data-t="navEditor"></a>
-    <a href="/sounds/" data-href-zh="/zh/sounds/" data-t="navLibrary"></a>
-    <a href="/packs/xianxia-game-sound-pack/" data-href-zh="/zh/packs/xianxia-game-sound-pack/" data-t="navPacks"></a>
-    <a href="#agents" data-t="navAgents"></a>
+<header class="bar">
+  <a class="bar-brand" href="/"><img src="/favicon.svg" alt=""><span>SFX Brew</span></a>
+  <nav class="bar-tabs">
+    <a href="/editor/" data-href-zh="/editor/?lang=zh"><span class="i18n" data-lang="en">SFX Editor</span><span class="i18n" data-lang="zh" hidden>音效编辑器</span></a>
+    <a href="/sounds/" data-href-zh="/zh/sounds/"><span class="i18n" data-lang="en">Sound Library</span><span class="i18n" data-lang="zh" hidden>音效库</span></a>
+    <a href="/lab/" data-href-zh="/zh/lab/"><span class="i18n" data-lang="en">Lab</span><span class="i18n" data-lang="zh" hidden>实验室</span></a>
   </nav>
-  <button id="lang" class="link"></button>
+  <span class="bar-spacer"></span>
+  <a class="bar-link hide-sm" href="#agents"><span class="i18n" data-lang="en">For AI agents</span><span class="i18n" data-lang="zh" hidden>给 AI 用</span></a>
+  <button id="lang" class="bar-link">中文</button>
 </header>
 
-<section class="hero">
-  <div class="hero-text">
-    <h1 data-t="heroTitle"></h1>
-    <p data-t="heroSub"></p>
-    <div class="cta">
-      <a class="btn primary" href="/sounds/" data-href-zh="/zh/sounds/" data-t="heroLibrary"></a>
-      <a class="btn" href="/packs/xianxia-game-sound-pack/" data-href-zh="/zh/packs/xianxia-game-sound-pack/" data-t="heroPack"></a>
-      <a class="link" href="#agents" data-t="heroAgents"></a>
-    </div>
-  </div>
-  <div class="featured">
-    <div class="featured-label" data-t="tryNow"></div>
-    <div id="featured" class="featured-grid"></div>
-  </div>
-</section>
-<section class="props">
-  <div><b data-t="prop1h"></b><span data-t="prop1"></span></div>
-  <div><b data-t="prop2h"></b><span data-t="prop2"></span></div>
-  <div><b data-t="prop3h"></b><span data-t="prop3"></span></div>
-</section>
-
-<main class="app" id="editor">
-  <aside class="presets">
-    <input id="preset-search" class="search" type="search" autocomplete="off">
-    <p id="search-empty" class="muted small" hidden data-t="noMatch"></p>
-    <h2 data-t="east"></h2>
-    <div id="group-east" class="grid"></div>
-    <h2 data-t="general"></h2>
-    <div id="group-general" class="grid"></div>
-  </aside>
-
-  <section class="stage">
-    <div class="title-row">
-      <h2 id="sound-name" class="sound-title"></h2>
-      <span id="dur" class="muted"></span>
-    </div>
-    <canvas id="wave" title="Play"></canvas>
-    <div class="actions">
-      <button id="btn-play" class="primary" data-t="play"></button>
-      <button id="btn-mutate" data-t="mutate"></button>
-      <button id="btn-new" data-t="fresh"></button>
-      <span class="sep"></span>
-      <button id="btn-wav" data-t="wav"></button>
-      <button id="btn-pack" data-t="pack"></button>
-      <button id="btn-code" class="accent" data-t="code"></button>
-      <button id="btn-share" class="link" data-t="share"></button>
-    </div>
-    <p class="muted small" data-t="keys"></p>
-
-    <div class="tweaks">
-      <span class="tweaks-label" data-t="tweakLabel"></span>
-      <div id="tweak-buttons" class="tweak-grid"></div>
-      <button id="btn-undo" class="link" data-t="undo" disabled></button>
-    </div>
-
-    <div id="history-wrap" class="history" hidden>
-      <span class="muted small" data-t="history"></span>
-      <div id="history"></div>
-    </div>
-
-    <details id="advanced" class="advanced">
-    <summary data-t="advanced"></summary>
-    <div class="panels">
-      <div class="panel">
-        <h3 data-t="layers"></h3>
-        <div id="layer-tabs" class="tabs"></div>
-        <div id="layer-fields" class="fields"></div>
-      </div>
-      <div class="panel">
-        <h3 data-t="effects"></h3>
-        <div id="fx-fields" class="fields"></div>
+<main class="intro">
+  <div class="intro-head">
+    <div>
+      <h1 class="i18n" data-lang="en">Game audio tools that run in your browser</h1>
+      <h1 class="i18n" data-lang="zh" hidden>在浏览器里做游戏音效和配乐</h1>
+      <p class="intro-sub i18n" data-lang="en">Sound effects and music for games, generated on your device. Eastern instruments (guqin, pipa, erhu, bells, war drums) and classic game sounds. Free for commercial use, no sign-up.</p>
+      <p class="intro-sub i18n" data-lang="zh" hidden>游戏音效和配乐，在你的设备上实时生成。古琴、琵琶、二胡、钟磬、战鼓等东方音色，加上常用的通用游戏音效。免费商用，不用注册。</p>
+      <div class="intro-cta">
+        <a class="btn primary big" href="/editor/" data-href-zh="/editor/?lang=zh"><span class="i18n" data-lang="en">Open the SFX editor</span><span class="i18n" data-lang="zh" hidden>打开音效编辑器</span></a>
+        <a class="btn big" href="/lab/" data-href-zh="/zh/lab/"><span class="i18n" data-lang="en">Open the music lab</span><span class="i18n" data-lang="zh" hidden>打开实验室</span></a>
       </div>
     </div>
-    </details>
-  </section>
+    <div class="demo">
+      <canvas id="demo-wave" aria-hidden="true"></canvas>
+      <div id="demo-chips" class="demo-chips"></div>
+    </div>
+  </div>
+
+  <div class="tools">
+    <a class="tool" href="/editor/" data-href-zh="/editor/?lang=zh">
+      <b class="i18n" data-lang="en">SFX Editor</b><b class="i18n" data-lang="zh" hidden>音效编辑器</b>
+      <span class="i18n" data-lang="en">29 presets. Mutate, make it heavier, farther or more magical, fine-tune every layer, then export WAV, a 10-sound pack or JavaScript.</span>
+      <span class="i18n" data-lang="zh" hidden>29 个预设。点变体、调得更重更远更魔幻，每一层都能细调，导出 WAV、10 个一包或 JavaScript。</span>
+      <em class="i18n" data-lang="en">Open →</em><em class="i18n" data-lang="zh" hidden>打开 →</em>
+    </a>
+    <a class="tool" href="/sounds/" data-href-zh="/zh/sounds/">
+      <b class="i18n" data-lang="en">Sound Library</b><b class="i18n" data-lang="zh" hidden>音效库</b>
+      <span class="i18n" data-lang="en">29 categories with 12 ready-made variations each, plus themed packs. Listen, download one WAV or the whole set as ZIP.</span>
+      <span class="i18n" data-lang="zh" hidden>29 类音效，每类 12 个现成变体，另有主题音效包。试听、单个下载 WAV 或整组下载 ZIP。</span>
+      <em class="i18n" data-lang="en">Browse →</em><em class="i18n" data-lang="zh" hidden>浏览 →</em>
+    </a>
+    <a class="tool" href="/lab/" data-href-zh="/zh/lab/">
+      <b class="i18n" data-lang="en">Lab</b><b class="i18n" data-lang="zh" hidden>实验室</b>
+      <span class="i18n" data-lang="en">Experimental tools. First up: a multitrack music studio with piano roll and drum grid that can write a full arrangement from a mood.</span>
+      <span class="i18n" data-lang="zh" hidden>实验性的工具。第一个是编曲工作室：多轨、钢琴卷帘、鼓网格，可以按情绪一键生成完整编曲再细改。</span>
+      <em class="i18n" data-lang="en">Try it →</em><em class="i18n" data-lang="zh" hidden>试试 →</em>
+    </a>
+  </div>
+
+  <div class="intro-cols">
+    <section id="agents">
+      <h2 class="i18n" data-lang="en">For AI coding agents</h2><h2 class="i18n" data-lang="zh" hidden>给 AI 写代码用</h2>
+      <p class="i18n" data-lang="en">One command gives Claude Code, Cursor and other MCP clients a free, local sound generator:</p>
+      <p class="i18n" data-lang="zh" hidden>一条命令，Claude Code、Cursor 等支持 MCP 的工具就有了一个免费、本地的音效生成器：</p>
+      <pre class="cmd">claude mcp add sfxbrew -- npx -y -p sfxbrew sfxbrew-mcp</pre>
+      <p class="i18n" data-lang="en">Or from the command line: <code>npx sfxbrew coin --out assets/sfx/coin.wav</code>. Teach your agent when to use it with the free <a href="https://www.agensi.io/skills/sfx-brew-game-sound-effects">skill on Agensi</a> or <a href="https://github.com/2365836149-sketch/sfxbrew/tree/main/skills/sfxbrew">SKILL.md on GitHub</a>. Details for agents: <a href="/llms.txt">llms.txt</a>.</p>
+      <p class="i18n" data-lang="zh" hidden>也可以用命令行：<code>npx sfxbrew coin --out assets/sfx/coin.wav</code>。想让 agent 知道什么时候用，可以装 <a href="https://www.agensi.io/skills/sfx-brew-game-sound-effects">Agensi 上的免费 skill</a> 或 <a href="https://github.com/2365836149-sketch/sfxbrew/tree/main/skills/sfxbrew">GitHub 上的 SKILL.md</a>。给 agent 看的说明：<a href="/llms.txt">llms.txt</a>。</p>
+    </section>
+    <section>
+      <h2 class="i18n" data-lang="en">How it works</h2><h2 class="i18n" data-lang="zh" hidden>原理</h2>
+      <p class="i18n" data-lang="en">Everything is synthesized live with the Web Audio API. A few sounds (war drum, lightning, gong, erhu) build on short CC0 recordings. Melodic sounds use the pentatonic scale, so they always stay in tune. The JavaScript export plays the same sound in your game with no audio files.</p>
+      <p class="i18n" data-lang="zh" hidden>所有声音都用 Web Audio 实时合成，少数（战鼓、霹雳、铜锣、二胡）用到了很短的 CC0 录音。有旋律的声音都用五声音阶，怎么组合都不走调。导出的 JavaScript 不需要任何音频文件，在游戏里就能播放同一个声音。</p>
+      <h2 class="i18n" data-lang="en">Eastern sounds</h2><h2 class="i18n" data-lang="zh" hidden>东方音效</h2>
+      <p class="i18n" data-lang="en">Wuxia and xianxia games need sounds stock libraries rarely have: sword qi, guqin, pipa, erhu, temple bells, gongs, war drums, talismans and heavenly thunder.</p>
+      <p class="i18n" data-lang="zh" hidden>武侠、修仙游戏需要的剑气、古琴、琵琶、二胡、寺钟、铜锣、战鼓、符箓、天雷，在普通音效库里很难找到。</p>
+    </section>
+  </div>
+  <p class="license i18n" data-lang="en">Every sound and song you make here is yours: free for commercial use, no attribution required. <a href="/samples/CREDITS.md">Recording credits</a> · <a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
+  <p class="license i18n" data-lang="zh" hidden>在这里生成的所有音效和曲子都归你：可以免费商用，不需要署名。<a href="/samples/CREDITS.md">录音素材来源</a> · <a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
 </main>
 
-<section class="about" id="agents">
-  <p class="license" data-t="license"></p>
-  <div class="i18n" data-lang="en">
-    <h2>How it works</h2>
-    <p>Every sound is synthesized live in your browser with the Web Audio API. Nothing is recorded or sampled, so there is nothing to license. Pick a preset, press <b>Mutate</b> until it fits, then fine-tune the layers.</p>
-    <h2>Made for AI-assisted game development</h2>
-    <p><b>Copy JS</b> gives you a small, dependency-free snippet that plays the exact same sound. Paste it into a game written with Claude, Cursor or by hand: no audio files to load or host.</p>
-    <h2>Let your AI agent make the sounds</h2>
-    <p>The same engine runs as a local MCP server: no API key, no network, no cost per sound. In Claude Code:</p>
-    <pre class="cmd">claude mcp add sfxbrew -- npx -y -p sfxbrew sfxbrew-mcp</pre>
-    <p>Then ask "add a coin sound and a hit sound to my game". Prefer the command line? <code>npx sfxbrew coin --out assets/sfx/coin.wav</code>. Details for agents: <a href="llms.txt">llms.txt</a>.</p>
-    <p>Want the agent to know when and how to use it? Install the free <a href="https://www.agensi.io/skills/sfx-brew-game-sound-effects">SFX Brew skill on Agensi</a> (works with Claude Code, Cursor, Codex CLI and other SKILL.md agents), or copy <a href="https://github.com/2365836149-sketch/sfxbrew/tree/main/skills/sfxbrew">SKILL.md from GitHub</a>.</p>
-    <h2>Eastern sounds</h2>
-    <p>Wuxia and xianxia games need sounds that stock libraries rarely have: sword qi, guqin plucks, temple bells, gongs, talismans and heavenly tribulation thunder. Melodic presets use the pentatonic scale, so every combination stays in tune.</p>
-  </div>
-  <div class="i18n" data-lang="zh" hidden>
-    <h2>原理</h2>
-    <p>所有声音都在你的浏览器里用 Web Audio 实时合成，没有录音也没有采样，不存在版权问题。选一个预设，点「变体」直到满意，再细调各个音层。</p>
-    <h2>为 AI 写游戏而做</h2>
-    <p>「复制 JS」会给你一小段不依赖任何库的代码，播放出来和这里听到的完全一样。粘进用 Claude、Cursor 或手写的游戏里就能用，不用加载或托管音频文件。</p>
-    <h2>让 AI agent 直接生成音效</h2>
-    <p>同一个合成引擎也能作为本地 MCP 服务运行：不需要 API key、不联网、每个声音零成本。在 Claude Code 里：</p>
-    <pre class="cmd">claude mcp add sfxbrew -- npx -y -p sfxbrew sfxbrew-mcp</pre>
-    <p>然后说"给我的游戏加一个金币音效和一个受击音效"就行。也可以用命令行：<code>npx sfxbrew coin --out assets/sfx/coin.wav</code>。给 agent 看的说明：<a href="llms.txt">llms.txt</a>。</p>
-    <p>想让 agent 知道什么时候、怎么用它？可以安装免费的 <a href="https://www.agensi.io/skills/sfx-brew-game-sound-effects">Agensi 上的 SFX Brew skill</a>（支持 Claude Code、Cursor、Codex CLI 等兼容 SKILL.md 的 agent），或者直接从 <a href="https://github.com/2365836149-sketch/sfxbrew/tree/main/skills/sfxbrew">GitHub 复制 SKILL.md</a>。</p>
-    <h2>东方音效</h2>
-    <p>武侠、修仙游戏需要的剑气、古琴、寺钟、铜锣、符箓、天雷，在普通音效库里很难找到。有旋律的预设都用五声音阶，怎么组合都不会走调。</p>
-  </div>
-</section>
-
-<dialog id="code-dlg">
-  <h3 data-t="codeTitle"></h3>
-  <p class="muted small" data-t="codeHint"></p>
-  <textarea id="code-text" readonly spellcheck="false"></textarea>
-  <div class="actions">
-    <button id="code-copy" class="primary" data-t="copy"></button>
-    <button id="code-close" data-t="close"></button>
-  </div>
-</dialog>
-
-<script src="engine.js"></script>
-<script src="presets.js"></script>
-<script src="shared.js"></script>
-<script src="app.js"></script>
+<script src="/engine.js"></script>
+<script src="/presets.js"></script>
+<script src="/shared.js"></script>
+<script>
+/* 介绍页：语言切换 + 一排可以点的示例声音 */
+(function () {
+  'use strict';
+  const NAMES = { swordQi: ['Sword Qi', '剑气'], guqin: ['Guqin', '古琴'], drum: ['War Drum', '战鼓'], lightning: ['Lightning', '霹雳'], bell: ['Temple Bell', '寺钟'], coin: ['Coin', '金币'], explosion: ['Explosion', '爆炸'], levelUp: ['Level Up', '升级'] };
+  let lang = (() => {
+    const q = new URLSearchParams(location.search).get('lang');
+    if (q === 'zh' || q === 'en') return q;
+    let s = null; try { s = localStorage.getItem('sfxbrew-lang'); } catch (e) { /* ignore */ }
+    return s || ((navigator.language || '').startsWith('zh') ? 'zh' : 'en');
+  })();
+  const SFX = makeSfx(), cv = document.getElementById('demo-wave'), chips = document.getElementById('demo-chips');
+  let cur = null;
+  function apply() {
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    document.title = lang === 'zh' ? 'SFX Brew：免费游戏音效、配乐实验室和 AI agent 工具' : 'SFX Brew — Free Game Sound Effects, Music Lab and AI Agent Tools';
+    document.querySelectorAll('.i18n').forEach(el => { el.hidden = el.dataset.lang !== lang; });
+    document.querySelectorAll('[data-href-zh]').forEach(el => {
+      if (!el.dataset.hrefEn) el.dataset.hrefEn = el.getAttribute('href');
+      el.setAttribute('href', lang === 'zh' ? el.dataset.hrefZh : el.dataset.hrefEn);
+    });
+    document.getElementById('lang').textContent = lang === 'zh' ? 'English' : '中文';
+    chips.innerHTML = '';
+    Object.keys(NAMES).forEach(id => {
+      const b = document.createElement('button');
+      b.textContent = NAMES[id][lang === 'zh' ? 1 : 0];
+      b.className = id === cur ? 'on' : '';
+      b.onclick = () => play(id);
+      chips.appendChild(b);
+    });
+  }
+  async function play(id) {
+    cur = id; apply();
+    const patch = window.SFX_PRESETS.find(p => p.id === id).gen();
+    SFX.play(patch);
+    const buf = await SFX.render(patch, 22050), d = buf.getChannelData(0);
+    SFXB.drawWave(cv, d, SFXB.trimLength(d, 22050));
+  }
+  cv.addEventListener('click', () => play(cur || 'swordQi'));
+  document.getElementById('lang').onclick = () => { lang = lang === 'zh' ? 'en' : 'zh'; try { localStorage.setItem('sfxbrew-lang', lang); } catch (e) { /* ignore */ } apply(); };
+  apply();
+  SFX.render(window.SFX_PRESETS.find(p => p.id === 'drum').gen(), 22050).then(buf => { const d = buf.getChannelData(0); SFXB.drawWave(cv, d, SFXB.trimLength(d, 22050)); });
+})();
+</script>
 </body>
 </html>

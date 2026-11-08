@@ -25,6 +25,7 @@
   "files": [
     "engine.js",
     "presets.js",
+    "catalog.js",
     "node/lib.js",
     "node/cli.js",
     "node/mcp.js",
@@ -36,7 +37,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node node/test.js"
+    "test": "node node/catalog-test.js && node node/test.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",

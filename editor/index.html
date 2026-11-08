@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sound Effect Editor — Free Game SFX Generator | SFX Brew</title>
+<meta name="description" content="Make royalty-free game sound effects in your browser: pick a preset, mutate it, make it heavier or farther, fine-tune layers, then export WAV, a 10-sound pack or drop-in JavaScript. Free for commercial use.">
+<link rel="canonical" href="https://sfxbrew.com/editor/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="bar">
+  <a class="bar-brand" href="/" data-href-zh="/?lang=zh"><img src="/favicon.svg" alt=""><span>SFX Brew</span></a>
+  <nav class="bar-tabs">
+    <a href="/editor/" class="on" aria-current="page" data-t="navEditor"></a>
+    <a href="/sounds/" data-href-zh="/zh/sounds/" data-t="navLibrary"></a>
+    <a href="/lab/" data-href-zh="/zh/lab/" data-t="navLab"></a>
+  </nav>
+  <span class="bar-spacer"></span>
+  <a class="bar-link hide-sm" href="/#agents" data-href-zh="/?lang=zh#agents" data-t="navAgents"></a>
+  <button id="lang" class="bar-link"></button>
+</header>
+
+<main class="ed" id="editor">
+  <aside class="ed-presets">
+    <input id="preset-search" class="search" type="search" autocomplete="off">
+    <select id="preset-cat" class="search pcat"></select>
+    <p id="search-empty" class="muted small" hidden data-t="noMatch"></p>
+    <div id="preset-groups"></div>
+  </aside>
+
+  <section class="ed-stage">
+    <div class="title-row">
+      <h1 id="sound-name" class="sound-title"></h1>
+      <span id="dur" class="muted"></span>
+    </div>
+    <canvas id="wave"></canvas>
+    <div class="toolrow">
+      <button id="btn-play" class="btn primary" data-t="play"></button>
+      <button id="btn-mutate" class="btn" data-t="mutate"></button>
+      <button id="btn-new" class="btn" data-t="fresh"></button>
+      <span class="sep"></span>
+      <button id="btn-wav" class="btn" data-t="wav"></button>
+      <button id="btn-pack" class="btn" data-t="pack"></button>
+      <button id="btn-code" class="btn seal" data-t="code"></button>
+      <button id="btn-share" class="btn" data-t="share"></button>
+    </div>
+    <div class="box">
+      <div class="box-h"><span data-t="tweakLabel"></span><button id="btn-undo" class="link" data-t="undo" disabled></button></div>
+      <div id="tweak-buttons" class="tweak-grid"></div>
+    </div>
+    <div id="history-wrap" class="box" hidden>
+      <div class="box-h"><span data-t="history"></span></div>
+      <div id="history"></div>
+    </div>
+    <p class="keys-hint" data-t="keys"></p>
+  </section>
+
+  <aside class="ed-params">
+    <h3 data-t="layers"></h3>
+    <div id="layer-tabs" class="tabs"></div>
+    <div id="layer-fields" class="fields"></div>
+    <h3 data-t="effects"></h3>
+    <div id="fx-fields" class="fields"></div>
+  </aside>
+</main>
+
+<dialog id="code-dlg">
+  <h3 data-t="codeTitle"></h3>
+  <p class="muted small" data-t="codeHint"></p>
+  <textarea id="code-text" readonly spellcheck="false"></textarea>
+  <div class="toolrow">
+    <button id="code-copy" class="btn primary" data-t="copy"></button>
+    <button id="code-close" class="btn" data-t="close"></button>
+  </div>
+</dialog>
+
+<script src="/engine.js"></script>
+<script src="/presets.js"></script>
+<script src="/catalog.js"></script>
+<script src="/shared.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

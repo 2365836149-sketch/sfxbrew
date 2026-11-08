@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SFX Brew Lab — Free Online Music Studio for Game Soundtracks | SFX Brew</title>
+<meta name="description" content="A free music studio in your browser for game soundtracks: multitrack timeline, piano roll, drum grid and mixer with guqin, pipa, bamboo flute, erhu, bells and war drums. Generate a full arrangement from a mood, edit every note, export WAV, loops and stems. Free for commercial use.">
+<link rel="canonical" href="https://sfxbrew.com/lab/">
+<link rel="alternate" hreflang="en" href="https://sfxbrew.com/lab/">
+<link rel="alternate" hreflang="zh-Hans" href="https://sfxbrew.com/zh/lab/">
+<link rel="alternate" hreflang="x-default" href="https://sfxbrew.com/lab/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SFX Brew Lab — Free Online Music Studio for Game Soundtracks">
+<meta property="og:description" content="A free music studio in your browser for game soundtracks: multitrack timeline, piano roll, drum grid and mixer with guqin, pipa, bamboo flute, erhu, bells and war drums. Generate a full arrangement from a mood, edit every note, export WAV, loops and stems. Free for commercial use.">
+<meta property="og:url" content="https://sfxbrew.com/lab/">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/studio/studio.css">
+</head>
+<body class="st-page">
+<header class="bar">
+  <a class="bar-brand" href="/"><img src="/favicon.svg" alt=""><span>SFX Brew</span></a>
+  <nav class="bar-tabs"><a href="/editor/">SFX Editor</a><a href="/sounds/">Sound Library</a><a href="/lab/" class="on" aria-current="page">Lab</a></nav>
+  <span class="bar-spacer"></span>
+  <a class="bar-link hide-sm" href="/#agents">For AI agents</a>
+  <a class="bar-link" href="/zh/lab/" hreflang="zh-Hans" lang="zh-CN">中文</a>
+</header>
+<div class="st-app">
+<header class="st-top">
+  <select id="st-exp" class="st-exp" aria-label="Lab"><option>Music studio</option><option disabled>Text to music (coming soon)</option></select>
+  <input id="st-title" class="st-title" placeholder="Untitled song" spellcheck="false" aria-label="Untitled song">
+  <div class="st-group"><button id="st-home" class="st-ib" title="Go to start" aria-label="Go to start"><svg viewBox="0 0 16 16"><path d="M3 3v10M13 3 6 8l7 5z"/></svg></button><button id="st-play" class="st-ib st-playbtn" title="Play" aria-label="Play"><svg viewBox="0 0 16 16" class="i-play"><path d="M4 2.5v11l9-5.5z"/></svg><svg viewBox="0 0 16 16" class="i-stop"><rect x="3.5" y="3.5" width="9" height="9" rx="1"/></svg></button><button id="st-loop" class="st-ib" title="Cycle (C)" aria-label="Cycle (C)"><svg viewBox="0 0 16 16"><path d="M3 7V6a2 2 0 0 1 2-2h7l-2-2M13 9v1a2 2 0 0 1-2 2H4l2 2" fill="none"/></svg></button><button id="st-metro" class="st-ib" title="Metronome (K)" aria-label="Metronome (K)"><svg viewBox="0 0 16 16"><path d="M6 2h4l3 12H3zM8 10l4-6" fill="none"/></svg></button></div>
+  <div class="st-lcd" aria-live="off"><b id="st-bar">1.1</b><span id="st-time">0:00.0</span></div>
+  <div class="st-group st-proj">
+    <label class="st-mini"><span>Tempo</span><input id="st-tempo" type="number" min="30" max="240" step="1"></label>
+    <label class="st-mini"><span>Key</span><select id="st-root"></select></label>
+    <label class="st-mini"><span>Mode</span><select id="st-mode"></select></label>
+    <button id="st-lock" class="st-tb" title="Only show notes of the pentatonic scale in the piano roll">Pentatonic lock</button>
+  </div>
+  <div class="st-group"><button id="st-undo" class="st-ib" title="Undo (⌘Z)" aria-label="Undo (⌘Z)"><svg viewBox="0 0 16 16"><path d="M5 3 2 6l3 3M2 6h8a4 4 0 0 1 0 8H7" fill="none"/></svg></button><button id="st-redo" class="st-ib" title="Redo (⇧⌘Z)" aria-label="Redo (⇧⌘Z)"><svg viewBox="0 0 16 16"><path d="m11 3 3 3-3 3M14 6H6a4 4 0 0 0 0 8h3" fill="none"/></svg></button></div>
+  <div class="st-group st-zoomg"><button id="st-zout" class="st-ib" title="Zoom out" aria-label="Zoom out"><svg viewBox="0 0 16 16"><path d="M3 8h10" fill="none"/></svg></button><button id="st-zin" class="st-ib" title="Zoom in" aria-label="Zoom in"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" fill="none"/></svg></button></div>
+  <div class="st-spacer"></div>
+  <button id="st-new" class="st-tb">New</button>
+  <button id="st-export" class="st-tb primary" data-pop>Export ▾</button>
+</header>
+<p class="st-mobile">Editing works best on a computer. On a phone you can generate, listen and export.</p>
+<main class="st-main">
+  <aside id="st-heads" class="st-heads">
+    <div id="st-heads-in">
+      <div class="st-lanes"><span style="height:14px">Cycle</span><span style="height:20px">Bar</span><span style="height:18px">Sections</span><span style="height:20px">Chords</span></div>
+      <div id="st-heads-list"></div>
+      <div class="st-addrow"><button id="st-add" class="st-tb" data-pop>+ Track</button></div>
+    </div>
+  </aside>
+  <section class="st-tl-wrap"><div id="st-tl" class="st-scroll"><div id="st-tl-sizer"></div></div><canvas id="st-tl-cv" aria-hidden="true"></canvas></section>
+  <aside id="st-insp" class="st-insp"></aside>
+</main>
+<section id="st-roll" class="st-roll">
+  <div id="st-roll-grip" class="st-grip" aria-hidden="true"></div>
+  <div class="st-roll-bar">
+    <b id="st-roll-title"></b>
+    <label class="st-mini"><span>Grid</span><select id="st-roll-q"><option value="1">1/4</option><option value="0.5">1/8</option><option value="0.3333">1/8 triplet</option><option value="0.25">1/16</option></select></label>
+    <button id="st-roll-quant" class="st-tb">Quantize (Q)</button>
+    <button id="st-roll-loop" class="st-tb">Cycle this region</button>
+    <button id="st-roll-zout" class="st-ib" title="Zoom out" aria-label="Zoom out"><svg viewBox="0 0 16 16"><path d="M3 8h10" fill="none"/></svg></button><button id="st-roll-zin" class="st-ib" title="Zoom in" aria-label="Zoom in"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" fill="none"/></svg></button>
+    <span class="st-roll-hint">Click to add a note, drag right to lengthen · drag to move · drag the right edge to resize · double-click or ⌥-click to delete · ⇧-drag to select · ↑↓ transpose</span>
+    <button id="st-roll-close" class="st-ib" title="Hide editor (E)" aria-label="Hide editor (E)">✕</button>
+  </div>
+  <div class="st-roll-body"><div id="st-roll-scroll" class="st-scroll"><div id="st-roll-sizer"></div></div><canvas id="st-roll-cv" aria-hidden="true"></canvas></div>
+</section>
+<footer class="st-status"><span id="st-status-msg" role="status"></span></footer>
+</div>
+
+<div id="st-add-menu" class="st-pop" hidden></div>
+<div id="st-export-menu" class="st-pop" hidden>
+  <button id="x-song">Whole song (WAV)</button><button id="x-loop">Cycle range, seamless loop (WAV)</button><button id="x-stems">Stems, one WAV per track (ZIP)</button>
+  <hr><button id="x-save">Save project file</button><button id="x-open">Open project file…</button>
+</div>
+<input id="st-file" type="file" accept=".json,application/json" hidden>
+
+<div id="st-start" class="st-start" hidden>
+  <div class="st-start-box" role="dialog" aria-labelledby="st-start-h">
+    <button id="st-start-close" class="st-ib st-x" aria-label="Hide editor (E)">✕</button>
+    <h2 id="st-start-h">Start a new song</h2>
+    <p>Pick a mood to get a full arrangement you can edit, or start from an empty track.</p>
+    <h3>Generate from a mood</h3>
+    <div class="st-moods"><button class="st-mood" data-mood="calm"><b>Calm landscape</b><span>Guqin and bamboo flute over a soft drone. Meditation, cultivation, villages, idle progress.</span></button><button class="st-mood" data-mood="battle"><b>Battle</b><span>Dagu war drums, pipa tremolo and a low pulse, with a gong every eight bars. Combat, bosses, sieges.</span></button><button class="st-mood" data-mood="mystery"><b>Mysterious cave</b><span>Dark drone, distant bells, wind chimes and guqin harmonics. Exploration, caves, secret realms.</span></button><button class="st-mood" data-mood="sad"><b>Sorrow</b><span>Erhu melody over gentle guqin chords. Farewells, defeat, emotional story beats.</span></button></div>
+    <div class="st-start-row">
+      <button id="st-blank" class="st-mood"><b>Empty project</b><span>One guqin track, nothing in it.</span></button>
+      <button id="st-start-open" class="st-tb">Open project file</button>
+      <button id="st-start-resume" class="st-tb primary" hidden>Back to my song</button>
+    </div>
+  </div>
+</div>
+
+<section class="st-about">
+  <h1>A music studio for game soundtracks</h1>
+  <p>SFX Brew Studio is a small music workstation that runs in your browser. Every song is made of tracks, every track of regions, every region of notes you can edit in the piano roll or drum grid. Nothing is uploaded: sound is synthesised on your computer.</p>
+  <p>Generate a piece from a mood (calm landscape, battle, mysterious cave, sorrow) and the composer writes a theme, harmony, sections, bass and percussion as separate tracks. Change the instruments, move regions, redraw the melody, mute and solo, set the cycle range and export a seamless loop or stems for your game engine.</p>
+  <p>Everything you make is free for commercial use, no attribution required. The few recordings used (drums, gong, erhu) are CC0.</p>
+  <p class="foot-meta"><a href="/sounds/">Sound Library</a><a href="/samples/CREDITS.md">Recording credits</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
+</section>
+<script type="application/json" id="studio-data">{"lang":"en","i18n":{"play":"Play","stop":"Stop","saved":"Saved in this browser","saveFailed":"Could not save (storage full or blocked)","restored":"Restored your last song","sections":{"intro":"Intro","outro":"Outro","A":"A","B":"B"},"trackName":"Track name","mute":"Mute","solo":"Solo","volume":"Volume","pan":"Pan","reverb":"Reverb","instrument":"Instrument","project":"Song","songBars":"Length (bars)","inspEmpty":"Select a track or region to edit it. Double-click an empty spot on a track to add a region.","shortcuts":"Shortcuts","keys":[["Space","Play / stop"],["Return","Go to start"],["C","Cycle on / off"],["K","Metronome"],["E","Show / hide editor"],["⌘Z / ⇧⌘Z","Undo / redo"],["⌘D","Duplicate region"],["⌫","Delete selection"],["⌥-drag","Copy region"],["⌘-scroll","Zoom"]],"trackInfo":"Regions: {regions} · notes: {notes}","dupTrack":"Duplicate track","delTrack":"Delete track","region":"Region","regionStart":"Starts at bar","regionLen":"Length (bars)","regionInfo":"Notes: {notes}","dupRegion":"Duplicate","loopRegion":"Cycle it","delRegion":"Delete","center":"Center","left":"L","right":"R","modes":{"gong":"Gong (bright)","shang":"Shang","jue":"Jue","zhi":"Zhi","yu":"Yu (sad)"},"rendering":"Rendering…","renderingStem":"Rendering track {i} of {n}…","exported":"Downloaded","exportFailed":"Nothing to export yet","opened":"Opened {name}","openFailed":"That file is not an SFX Brew project","rollEmpty":"Select a region to edit its notes (double-click an empty spot on a track to make one)","regionAt":"bar {bar}, {len} bars","velocity":"Velocity"}}</script>
+<script src="/engine.js"></script>
+<script src="/shared.js"></script>
+<script src="/music.js"></script>
+<script src="/studio/project.js"></script>
+<script src="/studio/instruments.js"></script>
+<script src="/studio/player.js"></script>
+<script src="/studio/smart.js"></script>
+<script src="/studio/roll.js"></script>
+<script src="/studio/app.js"></script>
+</body>
+</html>

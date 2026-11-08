@@ -20,8 +20,19 @@
     'drum-center-loud': { length: 2.7 }, 'drum-center-soft': { length: 2.7 }, 'drum-edge-loud': { length: 3.5 }, 'drum-rim': { length: 1.8 },
     'lightning-1': { length: 6.5 }, 'lightning-2': { length: 7 },
     'gong-1': { length: 10 }, 'gong-2': { length: 12 },
-    'erhu-d3': { length: 4.9, root: 295.4 }, 'erhu-f5': { length: 6, root: 697.2 }
+    'erhu-d3': { length: 4.9, root: 295.4 }, 'erhu-f5': { length: 6, root: 697.2 },
+    /* 多段素材：一个文件里按固定间隔（slot 秒）排了好几次独立的录音，用 take(名字, 第几段) 取其中一段 */
+    'sword-clash': { length: 7.2, slot: 0.9, takes: 8 }, 'footstep-stone': { length: 5.4, slot: 0.45, takes: 12 }, 'arrow': { length: 4, slot: 0.8, takes: 5 },
+    'footstep-grass': { length: 3.2, slot: 0.4, takes: 8 }, 'land': { length: 2.1, slot: 0.7, takes: 3 }, 'shield-block': { length: 3.6, slot: 0.6, takes: 6 },
+    'page-turn': { length: 8.75, slot: 1.25, takes: 7 }, 'typewriter': { length: 4.55, slot: 0.35, takes: 13 }, 'chest-open': { length: 11.1, slot: 3.7, takes: 3 },
+    'monster-growl': { length: 12.8, slot: 3.2, takes: 4 },
+    /* 可循环的环境声：每段 5 秒，首尾已经交叉淡化过，从段首开始播放 */
+    'campfire': { length: 10.4, slot: 5.2, takes: 2, loop: 5 }, 'stream': { length: 10.4, slot: 5.2, takes: 2, loop: 5 }
   };
+  /* 取多段素材的第 k 段：跳过每段开头的静音，播放到这一段结束 */
+  const take = (name, k, o) => { const m = SAMPLES[name]; return S(name, Object.assign({ offset: k * m.slot + 0.035, hold: m.slot - 0.2, decay: 0.12 }, o)); };
+  /* 环境声的一段：淡入淡出各 0.3 秒，总长约等于一段 */
+  const loopTake = (name, k, o) => { const m = SAMPLES[name]; return S(name, Object.assign({ offset: k * m.slot, attack: 0.3, hold: m.loop - 0.6, decay: 0.3 }, o)); };
   /* 播放一段素材的音层：默认整段自然播放完（hold 撑到素材结尾，最后 0.15 秒淡出） */
   const S = (name, o) => L(Object.assign({ type: 'sample', sample: name, pitch: 0, offset: 0, attack: 0.001, hold: Math.max(0, SAMPLES[name].length - 0.15), decay: 0.15, vol: 0.9 }, o));
 
@@ -339,6 +350,122 @@
         L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: r(300, 500), cutoffPeak: r(1500, 3500), cutoffEnd: r(250, 400), q: r(1, 2), attack: a, decay: d, vol: 1 }),
         L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 200, cutoffPeak: 700, cutoffEnd: 180, attack: a, decay: d, vol: 0.4 })
       ], { reverb: 0.08, gain: 1.5 });
+    } },
+
+    /* ================= 第一批扩充（2026-11）：战斗 / 角色 / 环境 / 界面 ================= */
+    /* 射箭 / 刀剑相击 / 脚步（石地）：真实录音（Freesound CC0，见 samples/CREDITS.md）为底，
+       每次随机挑一段录音、随机微调音高和音量，再按情况组合，变体之间听得出差别但都是真实的质感。 */
+    /* 射箭：两种射出（带破空声的整段 / 只有弓弦）任选其一；55% 的变体在箭飞出去之后接一声中靶（三段里随机一段）。 */
+    { id: 'arrow', group: 'general', gen: () => {
+      const loose = ri(0, 1), hit = chance(0.55);
+      const layers = [take('arrow', loose, { pitch: r(-1.5, 1.5), vol: r(0.8, 0.95) })];
+      if (loose === 1) layers.push(L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: 900, cutoffPeak: r(3500, 5000), cutoffEnd: 1400, q: 2, start: 0.06, attack: 0.08, decay: r(0.15, 0.25), vol: 0.35 }));
+      if (hit) layers.push(take('arrow', ri(2, 4), { start: r(0.28, 0.45), pitch: r(-2, 1), vol: r(0.75, 0.95) }));
+      return P(layers, { reverb: r(0.05, 0.12), gain: 0.9 });
+    } },
+    /* 刀剑相击：真剑对砍的录音里切出 8 下，随机一下；三成变体是快速的两下（第二下换一段、轻一点）。 */
+    { id: 'swordClash', group: 'general', gen: () => {
+      const a = ri(0, 7), layers = [take('sword-clash', a, { pitch: r(-2.5, 1.5), vol: r(0.85, 0.95) })];
+      if (chance(0.3)) layers.push(take('sword-clash', (a + ri(1, 7)) % 8, { start: r(0.1, 0.18), pitch: r(-2, 2), vol: r(0.55, 0.75) }));
+      return P(layers, { reverb: r(0.08, 0.2), gain: 0.9 });
+    } },
+    /* 脚步（石地）：12 段真实的单步（登山靴和普通鞋各 6 步），每次随机一步、音高和轻重微调。 */
+    { id: 'footstepStone', group: 'general', gen: () => P([
+      take('footstep-stone', ri(0, 11), { pitch: r(-2, 1.5), vol: r(0.75, 0.95) })
+    ], { reverb: r(0.03, 0.1), gain: 0.95 }) },
+    /* 雨：大片的沙沙声（白噪声带通，微微起伏）+ 几十滴打在不同东西上的雨点（极短的正弦"嗒"，随机时刻、随机音高）
+       + 低处的水声（棕色噪声）。约 4 秒，首尾淡入淡出，可以循环。小雨 / 中雨 / 大雨三种。 */
+    { id: 'rain', group: 'general', gen: () => {
+      const k = pick([0.5, 1, 1.6]), dur = 4;
+      return P([
+        L({ type: 'noise', filter: 'bandpass', cutoff: r(2500, 4000), cutoffEnd: r(2500, 4000), q: 0.5, attack: 0.6, hold: dur - 1.2, decay: 0.6, vol: 0.35 * k, trem: 0.15, tremRate: r(0.3, 0.7) }),
+        L({ type: 'noise', color: 'pink', filter: 'lowpass', cutoff: 1500, cutoffEnd: 1500, attack: 0.6, hold: dur - 1.2, decay: 0.6, vol: 0.25 * k }),
+        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 350, cutoffEnd: 350, attack: 0.6, hold: dur - 1.2, decay: 0.6, vol: 0.3 * Math.min(1.3, k) }),
+        L({ type: 'tone', freq: r(2200, 3200), freqEnd: r(3500, 4500), slideTime: 0.01, start: 0.3, attack: 0.0005, decay: r(0.008, 0.015), vol: 0.22, rep: Math.round(60 * k), repGap: (dur - 0.8) / (60 * k), jitter: 1, pitchJitter: 10 }),
+        L({ type: 'noise', filter: 'bandpass', cutoff: 5000, cutoffEnd: 5000, q: 3, start: 0.3, attack: 0.0005, decay: 0.006, vol: 0.25, rep: Math.round(40 * k), repGap: (dur - 0.8) / (40 * k), jitter: 1, pitchJitter: 12 })
+      ], { reverb: 0.2, gain: 1.1 });
+    } },
+    /* 通知：两个柔和的"叮"（类似马林巴：基音 + 很快消失的高泛音），第二个音往上走一个五声音阶的音程。 */
+    { id: 'notify', group: 'general', gen: () => {
+      const d = ri(13, 16), up = pick([1, 2, 3]), gap = r(0.11, 0.16);
+      return P([
+        same(L({ type: 'bell', freq: penta(d), partials: [[1, 1, 1], [3.93, 0.35, 0.25], [9.2, 0.12, 0.1]], attack: 0.002, decay: r(0.5, 0.8), vol: 0.35, rep: 2, repGap: gap, repStep: up })),
+        L({ type: 'noise', filter: 'highpass', cutoff: 5000, cutoffEnd: 5000, attack: 0.0005, decay: 0.005, vol: 0.1, rep: 2, repGap: gap })
+      ], { reverb: 0.22, gain: 1.3 });
+    } },
+
+    /* ================= 第一批扩充（续）：写实的用 CC0 录音为底，风和洞穴滴水用合成 ================= */
+    /* 脚步（草地）：踩在草和落叶上的 8 段真实脚步，随机一步，音高和轻重微调 */
+    { id: 'footstepGrass', group: 'general', gen: () => P([
+      take('footstep-grass', ri(0, 7), { pitch: r(-2, 1.5), vol: r(0.75, 0.95) })
+    ], { reverb: r(0.02, 0.08), gain: 1.3 }) },
+    /* 落地：三段真实的跳起落地（硬地、普通地面、踩到树枝），四成变体垫一下低频的"咚"让它更重 */
+    { id: 'land', group: 'general', gen: () => {
+      const layers = [take('land', ri(0, 2), { pitch: r(-3, 1), vol: r(0.8, 0.95) })];
+      if (chance(0.4)) layers.push(L({ type: 'tone', freq: r(85, 110), freqEnd: r(40, 50), slideTime: 0.05, attack: 0.001, decay: r(0.1, 0.16), vol: 0.45 }));
+      return P(layers, { reverb: r(0.03, 0.1), gain: 0.95 });
+    } },
+    /* 格挡：盾牌 / 兵器挡下一击 = 录音里的金属撞击 + 合成的盾身闷响（低频下滑）+ 一点木头的"嗒" */
+    { id: 'shieldBlock', group: 'general', gen: () => P([
+      take('shield-block', ri(0, 5), { pitch: r(-4, 0.5), vol: r(0.75, 0.9) }),
+      L({ type: 'tone', freq: r(130, 180), freqEnd: r(50, 65), slideTime: 0.05, attack: 0.001, decay: r(0.14, 0.22), vol: r(0.45, 0.65) }),
+      L({ type: 'noise', filter: 'lowpass', cutoff: r(1200, 2000), cutoffEnd: 400, attack: 0.0005, decay: r(0.05, 0.09), vol: 0.4 })
+    ], { reverb: r(0.08, 0.16), gain: 0.85 }) },
+    /* 风：粉红噪声带通的"呼——"，中心频率随阵风先升后降；高处一缕窄带的哨音（q 很高、忽强忽弱）；
+       底下棕色噪声的低吼。约 4 秒，首尾淡入淡出。轻风 / 阵风 / 狂风三种。 */
+    { id: 'wind', group: 'general', gen: () => {
+      const k = pick([0.6, 1, 1.4]), dur = r(3.5, 4.5);
+      return P([
+        L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: r(250, 400), cutoffPeak: r(700, 1300) * k, cutoffEnd: r(250, 400), sweepTime: dur, q: r(0.8, 1.4), attack: dur * 0.35, hold: dur * 0.2, decay: dur * 0.45, vol: 0.9, trem: 0.25, tremRate: r(0.4, 0.9) }),
+        L({ type: 'noise', filter: 'bandpass', cutoff: r(600, 900), cutoffPeak: r(1200, 1900) * Math.sqrt(k), cutoffEnd: r(700, 1000), sweepTime: dur, q: r(10, 18), attack: dur * 0.4, decay: dur * 0.6, vol: 0.25 * k, trem: 0.6, tremRate: r(0.8, 1.6) }),
+        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 180, cutoffPeak: 320, cutoffEnd: 160, sweepTime: dur, attack: dur * 0.3, hold: dur * 0.3, decay: dur * 0.4, vol: 0.5 * k })
+      ], { reverb: 0.15, gain: 1.2 });
+    } },
+    /* 篝火：真实篝火的 5 秒录音（两段任选，首尾已对接，可以循环）；一半变体再加几下合成的木柴爆裂 */
+    { id: 'campfire', group: 'general', gen: () => {
+      const layers = [loopTake('campfire', ri(0, 1), { pitch: r(-1, 1), vol: 0.9 })];
+      if (chance(0.5)) layers.push(L({ type: 'noise', filter: 'highpass', cutoff: 900, cutoffEnd: 900, start: 0.4, attack: 0.0005, decay: r(0.015, 0.03), vol: 0.25, rep: ri(3, 6), repGap: 0.8, jitter: 1, pitchJitter: 6 }));
+      /* 录音里偶尔的大爆裂把整体标准化压低了，这里推高，爆裂由引擎的限幅器压住 */
+      return P(layers, { reverb: 0.05, gain: 2.6 });
+    } },
+    /* 流水：溪水近距离录音 5 秒（两段任选，可循环），音高微调就像换了一段水流 */
+    { id: 'stream', group: 'general', gen: () => P([
+      loopTake('stream', ri(0, 1), { pitch: r(-1.5, 1.5), vol: 0.9 })
+    ], { reverb: 0.05, gain: 0.55 }) },
+    /* 洞穴滴水：水滴落进水洼的"咚"= 正弦波，音高在一瞬间往上扬（和冒泡同理），加上很长的洞穴混响和回声；
+       几滴在随机时刻落下，底下一层很暗的空间底噪。 */
+    { id: 'caveDrip', group: 'general', gen: () => {
+      const f = r(700, 1300), n = ri(3, 6);
+      return P([
+        L({ type: 'tone', wave: 'sine', freq: f, freqEnd: f * r(1.5, 2), slideTime: 0.02, attack: 0.0008, decay: r(0.05, 0.09), vol: 0.6, rep: n, repGap: r(0.5, 0.8), jitter: 0.6, pitchJitter: 4 }),
+        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 220, cutoffEnd: 220, attack: 0.5, hold: n * 0.6, decay: 0.8, vol: 0.12 })
+      ], { reverb: r(0.6, 0.8), echo: r(0.2, 0.35), echoTime: r(0.18, 0.3), gain: 1 });
+    } },
+    /* 翻页：7 段真实的翻书声（薄页、厚书页），随机一段 */
+    { id: 'pageTurn', group: 'general', gen: () => P([
+      take('page-turn', ri(0, 6), { pitch: r(-1.5, 1.5), vol: r(0.8, 0.95) })
+    ], { reverb: r(0.02, 0.08), gain: 0.95 }) },
+    /* 打字：老式打字机的真实按键声，随机敲 3–8 下（每下换一个键、间隔不等）；四分之一的变体最后"叮"一声换行 */
+    { id: 'typing', group: 'general', gen: () => {
+      const n = ri(3, 8), layers = [];
+      let t = 0;
+      for (let i = 0; i < n; i++) { layers.push(take('typewriter', ri(0, 11), { start: t, pitch: r(-1, 1), vol: r(0.6, 0.9) })); t += r(0.07, 0.17); }
+      if (chance(0.25)) layers.push(take('typewriter', 12, { start: t + 0.1, vol: 0.8 }));
+      return P(layers, { reverb: 0.05, gain: 1.2 });
+    } },
+    /* 开宝箱：三段真实录音（木箱慢慢打开的吱呀、宝箱开盖、木头吱嘎），随机一段；四成变体接一串"发现宝物"的风铃 */
+    { id: 'chestOpen', group: 'general', gen: () => {
+      const k = ri(0, 2), layers = [take('chest-open', k, { pitch: r(-2, 1), vol: 0.9 })];
+      if (chance(0.4)) layers.push(same(L({ type: 'bell', freq: penta(ri(18, 21)), partials: [[1, 1, 1], [2.756, 0.4, 0.6], [5.404, 0.15, 0.35]], start: [1.2, 0.6, 0.5][k] + r(0, 0.2), attack: 0.002, decay: r(1.2, 1.8), vol: 0.12, rep: ri(3, 5), repGap: r(0.07, 0.11), repStep: 1 })));
+      return P(layers, { reverb: r(0.1, 0.2), gain: 0.95 });
+    } },
+    /* 怪物低吼：四段真实的低吼 / 咆哮，随机一段，音高随机压低或抬高（越低越像大块头），垫一层低频的胸腔共鸣 */
+    { id: 'monsterGrowl', group: 'general', gen: () => {
+      const k = ri(0, 3), dur = [2.2, 1.95, 2.46, 3.1][k];
+      return P([
+        take('monster-growl', k, { pitch: r(-5, 1), vol: 0.9 }),
+        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 220, cutoffEnd: 120, attack: 0.15, decay: dur, vol: r(0.25, 0.4), trem: 0.4, tremRate: r(6, 11) })
+      ], { reverb: r(0.12, 0.25), gain: 0.95 });
     } }
   ];
 
@@ -397,21 +524,8 @@
     retro: p => { const q = JSON.parse(JSON.stringify(p)); q.crush = q.crush ? clamp(q.crush - 1, 3, 16) : 7; q.reverb = q.reverb * 0.3; q.echo = 0; return q; }
   };
 
-  /* 搜索用的关键词：中英文名 + 同义词 */
-  const KEYWORDS = {
-    swordQi: '剑 剑气 刀 挥剑 斩 sword slash blade qi katana', guqin: '古琴 琴 拨弦 弦 guqin zither pluck harp', bell: '钟 寺钟 铜钟 梵钟 铃 bell temple chime notification',
-    gong: '锣 铜锣 大锣 京剧 gong tam', spell: '施法 法术 魔法 技能 spell magic cast skill', thunder: '雷 天雷 雷声 渡劫 thunder storm rumble',
-    lightning: '霹雳 闪电 雷击 电 lightning strike electric zap', breakthrough: '突破 境界 渡劫 升级 飞升 breakthrough ascend realm prestige',
-    talisman: '符 符箓 燃烧 火 火焰 talisman fire burn crackle', alchemy: '丹 炼丹 药水 冒泡 气泡 potion bubble brew alchemy',
-    chime: '风铃 铃 发现 chime wind sparkle discover', flute: '笛 竹笛 笛子 flute dizi', qiGather: '聚气 蓄力 充能 气 charge energy qi',
-    pipa: '琵琶 拨弦 pipa lute', erhu: '二胡 胡琴 拉弦 悲伤 erhu fiddle sad', woodfish: '木鱼 敲 寺庙 点击 wooden fish block temple tok',
-    drum: '鼓 战鼓 擂鼓 打仗 drum war battle taiko', coin: '金币 钱 硬币 金钱 收入 coin money gold cash', pickup: '拾取 捡 道具 宝石 pickup item collect gem',
-    click: '点击 按钮 咔哒 click button tap ui', confirm: '确认 成功 好的 confirm ok success', error: '错误 失败 不行 error wrong fail deny',
-    jump: '跳 跳跃 弹跳 jump bounce hop', hit: '打 受击 打击 拳 伤害 hit punch impact damage', explosion: '爆炸 爆 炸弹 boom explosion bomb blast',
-    laser: '激光 枪 射击 激光枪 laser gun shoot blaster pew', powerUp: '强化 增益 变强 power up buff upgrade', levelUp: '升级 等级 成就 奖励 level up achievement reward',
-    whoosh: '挥动 风 呼 冲刺 whoosh swoosh swing dash wind'
-  };
+  /* 分类、标签、搜索关键词在 catalog.js */
 
-  if (typeof window !== 'undefined') { window.SFX_PRESETS = PRESETS; window.SFX_MUTATE = mutate; window.SFX_SAMPLES = SAMPLES; window.SFX_TWEAKS = TWEAKS; window.SFX_KEYWORDS = KEYWORDS; }
-  if (typeof module !== 'undefined' && module.exports) module.exports = { PRESETS, mutate, SAMPLES, TWEAKS, KEYWORDS };
+  if (typeof window !== 'undefined') { window.SFX_PRESETS = PRESETS; window.SFX_MUTATE = mutate; window.SFX_SAMPLES = SAMPLES; window.SFX_TWEAKS = TWEAKS; }
+  if (typeof module !== 'undefined' && module.exports) module.exports = { PRESETS, mutate, SAMPLES, TWEAKS };
 })();

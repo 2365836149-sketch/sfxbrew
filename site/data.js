@@ -442,6 +442,246 @@ const SOUNDS = {
       uses: ['冲刺、闪避、挥舞', '界面面板滑入', '场景切换', '投掷物'],
       tip: '把扫频反过来（截止频率从高到低），就像东西在远离玩家。'
     }
+  },
+  arrow: {
+    slug: 'arrow-sound-effect', related: ['swordClash', 'whoosh', 'hit', 'swordQi'],
+    en: {
+      name: 'Arrow', title: 'Free Arrow & Bow Sound Effects',
+      intro: 'A bowstring twang followed by the hiss of the arrow cutting the air. About half of the variations end with a dull wooden thud as the arrow hits its target, so you get both the shot and the impact from one sound.',
+      uses: ['Archers, crossbows and ranged attacks', 'Arrow traps', 'Hit confirmation on a target', 'Skill shots and volleys'],
+      tip: 'Built from real CC0 recordings of a bow, an arrow in flight and arrows hitting a target. Transpose down a few semitones for a heavier longbow.'
+    },
+    zh: {
+      name: '射箭', title: '免费射箭 / 弓箭音效',
+      intro: '弓弦"嘣"的一声，接着箭破空的"嗖"。大约一半变体最后有一声闷闷的"笃"，是箭扎进靶子或木头里，一个声音就包含了射出和命中。',
+      uses: ['弓手、弩和各种远程攻击', '机关暗箭', '命中靶子的反馈', '技能连射、箭雨'],
+      tip: '用的是真实的 CC0 录音：弓弦、箭飞过和中靶。想要更沉的长弓，把移调往下调几个半音。'
+    }
+  },
+  swordClash: {
+    slug: 'sword-clash-sound-effect', related: ['swordQi', 'hit', 'arrow', 'gong'],
+    en: {
+      name: 'Sword Clash', title: 'Free Sword Clash Sound Effects',
+      intro: 'Blade meets blade: a bright metallic clang whose tail rings and beats like real steel, plus a short scrape of the edges sliding apart. Some variations are a quick double hit.',
+      uses: ['Parries and blocks', 'Duels and clashing weapons', 'Critical hits on armored enemies', 'Forging and anvil-like UI feedback'],
+      tip: 'Cut from a real recording of two swords clashing. Transpose down and add reverb for heavy blades in a hall.'
+    },
+    zh: {
+      name: '刀剑相击', title: '免费刀剑相击 / 格挡音效',
+      intro: '兵刃相碰：清亮的金属"锵"，余音像真钢铁一样带点颤动，再加一下刀刃擦开的"嚓"。有些变体是连着两下。',
+      uses: ['格挡、招架', '比武、兵器碰撞', '打在重甲上的暴击', '锻造、铁匠铺之类的反馈'],
+      tip: '切自两把真剑对砍的录音。移调往下、混响加大，就像在大殿里两把重剑相交。'
+    }
+  },
+  footstepStone: {
+    slug: 'footstep-stone-sound-effect', related: ['jump', 'whoosh', 'hit', 'click'],
+    en: {
+      name: 'Footstep (Stone)', title: 'Free Footstep on Stone Sound Effects',
+      intro: 'Single footsteps on a stone floor: a soft heel thud, the scuff of the sole and a little grit. Each variation is one step, so you can trigger them in sync with a walk animation and alternate a few to avoid repetition.',
+      uses: ['Walking and running on stone, tiles or paths', 'Dungeons, temples and city streets', 'Footsteps of NPCs approaching', 'Cutscene foley'],
+      tip: 'Twelve real steps (boots and shoes) recorded on stone. Download a pack of 10 and pick one at random for each step; transpose down for heavy armored characters.'
+    },
+    zh: {
+      name: '脚步（石地）', title: '免费脚步声音效：石板地',
+      intro: '走在石板地上的单个脚步：脚跟着地的闷响、鞋底的摩擦和一点沙砾声。每个变体就是一步，方便和走路动画对齐；准备几个轮流播放就不会重复。',
+      uses: ['在石板、地砖、山路上行走或奔跑', '地牢、寺庙、城镇街道', 'NPC 走近的脚步', '过场动画的拟音'],
+      tip: '共 12 步真实录音（靴子和普通鞋走在石头上）。打包下载 10 个，每一步随机挑一个播放；重甲角色可以往下移调。'
+    }
+  },
+  rain: {
+    slug: 'rain-sound-effect', related: ['thunder', 'lightning', 'alchemy', 'chime'],
+    en: {
+      name: 'Rain', title: 'Free Rain Sound Effects',
+      intro: 'About four seconds of rain: a soft wash of falling water, dozens of drops hitting different surfaces and a low watery bed. Each variation is light, medium or heavy rain, and it fades in and out so it can loop or be crossfaded.',
+      uses: ['Weather systems and rainy levels', 'Background ambience for villages and forests', 'Sad or calm story scenes', 'Layering under thunder for a storm'],
+      tip: 'For a longer bed, loop two variations with a crossfade. Add the thunder preset on top for a storm.'
+    },
+    zh: {
+      name: '雨', title: '免费雨声音效',
+      intro: '大约四秒的雨声：一片沙沙的落雨、几十滴打在不同东西上的雨点，下面垫一层低低的水声。每个变体随机是小雨、中雨或大雨，首尾淡入淡出，可以循环或者交叉淡化。',
+      uses: ['天气系统、下雨的关卡', '村庄、山林的背景氛围', '悲伤或安静的剧情', '叠上雷声做暴风雨'],
+      tip: '想要更长的雨，就拿两个变体交叉淡化循环；再叠上"天雷"就是一场暴风雨。'
+    }
+  },
+  notify: {
+    slug: 'notification-sound-effect', related: ['confirm', 'click', 'chime', 'levelUp'],
+    en: {
+      name: 'Notification', title: 'Free Notification Sound Effects',
+      intro: 'Two soft, marimba-like dings that step up a little, the friendly kind of alert that says something happened without startling the player. The notes stay on the pentatonic scale.',
+      uses: ['Messages, toasts and pop-ups', 'Quest updates and new items in the log', 'Friend online, mail received', 'Timers finishing'],
+      tip: 'For an important alert, raise the pitch and shorten the gap between the two notes.'
+    },
+    zh: {
+      name: '通知', title: '免费通知 / 提示音效',
+      intro: '两声柔和、像马林巴一样的"叮咚"，第二个音往上走一点。是那种告诉玩家"有事发生了"、又不会吓人一跳的提示音。音高都在五声音阶上。',
+      uses: ['消息、弹窗、横幅提示', '任务更新、背包里有新东西', '好友上线、收到邮件', '计时结束'],
+      tip: '重要的提醒可以把音高调高、两个音之间的间隔缩短。'
+    }
+  },
+  footstepGrass: {
+    slug: 'footstep-grass-sound-effect', related: ['footstepStone','land','jump','stream'],
+    en: {
+      name: "Footstep (Grass)", title: "Free Footstep on Grass Sound Effects",
+      intro: "Single footsteps on grass and dry leaves, cut from a real recording of someone running through a forest. Each variation is one step with a soft crunch, so it lines up with your walk or run animation.",
+      uses: ["Walking and running in fields, forests and gardens","Sneaking through tall grass","Animals and NPCs moving outdoors","Outdoor cutscene foley"],
+      tip: "Pick a random step for each footfall. Lower the volume for walking and keep it for running."
+    },
+    zh: {
+      name: "脚步（草地）", title: "免费脚步声音效：草地 / 落叶",
+      intro: "踩在草地和枯叶上的单个脚步，切自一段在树林里跑步的真实录音。每个变体就是一步，带一点\"沙沙\"的脆响，方便和走路、跑步动画对齐。",
+      uses: ["在田野、树林、园子里行走或奔跑","在草丛里潜行","野外的动物和 NPC 走动","户外过场动画的拟音"],
+      tip: "每一步随机挑一个播放。走路时音量调小一点，跑步时保持原样。"
+    }
+  },
+  land: {
+    slug: 'landing-sound-effect', related: ['jump','footstepStone','hit','footstepGrass'],
+    en: {
+      name: "Land", title: "Free Landing Sound Effects",
+      intro: "The thud of a character landing after a jump, from real recordings: on a hard floor, on the ground and onto some snapping sticks. Some variations add a low thump for heavier characters.",
+      uses: ["Landing after a jump or fall","Heavy enemies dropping into the arena","Wall jumps and double jumps","Items or crates falling"],
+      tip: "Pair it with the Jump preset: jump on the way up, land on the way down."
+    },
+    zh: {
+      name: "落地", title: "免费落地音效",
+      intro: "角色跳起后着地的那一声，来自真实录音：落在硬地板上、普通地面上，还有一段踩断了树枝。有些变体垫了一下低频的\"咚\"，适合块头大的角色。",
+      uses: ["跳跃或掉落后着地","重型敌人跳进场地","蹬墙跳、二段跳","道具、箱子掉在地上"],
+      tip: "和\"跳跃\"配着用：起跳时放跳跃，落下时放落地。"
+    }
+  },
+  shieldBlock: {
+    slug: 'shield-block-sound-effect', related: ['swordClash','hit','swordQi','gong'],
+    en: {
+      name: "Shield Block", title: "Free Shield Block Sound Effects",
+      intro: "An attack stopped by a shield: a real metal impact layered with a deep, synthesized thud of the shield body and a short wooden knock. Heavier and duller than a sword clash.",
+      uses: ["Blocking and guarding","Perfect parry or guard break","Hits on armored or shielded enemies","Defensive skills"],
+      tip: "Transpose down for a big tower shield; turn the thud down for a small buckler."
+    },
+    zh: {
+      name: "格挡", title: "免费格挡 / 盾牌音效",
+      intro: "一击被盾牌挡下：真实录音里的金属撞击，叠上合成的盾身闷响和一下短促的木头声。比刀剑相击更沉、更钝。",
+      uses: ["举盾格挡、防御","完美招架、破防","打在带盾或重甲的敌人身上","防御类技能"],
+      tip: "大盾就往下移调；小圆盾就把闷响那一层调小。"
+    }
+  },
+  wind: {
+    slug: 'wind-sound-effect', related: ['rain','whoosh','caveDrip','thunder'],
+    en: {
+      name: "Wind", title: "Free Wind Sound Effects",
+      intro: "About four seconds of wind: a gust that swells and dies away, a thin whistle riding on top and a low rumble underneath. Each variation is a light breeze, a gust or a strong wind.",
+      uses: ["Mountain tops, deserts and open plains","Weather systems and storms","Transitions between scenes","Spirit or ghost ambience"],
+      tip: "Layer two variations with an offset for a continuous wind, or play one when the camera moves somewhere high."
+    },
+    zh: {
+      name: "风", title: "免费风声音效",
+      intro: "大约四秒的风：一阵风涌起又散去，上面飘着一缕细细的哨音，底下是低沉的呼呼声。每个变体随机是微风、阵风或狂风。",
+      uses: ["山顶、沙漠、开阔的平原","天气系统、暴风雨","场景切换","鬼魂、精怪出没的氛围"],
+      tip: "两个变体错开叠在一起就是持续的风；镜头拉到高处时放一段也很有效果。"
+    }
+  },
+  campfire: {
+    slug: 'campfire-sound-effect', related: ['talisman','stream','wind','alchemy'],
+    en: {
+      name: "Campfire", title: "Free Campfire Sound Effects",
+      intro: "Five seconds of a real campfire crackling on a quiet night. The end is crossfaded into the start, so it loops without a seam; some variations add a few extra pops of burning wood.",
+      uses: ["Camps, rest points and save spots","Hearths, forges and kitchens","Torches and braziers (quieter)","Night scenes outdoors"],
+      tip: "Loop it under your scene and fade the volume with distance from the fire."
+    },
+    zh: {
+      name: "篝火", title: "免费篝火音效",
+      intro: "五秒真实的篝火录音，安静的夜里木柴噼啪作响。结尾已经和开头交叉淡化过，循环播放没有接缝；有些变体还多加了几下木柴爆裂声。",
+      uses: ["营地、休息点、存档点","灶台、炼器炉、厨房","火把、火盆（音量调小）","野外的夜晚"],
+      tip: "循环放在场景底下，离火越远音量越小。"
+    }
+  },
+  stream: {
+    slug: 'stream-sound-effect', related: ['rain','caveDrip','campfire','alchemy'],
+    en: {
+      name: "Stream", title: "Free Stream & Flowing Water Sound Effects",
+      intro: "Five seconds of a real babbling stream recorded up close, with a seamless loop point. Each variation picks one of two passages and shifts it slightly in pitch, like a different part of the water.",
+      uses: ["Rivers, brooks and waterfalls (from a distance)","Peaceful villages and forests","Fishing spots","Meditation and healing areas"],
+      tip: "Loop it and raise the volume as the player approaches the water."
+    },
+    zh: {
+      name: "流水", title: "免费流水 / 溪水音效",
+      intro: "五秒近距离录的真实溪水声，首尾已经对接好，可以无缝循环。每个变体从两段里随机选一段，再微调一点音高，就像换了一处水流。",
+      uses: ["河流、小溪、远处的瀑布","宁静的村庄和山林","钓鱼点","打坐、疗伤的地方"],
+      tip: "循环播放，玩家离水越近音量越大。"
+    }
+  },
+  caveDrip: {
+    slug: 'cave-drip-sound-effect', related: ['stream','wind','chime','rain'],
+    en: {
+      name: "Cave Drip", title: "Free Cave Water Drip Sound Effects",
+      intro: "Water drops falling into a pool somewhere in a cave: a short rising \"plink\" for each drop, a long cave reverb and a soft echo, over a dark room tone.",
+      uses: ["Caves, grottoes and dungeons","Secret realms and hidden chambers","Quiet, tense exploration","Underground waterways"],
+      tip: "Play a variation every few seconds at a random volume so the cave never sounds looped."
+    },
+    zh: {
+      name: "洞穴滴水", title: "免费洞穴滴水音效",
+      intro: "洞里某处水滴落进水洼：每一滴是一声短促、往上扬的\"叮咚\"，带着很长的洞穴混响和轻轻的回声，下面是一层幽暗的空间底噪。",
+      uses: ["山洞、石窟、地牢","秘境、密室","安静又紧张的探索","地下水道"],
+      tip: "每隔几秒随机音量放一个变体，洞里就不会听出循环感。"
+    }
+  },
+  pageTurn: {
+    slug: 'page-turn-sound-effect', related: ['click','typing','confirm','talisman'],
+    en: {
+      name: "Page Turn", title: "Free Page Turn Sound Effects",
+      intro: "Real recordings of book pages being turned, from a thin page to the heavier pages of an old book. Each variation is a single turn.",
+      uses: ["Journals, quest logs and codices","Spell books and manuals","Menu tabs and inventory pages","Story books and tutorials"],
+      tip: "Use it for any UI that flips between pages; it reads as \"next\" without a beep."
+    },
+    zh: {
+      name: "翻页", title: "免费翻页 / 翻书音效",
+      intro: "真实的翻书录音，从薄薄的一页纸到旧书厚重的书页。每个变体就是翻一页。",
+      uses: ["日志、任务记录、图鉴","秘籍、功法、说明书","菜单分页、背包翻页","故事书和新手教程"],
+      tip: "凡是在页面之间切换的界面都可以用，比\"嘀\"一声更有质感。"
+    }
+  },
+  typing: {
+    slug: 'typing-sound-effect', related: ['click','pageTurn','notify','confirm'],
+    en: {
+      name: "Typing", title: "Free Typing & Typewriter Sound Effects",
+      intro: "A short burst of real typewriter keystrokes, three to eight keys with uneven gaps like a person typing. A quarter of the variations end with the carriage bell.",
+      uses: ["Dialogue text appearing letter by letter","Terminals, hacking and computers","Letters, reports and notes","Name entry screens"],
+      tip: "For text that types itself, play a short variation every few characters instead of one per letter."
+    },
+    zh: {
+      name: "打字", title: "免费打字 / 打字机音效",
+      intro: "一小串真实的打字机按键声，三到八下，间隔不均匀，像真人在打字。四分之一的变体最后有换行的\"叮\"。",
+      uses: ["对话文字逐字出现","终端、黑客、电脑操作","书信、报告、便条","输入名字的界面"],
+      tip: "文字逐字出现时，不必每个字都放一次，每隔几个字放一段短的就好。"
+    }
+  },
+  chestOpen: {
+    slug: 'chest-open-sound-effect', related: ['coin','pickup','levelUp','chime'],
+    en: {
+      name: "Chest Open", title: "Free Treasure Chest Open Sound Effects",
+      intro: "Real recordings of a wooden chest and an old trunk creaking open. Some variations finish with a little sparkle of chimes, the classic \"you found treasure\" moment.",
+      uses: ["Treasure chests and loot","Crates, cabinets and doors","Reward screens","Secret rooms being revealed"],
+      tip: "Use the plain creak for ordinary containers and keep the sparkle variations for rare loot."
+    },
+    zh: {
+      name: "开宝箱", title: "免费开宝箱音效",
+      intro: "真实录音：木箱、旧箱子\"吱呀\"一声被打开。有些变体最后还有一串风铃般的闪光声，就是经典的\"发现宝物\"时刻。",
+      uses: ["开宝箱、拾取战利品","木箱、柜子、门","奖励结算画面","密室被打开"],
+      tip: "普通箱子用只有吱呀声的变体，稀有宝物才用带闪光的。"
+    }
+  },
+  monsterGrowl: {
+    slug: 'monster-growl-sound-effect', related: ['explosion','thunder','hit','drum'],
+    en: {
+      name: "Monster Growl", title: "Free Monster Growl & Roar Sound Effects",
+      intro: "Real growls and roars, pitched down or up at random and reinforced with a low chest rumble. Lower variations sound like big beasts and dragons, higher ones like smaller creatures.",
+      uses: ["Monsters, beasts and dragons","Boss intros and enrage phases","Enemies noticing the player","Demonic or spirit beasts in xianxia games"],
+      tip: "Transpose further down and add reverb for a giant boss in a cave."
+    },
+    zh: {
+      name: "怪物低吼", title: "免费怪物低吼 / 咆哮音效",
+      intro: "真实的低吼和咆哮录音，音高随机压低或抬高，再垫一层低频的胸腔共鸣。音低的变体像巨兽、龙，音高的像小型怪物。",
+      uses: ["怪物、野兽、龙","Boss 登场、狂暴阶段","敌人发现玩家","修仙游戏里的妖兽、灵兽"],
+      tip: "再往下移调、加大混响，就像山洞里的巨型 Boss。"
+    }
   }
 };
 
@@ -471,19 +711,48 @@ const PACKS = {
   }
 };
 
+/* 每个大类一页（/sounds/c/<大类>/）：标题和一句话介绍，给搜索引擎和第一次来的人看 */
+const CAT_COPY = {
+  combat: { slug: 'combat',
+    en: { title: 'Free Combat Sound Effects', intro: 'Sword slashes, punches, hits, explosions, lasers and war drums for fights and boss battles.' },
+    zh: { title: '免费战斗音效', intro: '挥剑、拳脚、受击、爆炸、激光和战鼓，打斗和 Boss 战用得上的声音。' } },
+  magic: { slug: 'magic',
+    en: { title: 'Free Magic & Xianxia Sound Effects', intro: 'Spell casts, heavenly thunder, lightning, qi charging, talismans, alchemy and realm breakthroughs.' },
+    zh: { title: '免费法术 / 仙侠音效', intro: '施法、天雷、霹雳、聚气、符箓、炼丹和境界突破，修仙和魔法游戏的核心音效。' } },
+  instrument: { slug: 'eastern-instruments',
+    en: { title: 'Free Eastern Instrument Sound Effects', intro: 'Single notes and hits of Chinese instruments: guqin, pipa, erhu, bamboo flute, temple bells, gongs, wooden fish and war drums.' },
+    zh: { title: '免费东方乐器音效', intro: '中国乐器的单音和敲击：古琴、琵琶、二胡、竹笛、寺钟、铜锣、木鱼和战鼓。' } },
+  ui: { slug: 'ui',
+    en: { title: 'Free UI Sound Effects', intro: 'Clicks, confirms, errors and notification tones for menus and buttons.' },
+    zh: { title: '免费界面音效', intro: '菜单和按钮用的点击、确认、错误和提示音。' } },
+  items: { slug: 'items-rewards',
+    en: { title: 'Free Item & Reward Sound Effects', intro: 'Coins, pickups, power-ups and level-ups: the sounds that make progress feel good.' },
+    zh: { title: '免费道具 / 奖励音效', intro: '金币、拾取、强化和升级，让玩家觉得"赚到了"的声音。' } },
+  character: { slug: 'character',
+    en: { title: 'Free Character Movement Sound Effects', intro: 'Footsteps on stone and grass, jumps, landings and dashes for player characters and NPCs.' },
+    zh: { title: '免费角色动作音效', intro: '石地和草地脚步、跳跃、落地、冲刺，角色和 NPC 移动时的声音。' } },
+  ambience: { slug: 'ambience',
+    en: { title: 'Free Ambience Sound Effects', intro: 'Weather and atmosphere: rain, wind, thunder, a crackling campfire, a babbling stream and dripping caves. Several loop seamlessly.' },
+    zh: { title: '免费环境氛围音效', intro: '天气和氛围：雨、风、雷、噼啪的篝火、潺潺的溪水和洞穴滴水，有几个可以无缝循环。' } },
+  creature: { slug: 'creatures',
+    en: { title: 'Free Creature Sound Effects', intro: 'Monster growls and roars for beasts, dragons and bosses.' },
+    zh: { title: '免费生物音效', intro: '怪物、野兽、龙和 Boss 的低吼与咆哮。' } }
+};
+
 /* 页面固定文字 */
 const UI = {
   en: {
-    navEditor: 'Editor', navLibrary: 'Sound Library', navPacks: 'Packs', navAgents: 'For AI Agents', switchLang: '中文',
-    library: 'Sound Library', packs: 'Packs', groupEast: 'Eastern & Xianxia', groupGeneral: 'General Game Sounds',
+    navEditor: 'SFX Editor', navLibrary: 'Sound Library', navLab: 'Lab', navMusic: 'Music', navPacks: 'Packs', navAgents: 'For AI agents', switchLang: '中文',
+    nVariants: n => n + ' variations', libCount: (k, n) => k + ' categories × ' + n + ' variations', moreInfo: name => 'About these ' + name.toLowerCase() + ' sounds, uses and license', aboutLib: 'About this library',
+    library: 'Sound Library', packs: 'Packs', category: 'Category', filters: 'Filters', categoriesH: 'Categories', searchPh: 'Search: sword, coin, rain, 剑…', sortDefault: 'Sort: category', sortName: 'Sort: name', sortDur: 'Sort: length', clearAll: 'Clear filters', showing: (n, m) => n + ' of ' + m + ' sounds', nSounds: n => n + ' free sounds', libMetaTail: 'Free for commercial use: play in the browser, download WAV or copy JavaScript.', noResults: 'No sound matches. Try another word or clear the filters.', reroll: 'New variation', details: 'Details', allIn: name => 'All ' + name.toLowerCase(), groupInstr: 'Eastern instruments', groupXianxia: 'Xianxia & magic', groupEast: 'Eastern & Xianxia', groupGeneral: 'General Game Sounds',
     zipAll: n => 'Download all ' + n + ' as ZIP', zipPack: n => 'Download all ' + n + ' sounds as ZIP',
-    codeAll: n => 'Copy JavaScript for all ' + n, codePack: 'Copy JavaScript for the whole pack', editor: 'Brew your own in the editor',
+    codeAll: n => 'Copy JavaScript for all ' + n, codePack: 'Copy JavaScript for the whole pack', editor: 'Make your own in the editor',
     fixedNote: (name, n) => 'Every press of New in the editor brews a different ' + name.toLowerCase() + '; these ' + n + ' are a fixed selection so the links stay the same.',
     goodFor: 'Good for', tipH: 'Tweaking tip', tipTail: ' Open any variant with Edit to change it with sliders.',
     agentH: 'Generate them from code or an AI agent', skillP: 'Free agent skill that teaches your agent when and how to use it:', agentP1: 'The same sounds are available from the command line:',
     agentP2: (name) => 'Or let Claude Code, Cursor or any MCP client add them to your project, then ask for "' + name.toLowerCase() + ' sounds":',
     licenseH: 'License', licenseP: 'Free for commercial and non-commercial use. No attribution, no sign-up. Most sounds are synthesized from scratch; the few that use recordings use CC0 (public domain) recordings, so there are no third-party rights attached.',
-    related: 'Related sounds', morePacks: 'More packs', allCats: 'All sound categories', edit: 'Edit', more: 'More', play: 'Play',
+    related: 'Related sounds', morePacks: 'More packs', allCats: 'All sounds', edit: 'Edit', more: 'More', play: 'Play',
     packSounds: n => n + ' sounds', soundsWord: 'sounds',
     libTitle: 'Free Game Sound Effects Library', libLead: (k, n) => k + ' kinds of sound effects for games, each with ' + n + ' ready-made variations. Press play to listen, download WAV files, or copy a JavaScript snippet that plays them with no audio files at all. Everything is synthesized in your browser and free for commercial use.',
     libMetaTitle: 'Free Game Sound Effects Library — Eastern & Classic SFX | SFX Brew',
@@ -496,8 +765,9 @@ const UI = {
     js: { rendering: (i, n) => 'Rendering ' + i + ' / ' + n + '…', downloaded: 'Downloaded ✓', copied: 'Copied — paste it into your game ✓', copyFailed: 'Copy failed' }
   },
   zh: {
-    navEditor: '编辑器', navLibrary: '音效库', navPacks: '音效包', navAgents: '给 AI agent 用', switchLang: 'English',
-    library: '音效库', packs: '音效包', groupEast: '东方 / 修仙', groupGeneral: '通用游戏音效',
+    navEditor: '音效编辑器', navLibrary: '音效库', navLab: '实验室', navMusic: '配乐', navPacks: '音效包', navAgents: '给 AI 用', switchLang: 'English',
+    nVariants: n => n + ' 个变体', libCount: (k, n) => k + ' 类 × 每类 ' + n + ' 个变体', moreInfo: name => '关于' + name + '音效：适用场景、技巧和授权', aboutLib: '关于这个音效库',
+    library: '音效库', packs: '音效包', category: '分类', filters: '筛选', categoriesH: '大类', searchPh: '搜索：剑、金币、雨、slash…', sortDefault: '排序：按大类', sortName: '排序：按名称', sortDur: '排序：按长短', clearAll: '清除筛选', showing: (n, m) => '显示 ' + n + ' / ' + m + ' 个音效', nSounds: n => n + ' 个免费音效', libMetaTail: '免费商用，可在线试听、下载 WAV 或复制 JavaScript。', noResults: '没有匹配的音效。换个词，或者清除筛选。', reroll: '换一个', details: '详情', allIn: name => '全部' + name, groupInstr: '东方乐器', groupXianxia: '仙侠', groupEast: '东方 / 修仙', groupGeneral: '通用游戏音效',
     zipAll: n => '下载全部 ' + n + ' 个（ZIP）', zipPack: n => '下载全部 ' + n + ' 个音效（ZIP）',
     codeAll: n => '复制全部 ' + n + ' 个的 JavaScript', codePack: '复制整个音效包的 JavaScript', editor: '在编辑器里自己调',
     fixedNote: (name, n) => '在编辑器里每按一次"重新生成"都会得到一个不同的' + name + '；这里的 ' + n + ' 个是固定的，方便分享链接。',
@@ -505,7 +775,7 @@ const UI = {
     agentH: '用代码或 AI agent 生成', skillP: '免费的 agent skill，教你的 agent 什么时候、怎么用：', agentP1: '同样的音效也可以用命令行生成：',
     agentP2: (name) => '或者让 Claude Code、Cursor 等支持 MCP 的工具直接加进你的项目，然后跟它说"加几个' + name + '音效"：',
     licenseH: '授权', licenseP: '可免费用于商业和非商业用途，不需要署名，不需要注册。大部分声音是从零合成的；少数用到录音的，用的都是 CC0（公有领域）录音，不涉及任何第三方版权。',
-    related: '相关音效', morePacks: '更多音效包', allCats: '全部音效分类', edit: '编辑', more: '更多', play: '播放',
+    related: '相关音效', morePacks: '更多音效包', allCats: '全部音效', edit: '编辑', more: '更多', play: '播放',
     packSounds: n => n + ' 个音效', soundsWord: '个音效',
     libTitle: '免费游戏音效库', libLead: (k, n) => '共 ' + k + ' 类游戏音效，每类 ' + n + ' 个现成的变体。点播放试听，下载 WAV，或者复制一段 JavaScript，不用任何音频文件就能在游戏里播放。全部在你的浏览器里实时合成，可以免费商用。',
     libMetaTitle: '免费游戏音效库：古琴、琵琶、寺钟、战鼓、金币、打击 | SFX Brew',
@@ -519,4 +789,165 @@ const UI = {
   }
 };
 
-module.exports = { SOUNDS, PACKS, UI };
+
+/* 配乐页面（/music/ 和 /zh/music/） */
+const MUSIC = {
+  en: {
+    title: 'Free Game Background Music Generator — Eastern & Xianxia BGM',
+    metaDesc: 'Generate royalty-free background music for games in your browser: calm guqin landscapes, battle drums, mysterious caves and sad erhu. Seamless loop WAVs, never-repeating generative JavaScript and short stingers. Free for commercial use.',
+    h1: 'Eastern Game Music Generator',
+    lead: 'Background music for games, composed live in your browser on the pentatonic scale with guqin, pipa, bamboo flute, bells, war drums, gongs and erhu. Press play to hear it compose; download a seamless loop, or copy JavaScript that keeps composing in your game and never repeats.',
+    moods: {
+      calm: ['Calm landscape', 'Guqin and bamboo flute over a soft drone. Meditation, cultivation, villages, idle progress.'],
+      battle: ['Battle', 'Dagu war drums, pipa tremolo and a low pulse, with a gong every eight bars. Combat, bosses, sieges.'],
+      mystery: ['Mysterious cave', 'Dark drone, distant bells, wind chimes and guqin harmonics. Exploration, caves, secret realms.'],
+      sad: ['Sorrow', 'Erhu melody over gentle guqin chords. Farewells, defeat, emotional story beats.']
+    },
+    play: 'Play', stop: 'Stop', nowPlaying: 'Now composing: {mood} · variation {seed}', idle: 'Pick a mood and press Play. Each variation composes differently.',
+    tempo: 'Tempo', volume: 'Volume', reseed: 'New variation',
+    exportH: 'Use it in your game', loopLen: 'Loop length', seconds: 's',
+    downloadLoop: 'Download seamless loop (WAV)', copyJs: 'Copy JavaScript (never repeats)',
+    exportP: 'The loop is one full piece with your arrangement. Its end is folded back onto its start, so it repeats without a gap or click. Long or busy pieces take a few seconds to render. The JavaScript version keeps your theme and writes new material forever; pieces with drums or erhu load a few small CC0 recordings.',
+    stingersH: 'Short stingers', stingersP: 'Two to six second musical cues for game events.',
+    stingers: {
+      victory: ['Victory', 'Rising pipa run, bell and soft gong.'],
+      defeat: ['Defeat', 'Falling guqin, low bell and an erhu sigh.'],
+      battleStart: ['Battle start', 'Three dagu hits and a gong.'],
+      treasure: ['Treasure found', 'A sparkling chime run and a bell.'],
+      breakthrough: ['Breakthrough', 'Deep bell, guqin arpeggio and a flute note.']
+    },
+    licenseH: 'License', licenseP: 'Everything you generate here is free for commercial use, no attribution required. The few recordings used (drums, gong, erhu) are CC0.',
+    rendering: 'Rendering…', copied: 'Copied ✓', copyFailed: 'Copy failed',
+    melodyH: 'Melody', melodyP: 'This is the melody your theme generated. Click an empty cell to add a note (drag right to make it longer), click a note to remove it. Your melody is used everywhere that section appears in the piece.',
+    tabA: 'Theme (A)', tabB: 'Contrast (B)', preview: 'Play this section', stopPreview: 'Stop', reset: 'Back to generated', clear: 'Clear', edited: 'Edited by you', generated: 'Generated',
+    arrangeH: 'Arrangement', arrangeP: 'Start from a mood, then change anything. Every change is heard on the next play.',
+    newTheme: 'New theme', playPiece: 'Play', stopPiece: 'Stop',
+    f: { mode: 'Mode', root: 'Key', tempo: 'Tempo', melody: 'Lead', melodyB: 'Second lead (B section)', accomp: 'Accompaniment', bass: 'Bass', perc: 'Percussion', structure: 'Form', curve: 'Intensity', density: 'Note density', humanize: 'Human feel', sparkle: 'Wind chime sparkles' },
+    opt: {
+      gong: 'Gong (bright, major-like)', shang: 'Shang', jue: 'Jue', zhi: 'Zhi', yu: 'Yu (sad, minor-like)',
+      guqin: 'Guqin', flute: 'Bamboo flute', erhu: 'Erhu', pipa: 'Pipa',
+      accGuqin: 'Guqin arpeggios', accPipa: 'Pipa strums', pad: 'Soft chord pad', none: 'None',
+      drone: 'Drone', pulse: 'Plucked bass',
+      woodfish: 'Wooden fish', drum: 'Soft drum', battle: 'War drums',
+      f1: 'Intro A A B A Outro', f2: 'Intro A B A Outro', f3: 'A A B A', f4: 'A B A B',
+      cPreset: 'As the mood', cSteady: 'Steady', cBuild: 'Building up', cArc: 'Rise and fall', cFade: 'Fading out'
+    },
+    pieceInfo: '{bars} bars, about {sec} seconds per full piece. Live playback keeps the theme and writes new material every round.',
+  },
+  zh: {
+    title: '免费游戏背景音乐生成器：东方 / 修仙配乐',
+    metaDesc: '在浏览器里生成免费可商用的游戏背景音乐：古琴山水、战鼓战斗、神秘洞府、二胡抒情。可下载无缝循环 WAV、复制永不重复的生成式 JavaScript，还有短乐句。',
+    h1: '东方游戏配乐生成器',
+    lead: '在你的浏览器里实时作曲的游戏背景音乐：五声音阶，古琴、琵琶、竹笛、钟磬、战鼓、铜锣、二胡。点播放就能听它边作边奏；可以下载无缝循环，也可以复制一段 JavaScript，放进游戏里一直作曲、永不重复。',
+    moods: {
+      calm: ['宁静山水', '古琴和竹笛，底下一层柔和的长音。打坐修炼、村庄、放置挂机。'],
+      battle: ['战斗', '大鼓擂动、琵琶轮指、低音推进，每八小节一声锣。战斗、Boss、攻城。'],
+      mystery: ['神秘洞府', '幽暗的低音、远处的钟声、风铃和古琴泛音。探索、洞府、秘境。'],
+      sad: ['悲伤抒情', '二胡旋律配柔和的古琴和弦。离别、失败、感人剧情。']
+    },
+    play: '播放', stop: '停止', nowPlaying: '正在作曲：{mood} · 变奏 {seed}', idle: '选一种情绪点播放。每个变奏的作曲都不一样。',
+    tempo: '速度', volume: '音量', reseed: '换一个变奏',
+    exportH: '用到游戏里', loopLen: '循环长度', seconds: '秒',
+    downloadLoop: '下载无缝循环（WAV）', copyJs: '复制 JavaScript（永不重复）',
+    exportP: '循环就是按你的编曲生成的一整首，结尾会折回开头，循环播放时没有停顿和"咔"声。曲子长或音符多时要渲染几秒钟。JavaScript 版保留你的主题、一直写新的段落；用到鼓或二胡时会加载几个很小的 CC0 录音。',
+    stingersH: '短乐句', stingersP: '两到六秒的提示乐句，用在游戏的关键时刻。',
+    stingers: {
+      victory: ['胜利', '上行的琵琶、钟声和轻轻一声锣。'],
+      defeat: ['失败', '下行的古琴、低沉的钟和一声二胡叹息。'],
+      battleStart: ['开战', '三声大鼓接一声锣。'],
+      treasure: ['获得宝物', '闪亮的风铃琶音和一声钟。'],
+      breakthrough: ['突破', '深沉的钟、古琴琶音和一声竹笛。']
+    },
+    licenseH: '授权', licenseP: '这里生成的所有内容都可以免费商用，不需要署名。用到的少量录音（鼓、锣、二胡）都是 CC0。',
+    rendering: '渲染中…', copied: '已复制 ✓', copyFailed: '复制失败',
+    melodyH: '旋律', melodyP: '这是当前主题生成的旋律。点空格子加音符（按住往右拖可以拉长），点音符删除。你改的旋律会用在整首曲子里每次出现这一段的地方。',
+    tabA: 'A 段主题', tabB: 'B 段', preview: '试听这一段', stopPreview: '停止', reset: '恢复生成的旋律', clear: '清空', edited: '已手动修改', generated: '自动生成',
+    arrangeH: '编曲', arrangeP: '先选一种情绪，再随意修改。改动在下一次播放时生效。',
+    newTheme: '换一个主题', playPiece: '播放', stopPiece: '停止',
+    f: { mode: '调式', root: '主音', tempo: '速度', melody: '主奏', melodyB: '副奏（B 段）', accomp: '伴奏', bass: '低音', perc: '打击乐', structure: '曲式', curve: '强弱走向', density: '音符密度', humanize: '人味', sparkle: '点缀风铃' },
+    opt: {
+      gong: '宫调（明亮）', shang: '商调', jue: '角调', zhi: '徵调', yu: '羽调（哀婉）',
+      guqin: '古琴', flute: '竹笛', erhu: '二胡', pipa: '琵琶',
+      accGuqin: '古琴分解和弦', accPipa: '琵琶扫弦', pad: '柔和长音', none: '无',
+      drone: '持续低音', pulse: '拨奏低音',
+      woodfish: '木鱼', drum: '轻鼓', battle: '战鼓',
+      f1: '引子 A A B A 尾声', f2: '引子 A B A 尾声', f3: 'A A B A', f4: 'A B A B',
+      cPreset: '按情绪默认', cSteady: '平稳', cBuild: '渐强', cArc: '起伏', cFade: '渐弱'
+    },
+    pieceInfo: '共 {bars} 小节，一整首约 {sec} 秒。实时播放时主题保留，每一轮都会写新的段落。',
+  }
+};
+
+/* 音乐工作室（/music/ 和 /zh/music/）界面文字 */
+const STUDIO = {
+  en: {
+    title: 'SFX Brew Lab — Free Online Music Studio for Game Soundtracks',
+    metaDesc: 'A free music studio in your browser for game soundtracks: multitrack timeline, piano roll, drum grid and mixer with guqin, pipa, bamboo flute, erhu, bells and war drums. Generate a full arrangement from a mood, edit every note, export WAV, loops and stems. Free for commercial use.',
+    untitled: 'Untitled song', expStudio: 'Music studio', expText: 'Text to music (coming soon)', newProject: 'New', exportBtn: 'Export',
+    play: 'Play', stop: 'Stop', toStart: 'Go to start', loop: 'Cycle (C)', metronome: 'Metronome (K)', undo: 'Undo (⌘Z)', redo: 'Redo (⇧⌘Z)',
+    tempo: 'Tempo', key: 'Key', mode: 'Mode', scaleLock: 'Pentatonic lock', scaleLockTip: 'Only show notes of the pentatonic scale in the piano roll',
+    zoomIn: 'Zoom in', zoomOut: 'Zoom out', addTrack: '+ Track', loopLane: 'Cycle', barsLane: 'Bar', secLane: 'Sections', chordLane: 'Chords',
+    xSong: 'Whole song (WAV)', xLoop: 'Cycle range, seamless loop (WAV)', xStems: 'Stems, one WAV per track (ZIP)', xSave: 'Save project file', xOpen: 'Open project file…',
+    quantGrid: 'Grid', quantize: 'Quantize (Q)', loopThis: 'Cycle this region', close: 'Hide editor (E)',
+    rollHint: 'Click to add a note, drag right to lengthen · drag to move · drag the right edge to resize · double-click or ⌥-click to delete · ⇧-drag to select · ↑↓ transpose',
+    q: { '1': '1/4', '0.5': '1/8', '0.3333': '1/8 triplet', '0.25': '1/16' },
+    startH: 'Start a new song', startP: 'Pick a mood to get a full arrangement you can edit, or start from an empty track.',
+    blank: 'Empty project', blankP: 'One guqin track, nothing in it.', openFile: 'Open project file', resume: 'Back to my song', moodsH: 'Generate from a mood',
+    mobile: 'Editing works best on a computer. On a phone you can generate, listen and export.',
+    aboutH: 'A music studio for game soundtracks', aboutP: [
+      'SFX Brew Studio is a small music workstation that runs in your browser. Every song is made of tracks, every track of regions, every region of notes you can edit in the piano roll or drum grid. Nothing is uploaded: sound is synthesised on your computer.',
+      'Generate a piece from a mood (calm landscape, battle, mysterious cave, sorrow) and the composer writes a theme, harmony, sections, bass and percussion as separate tracks. Change the instruments, move regions, redraw the melody, mute and solo, set the cycle range and export a seamless loop or stems for your game engine.',
+      'Everything you make is free for commercial use, no attribution required. The few recordings used (drums, gong, erhu) are CC0.'
+    ],
+    i18n: {
+      play: 'Play', stop: 'Stop', saved: 'Saved in this browser', saveFailed: 'Could not save (storage full or blocked)', restored: 'Restored your last song',
+      sections: { intro: 'Intro', outro: 'Outro', A: 'A', B: 'B' },
+      trackName: 'Track name', mute: 'Mute', solo: 'Solo', volume: 'Volume', pan: 'Pan', reverb: 'Reverb', instrument: 'Instrument',
+      project: 'Song', songBars: 'Length (bars)', inspEmpty: 'Select a track or region to edit it. Double-click an empty spot on a track to add a region.',
+      shortcuts: 'Shortcuts',
+      keys: [['Space', 'Play / stop'], ['Return', 'Go to start'], ['C', 'Cycle on / off'], ['K', 'Metronome'], ['E', 'Show / hide editor'], ['⌘Z / ⇧⌘Z', 'Undo / redo'], ['⌘D', 'Duplicate region'], ['⌫', 'Delete selection'], ['⌥-drag', 'Copy region'], ['⌘-scroll', 'Zoom']],
+      trackInfo: 'Regions: {regions} · notes: {notes}', dupTrack: 'Duplicate track', delTrack: 'Delete track',
+      region: 'Region', regionStart: 'Starts at bar', regionLen: 'Length (bars)', regionInfo: 'Notes: {notes}', dupRegion: 'Duplicate', loopRegion: 'Cycle it', delRegion: 'Delete',
+      center: 'Center', left: 'L', right: 'R',
+      modes: { gong: 'Gong (bright)', shang: 'Shang', jue: 'Jue', zhi: 'Zhi', yu: 'Yu (sad)' },
+      rendering: 'Rendering…', renderingStem: 'Rendering track {i} of {n}…', exported: 'Downloaded', exportFailed: 'Nothing to export yet', opened: 'Opened {name}', openFailed: 'That file is not an SFX Brew project',
+      rollEmpty: 'Select a region to edit its notes (double-click an empty spot on a track to make one)', regionAt: 'bar {bar}, {len} bars', velocity: 'Velocity'
+    }
+  },
+  zh: {
+    title: 'SFX Brew 实验室：免费在线编曲工作室（游戏配乐 / 民乐音色）',
+    metaDesc: '在浏览器里免费做游戏配乐的编曲工作室：多轨时间线、钢琴卷帘、鼓网格、混音，音色有古琴、琵琶、竹笛、二胡、钟磬和战鼓。按情绪一键生成完整编曲，每个音都能改，导出 WAV、无缝循环和分轨，免费商用。',
+    untitled: '未命名', expStudio: '编曲工作室', expText: '文字作曲（即将推出）', newProject: '新建', exportBtn: '导出',
+    play: '播放', stop: '停止', toStart: '回到开头', loop: '循环（C）', metronome: '节拍器（K）', undo: '撤销（⌘Z）', redo: '重做（⇧⌘Z）',
+    tempo: '速度', key: '主音', mode: '调式', scaleLock: '五声锁定', scaleLockTip: '钢琴卷帘里只显示五声音阶内的音',
+    zoomIn: '放大', zoomOut: '缩小', addTrack: '+ 音轨', loopLane: '循环', barsLane: '小节', secLane: '段落', chordLane: '和弦',
+    xSong: '整首（WAV）', xLoop: '循环区间，无缝循环（WAV）', xStems: '分轨，每轨一个 WAV（ZIP）', xSave: '保存项目文件', xOpen: '打开项目文件…',
+    quantGrid: '网格', quantize: '量化（Q）', loopThis: '循环这一段', close: '收起编辑器（E）',
+    rollHint: '点击加音符，往右拖拉长 · 拖动移动 · 拖右边缘改长度 · 双击或 ⌥ 点击删除 · ⇧ 拖动框选 · ↑↓ 移调',
+    q: { '1': '1/4', '0.5': '1/8', '0.3333': '1/8 三连音', '0.25': '1/16' },
+    startH: '新建一首曲子', startP: '选一种情绪，直接得到一份可以随便改的完整编曲；或者从空白音轨开始。',
+    blank: '空白项目', blankP: '一条古琴轨，里面什么都没有。', openFile: '打开项目文件', resume: '回到我的曲子', moodsH: '按情绪生成',
+    mobile: '精细编辑建议用电脑。手机上可以生成、试听和导出。',
+    aboutH: '给游戏配乐用的编曲工作室', aboutP: [
+      'SFX Brew 工作室是一个在浏览器里运行的小型编曲软件。一首曲子由多条音轨组成，每条轨上有若干片段，每个片段里的音符都能在钢琴卷帘或鼓网格里修改。不上传任何东西，声音都在你的电脑上实时合成。',
+      '按情绪（宁静山水、战斗、神秘洞府、悲伤抒情）生成一首，作曲引擎会写出主题、和声、段落、低音和打击乐，各占一条轨。可以换乐器、挪片段、重画旋律、静音独奏、设定循环区间，再导出无缝循环或分轨，放进游戏引擎里。',
+      '在这里做的所有内容都可以免费商用，不需要署名。用到的少量录音（鼓、锣、二胡）都是 CC0。'
+    ],
+    i18n: {
+      play: '播放', stop: '停止', saved: '已自动保存在本浏览器', saveFailed: '保存失败（存储空间满了或被禁用）', restored: '已恢复上次的曲子',
+      sections: { intro: '引子', outro: '尾声', A: 'A 段', B: 'B 段' },
+      trackName: '音轨名', mute: '静音', solo: '独奏', volume: '音量', pan: '声像', reverb: '混响', instrument: '乐器',
+      project: '曲子', songBars: '长度（小节）', inspEmpty: '选中一条音轨或一个片段来修改。在音轨的空白处双击可以新建片段。',
+      shortcuts: '快捷键',
+      keys: [['空格', '播放 / 停止'], ['回车', '回到开头'], ['C', '开关循环'], ['K', '节拍器'], ['E', '显示 / 收起编辑器'], ['⌘Z / ⇧⌘Z', '撤销 / 重做'], ['⌘D', '复制片段'], ['⌫', '删除选中的内容'], ['⌥ 拖动', '复制片段'], ['⌘ 滚轮', '缩放']],
+      trackInfo: '{regions} 个片段，{notes} 个音符', dupTrack: '复制音轨', delTrack: '删除音轨',
+      region: '片段', regionStart: '起始小节', regionLen: '长度（小节）', regionInfo: '{notes} 个音符', dupRegion: '复制', loopRegion: '循环它', delRegion: '删除',
+      center: '居中', left: '左', right: '右',
+      modes: { gong: '宫调（明亮）', shang: '商调', jue: '角调', zhi: '徵调', yu: '羽调（哀婉）' },
+      rendering: '渲染中…', renderingStem: '正在渲染第 {i} / {n} 轨…', exported: '已下载', exportFailed: '还没有可以导出的音符', opened: '已打开 {name}', openFailed: '这不是 SFX Brew 的项目文件',
+      rollEmpty: '选中一个片段来编辑音符（在音轨空白处双击可以新建片段）', regionAt: '第 {bar} 小节起，{len} 小节', velocity: '力度'
+    }
+  }
+};
+
+module.exports = { SOUNDS, PACKS, UI, MUSIC, STUDIO, CAT_COPY };
