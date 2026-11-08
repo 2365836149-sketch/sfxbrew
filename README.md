@@ -2,7 +2,7 @@
 
 Procedural game sound effects for humans **and AI coding agents**. Eastern (wuxia / xianxia) sounds plus the usual game sounds, synthesized locally, with no API keys, no network and no per-call cost.
 
-- 24 presets: sword qi, guqin pluck, temple bell, gong, spell cast, heavenly thunder, breakthrough, talisman, alchemy, wind chime, bamboo flute, qi gathering, coin, pickup, click, confirm, error, jump, hit, explosion, laser, power-up, level up, whoosh
+- 28 presets: sword qi, guqin, pipa, erhu, wooden fish, war drum, temple bell, gong, spell cast, heavenly thunder, breakthrough, talisman, alchemy, wind chime, bamboo flute, qi gathering, coin, pickup, click, confirm, error, jump, hit, explosion, laser, power-up, level up, whoosh
 - Every generation is a fresh variation; a **seed** reproduces it exactly
 - Output: 16-bit WAV, or a ~7 KB dependency-free JavaScript snippet that plays the same sound with Web Audio
 - **Free for commercial use, no attribution required** for the sounds you generate

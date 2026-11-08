@@ -65,6 +65,25 @@ function makeSfx(env) {
     return c;
   }
 
+  function stringBuffer(c, f, L, k) {
+    var sr = c.sampleRate, len = Math.ceil(sr * (L.attack + L.decay + 0.05));
+    var bright = L.bright == null ? 0.5 : Math.max(0, Math.min(1, L.bright));
+    var blend = 0.5 * (1 - bright), w = 2 * Math.PI * f / sr;
+    var pd = function (b) { return Math.atan2(b * Math.sin(w), (1 - b) + b * Math.cos(w)) / w; };
+    var target = Math.max(2, sr / f - pd(blend)), Ni = Math.floor(target), lo = 0, hi = 1, fr = 0.5, it;
+    for (it = 0; it < 30; it++) { fr = (lo + hi) / 2; if (pd(fr) < target - Ni) lo = fr; else hi = fr; }
+    var buf = c.createBuffer(1, len, sr), d = buf.getChannelData(0);
+    var r = rng(Math.floor(f * 100) + k * 7919 + 1), lp = 0, a = 0.15 + 0.85 * bright, i;
+    for (i = 0; i <= Ni + 1 && i < len; i++) { lp += a * ((r() * 2 - 1) - lp); d[i] = lp * 1.6; }
+    var loss = Math.pow(0.001, 1 / (Math.max(0.05, L.decay * 1.5) * f));
+    for (i = Ni + 2; i < len; i++) {
+      var x0 = d[i - Ni] * (1 - fr) + d[i - Ni - 1] * fr;
+      var x1 = d[i - Ni - 1] * (1 - fr) + d[i - Ni - 2] * fr;
+      d[i] = loss * ((1 - blend) * x0 + blend * x1);
+    }
+    return buf;
+  }
+
   function voice(c, A, out, L, t, k) {
     var ratio = Math.pow(2, stepSemis(L, k) / 12);
     var f0 = Math.max(1, L.freq * ratio), f1 = Math.max(1, (L.freqEnd || L.freq) * ratio);
@@ -103,13 +122,26 @@ function makeSfx(env) {
       s.start(t, (k * 0.37) % 1.5); s.stop(stopAt);
       return;
     }
-    var parts = L.type === 'bell' ? [[1, 1], [2.76, 0.5], [5.4, 0.25], [8.93, 0.12]]
+    if (L.type === 'string') {
+      var ss = c.createBufferSource();
+      ss.buffer = stringBuffer(c, f0, L, k);
+      ss.playbackRate.setValueAtTime(1, t);
+      if (f1 !== f0) ss.playbackRate.exponentialRampToValueAtTime(f1 / f0, tSlide);
+      if (lfoGain && ss.detune) lfoGain.connect(ss.detune);
+      ss.connect(dst);
+      ss.start(t); ss.stop(stopAt);
+      return;
+    }
+    var parts = L.type === 'bell' ? (L.partials && L.partials.length ? L.partials : [[1, 1], [2.76, 0.5], [5.4, 0.25], [8.93, 0.12]])
       : L.type === 'pluck' ? [[1, 1], [2.01, 0.3]] : [[1, 1]];
     var uni = Math.max(1, Math.min(5, Math.round(L.unison || 1))), spread = L.detune || 0;
     for (var i = 0; i < parts.length; i++) {
       var pg = c.createGain(), r = parts[i][0], nv = i === 0 ? uni : 1;
       pg.gain.setValueAtTime(parts[i][1] / Math.sqrt(nv), t);
-      if (L.type === 'bell' && i > 0) pg.gain.exponentialRampToValueAtTime(0.0001, t + L.attack + L.decay / Math.pow(r, 0.5));
+      if (L.type === 'bell' && (i > 0 || parts[i][2] != null)) {
+        var dm = parts[i][2] != null ? Math.min(1, parts[i][2]) : 1 / Math.pow(r, 0.5);
+        pg.gain.exponentialRampToValueAtTime(0.0001, t + L.attack + Math.max(0.01, L.decay * dm));
+      }
       pg.connect(dst);
       for (var u = 0; u < nv; u++) {
         var o = c.createOscillator();

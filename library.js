@@ -12,6 +12,7 @@
   const DATA = JSON.parse(el.textContent);
   const SFX = makeSfx();
   const PREVIEW_SR = 22050;
+  const T = Object.assign({ rendering: 'Rendering {i} / {n}…', downloaded: 'Downloaded ✓', copied: 'Copied ✓', copyFailed: 'Copy failed' }, DATA.i18n || {});
 
   /* ---- 渲染缓存：同一个声音只渲染一次 ---- */
   const cache = new Map();
@@ -65,19 +66,19 @@
     zipBtn.disabled = true;
     const label = zipBtn.textContent, files = [];
     for (let i = 0; i < DATA.sounds.length; i++) {
-      zipBtn.textContent = 'Rendering ' + (i + 1) + ' / ' + DATA.sounds.length + '…';
+      zipBtn.textContent = T.rendering.replace('{i}', i + 1).replace('{n}', DATA.sounds.length);
       files.push({ name: DATA.sounds[i].file + '.wav', data: SFXB.wavBytes(await render(i, 44100)) });
     }
     SFXB.downloadBlob(SFXB.zip(files), DATA.zip || 'sfxbrew.zip');
     zipBtn.textContent = label;
-    flash(zipBtn, 'Downloaded ✓');
+    flash(zipBtn, T.downloaded);
   });
 
   const codeBtn = document.querySelector('[data-act="code"]');
   if (codeBtn) codeBtn.addEventListener('click', async () => {
     codeBtn.disabled = true;
     const ok = await SFXB.copyText(SFXB.jsCode(DATA.sounds.map(s => ({ name: s.file, patch: s.patch }))));
-    flash(codeBtn, ok ? 'Copied — paste it into your game ✓' : 'Copy failed');
+    flash(codeBtn, ok ? T.copied : T.copyFailed);
   });
 
   window.addEventListener('resize', () => document.querySelectorAll('.card').forEach(c => { if (c.querySelector('.card-dur').textContent) drawCard(c); }));

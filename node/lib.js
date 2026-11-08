@@ -22,9 +22,9 @@ const SITE_URL = process.env.SFXBREW_SITE_URL || 'https://sfxbrew.com/';
 /* 给 agent 看的预设说明：选预设靠这里的描述 */
 const META = {
   swordQi: ['Sword Qi', 'Sharp airy slash with a metallic ring: sword strike, blade wave, qi projectile.'],
-  guqin: ['Guqin Pluck', 'Single plucked Chinese zither note on the pentatonic scale, sometimes with a pitch slide. UI tap, dialogue tick, calm feedback.'],
-  bell: ['Temple Bell', 'Clear struck bell with a long ringing tail. Shrine, notification, meditation, quest complete.'],
-  gong: ['Gong', 'Deep wobbling gong hit with a long tail. Battle start, boss entrance, big announcement.'],
+  guqin: ['Guqin Pluck', 'Physically modelled Chinese zither string on the pentatonic scale: open string, finger slide, or a bell-like harmonic. UI tap, dialogue tick, calm feedback.'],
+  bell: ['Temple Bell', 'Deep temple bell with beating overtones and a wooden-beam strike, or a smaller bronze bell. Shrine, notification, meditation, quest complete.'],
+  gong: ['Gong', 'Large shimmering tam-tam or a Chinese opera gong whose pitch bends after the hit. Battle start, boss entrance, big announcement.'],
   spell: ['Spell Cast', 'Rising whoosh plus a sparkling pentatonic bell arpeggio and echo. Magic casting, skill activation, buff.'],
   thunder: ['Heavenly Thunder', 'Loud crack and rolling rumble. Lightning strike, heavenly tribulation, storm.'],
   breakthrough: ['Breakthrough', 'Low bell, rumble and a rising plucked arpeggio. Cultivation realm breakthrough, major level up, prestige.'],
@@ -33,6 +33,10 @@ const META = {
   chime: ['Wind Chime', 'A few soft high bell notes. Discovery, secret found, gentle ambience, encounter.'],
   flute: ['Bamboo Flute', 'Breathy flute note with vibrato. Calm transition, menu open, pastoral moment.'],
   qiGather: ['Qi Gathering', 'Swelling wobbling rise ending in a bell. Charging energy, channelling, meditation tick.'],
+  pipa: ['Pipa', 'Bright plucked Chinese lute: single note, fast tremolo or strummed chord. Action accents, tension, Eastern UI.'],
+  erhu: ['Erhu', 'Bowed two-string fiddle note with vibrato and sometimes a slide. Sad or emotional moments, character themes, dialogue.'],
+  woodfish: ['Wooden Fish', 'Hollow wooden temple block knock, one to three hits. Monastery, chanting, clock tick, UI tap with an Eastern feel.'],
+  drum: ['War Drum', 'Chinese drum hit, one or two booms, small or large. Battle start, march, impact, turn change.'],
   coin: ['Coin', 'Two-note metallic ding. Coin, currency gained, purchase.'],
   pickup: ['Pickup', 'Quick upward chirp with a sparkle. Item pickup, collectible, gem.'],
   click: ['Click', 'Very short tactile tick. Button press, UI select, typing.'],
@@ -86,14 +90,16 @@ function round(p) {
 const DEFAULT_LAYER = {
   type: 'tone', wave: 'sine', freq: 440, freqEnd: 440, start: 0, attack: 0.005, decay: 0.3, vol: 0.5,
   filter: 'none', cutoff: 4000, cutoffEnd: 4000, q: 1, vib: 0, vibRate: 6, rep: 1, repGap: 0.1, repStep: 0, scale: 'penta',
-  slideTime: 0, sweepTime: 0, unison: 1, detune: 12, fmRatio: 2, fmIndex: 0, fmDecay: 0.1
+  slideTime: 0, sweepTime: 0, unison: 1, detune: 12, fmRatio: 2, fmIndex: 0, fmDecay: 0.1, bright: 0.5
 };
 const DEFAULT_FX = { reverb: 0, echo: 0, echoTime: 0.2, drive: 0, crush: 0, gain: 0.8 };
 
 /** 给 agent 的参数说明（MCP 工具描述里用） */
 const PATCH_DOC = `A patch is JSON: { layers: Layer[1..6], reverb 0-1, echo 0-0.9, echoTime s, drive 0-1, crush 0|1-16 bits, gain 0-1 }.
 Layer fields (all optional, defaults in brackets):
-  type: "tone"|"fm"|"pluck"|"bell"|"noise" ["tone"]; wave: "sine"|"triangle"|"square"|"sawtooth" (tone/fm/pluck)
+  type: "tone"|"fm"|"string"|"pluck"|"bell"|"noise" ["tone"]; wave: "sine"|"triangle"|"square"|"sawtooth" (tone/fm/pluck)
+  string: physically modelled plucked string (Karplus-Strong); bright 0-1 [0.5] = darker (guqin) to brighter (pipa); decay = ring time
+  bell: partials = [[ratio, amplitude, decayMultiplier 0-1], ...] (max 16) for custom bells, gongs, wood blocks; default is a metal bar
   freq, freqEnd: Hz, pitch slides exponentially from freq to freqEnd; slideTime: s the slide takes (0 = whole sound)
   start: s delay; attack: s; decay: s (exponential fade); vol: 0-1
   filter: "none"|"lowpass"|"highpass"|"bandpass"; cutoff, cutoffEnd: Hz; sweepTime: s (0 = whole); q: resonance
@@ -111,6 +117,11 @@ function validatePatch(p) {
     l.attack = Math.max(0.0005, Math.min(4, +l.attack)); l.decay = Math.max(0.005, Math.min(10, +l.decay));
     l.rep = Math.max(1, Math.min(32, Math.round(l.rep)));
     ['freq', 'freqEnd', 'cutoff', 'cutoffEnd'].forEach(k => { l[k] = Math.max(1, Math.min(20000, +l[k])); });
+    l.bright = Math.max(0, Math.min(1, +l.bright));
+    if (l.partials != null) {
+      if (!Array.isArray(l.partials) || l.partials.length > 16 || !l.partials.every(p => Array.isArray(p) && p.length >= 2 && p.every(x => typeof x === 'number' && isFinite(x))))
+        throw new Error('partials must be up to 16 arrays of numbers [ratio, amplitude, decayMultiplier]');
+    }
   });
   return out;
 }

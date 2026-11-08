@@ -11,7 +11,7 @@
 
 ## Presets
 
-Eastern: swordQi, guqin, bell, gong, spell, thunder, breakthrough, talisman, alchemy, chime, flute, qiGather
+Eastern: swordQi, guqin, bell, gong, spell, thunder, breakthrough, talisman, alchemy, chime, flute, qiGather, pipa, erhu, woodfish, drum
 General: coin, pickup, click, confirm, error, jump, hit, explosion, laser, powerUp, levelUp, whoosh
 
 Each call gives a new variation. Pass the returned seed to reproduce a sound exactly.
@@ -27,4 +27,4 @@ The editor URL fragment holds the sound: `/#<presetId>.<base64url(JSON patch)>`.
 
 ## Patch format
 
-`{ layers: [...], reverb 0-1, echo 0-0.9, echoTime s, drive 0-1, crush 0|1-16 bits, gain 0-1 }`. Layer: `type` tone|fm|pluck|bell|noise, `wave`, `freq`→`freqEnd` Hz over `slideTime` s, `start`, `attack`, `decay` s, `vol`, `filter` none|lowpass|highpass|bandpass with `cutoff`→`cutoffEnd` over `sweepTime`, `q`, `vib` cents, `vibRate`, `rep`/`repGap`/`repStep`/`scale` penta|chromatic, `unison`/`detune`, `fmRatio`/`fmIndex`/`fmDecay`.
+`{ layers: [...], reverb 0-1, echo 0-0.9, echoTime s, drive 0-1, crush 0|1-16 bits, gain 0-1 }`. Layer: `type` tone|fm|string|pluck|bell|noise (string = Karplus-Strong plucked string with `bright` 0-1; bell takes optional `partials` [[ratio, amp, decayMul]]), `wave`, `freq`→`freqEnd` Hz over `slideTime` s, `start`, `attack`, `decay` s, `vol`, `filter` none|lowpass|highpass|bandpass with `cutoff`→`cutoffEnd` over `sweepTime`, `q`, `vib` cents, `vibRate`, `rep`/`repGap`/`repStep`/`scale` penta|chromatic, `unison`/`detune`, `fmRatio`/`fmIndex`/`fmDecay`.
