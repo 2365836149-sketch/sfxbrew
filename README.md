@@ -56,7 +56,7 @@ const { bytes } = await sfx.renderWav(patch);
 
 ## Browser editor
 
-Tweak any sound with sliders and export WAV / JS in the [web editor](https://2365836149-sketch.github.io/sfxbrew/) (same engine).
+Tweak any sound with sliders and export WAV / JS in the [web editor](https://sfxbrew.com/) (same engine).
 
 ## License
 

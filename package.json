@@ -42,7 +42,7 @@
     "node-web-audio-api": "^2.2.0",
     "zod": "^4.6.7"
   },
-  "homepage": "https://2365836149-sketch.github.io/sfxbrew/",
+  "homepage": "https://sfxbrew.com/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/2365836149-sketch/sfxbrew.git"

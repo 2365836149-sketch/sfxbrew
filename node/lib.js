@@ -17,7 +17,7 @@ const { OfflineAudioContext } = require('node-web-audio-api');
 const SFX = makeSfx({ OfflineAudioContext });
 
 /** 网站上线后填上，生成结果会附带"在网页里试听和微调"的链接 */
-const SITE_URL = process.env.SFXBREW_SITE_URL || 'https://2365836149-sketch.github.io/sfxbrew/';
+const SITE_URL = process.env.SFXBREW_SITE_URL || 'https://sfxbrew.com/';
 
 /* 给 agent 看的预设说明：选预设靠这里的描述 */
 const META = {

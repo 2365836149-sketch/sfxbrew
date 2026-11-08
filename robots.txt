@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /node/
 
-Sitemap: https://2365836149-sketch.github.io/sfxbrew/sitemap.xml
+Sitemap: https://sfxbrew.com/sitemap.xml
