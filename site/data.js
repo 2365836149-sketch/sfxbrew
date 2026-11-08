@@ -688,6 +688,7 @@ const SOUNDS = {
 /* 主题包：每个包由若干预设组成，每个预设取 count 个变体 */
 const PACKS = {
   'xianxia-game-sound-pack': {
+    itch: 'https://2365836149-sketch.itch.io/xianxia-wuxia-sound-pack',
     items: [['swordQi', 3], ['guqin', 4], ['pipa', 2], ['erhu', 2], ['flute', 2], ['bell', 2], ['gong', 2], ['woodfish', 2], ['drum', 2], ['spell', 2], ['thunder', 2], ['lightning', 2], ['breakthrough', 2], ['talisman', 2], ['alchemy', 2], ['chime', 2], ['qiGather', 2], ['coin', 1], ['click', 1], ['confirm', 1], ['error', 1], ['hit', 2], ['levelUp', 1]],
     en: {
       name: 'Xianxia & Wuxia Game Sound Pack', title: 'Free Xianxia & Wuxia Game Sound Pack',
@@ -745,7 +746,7 @@ const UI = {
     navEditor: 'SFX Editor', navLibrary: 'Sound Library', navLab: 'Lab', navMusic: 'Music', navPacks: 'Packs', navAgents: 'For AI agents', switchLang: '中文',
     nVariants: n => n + ' variations', libCount: (k, n) => k + ' categories × ' + n + ' variations', moreInfo: name => 'About these ' + name.toLowerCase() + ' sounds, uses and license', aboutLib: 'About this library',
     library: 'Sound Library', packs: 'Packs', category: 'Category', filters: 'Filters', categoriesH: 'Categories', searchPh: 'Search: sword, coin, rain, 剑…', sortDefault: 'Sort: category', sortName: 'Sort: name', sortDur: 'Sort: length', clearAll: 'Clear filters', showing: (n, m) => n + ' of ' + m + ' sounds', nSounds: n => n + ' free sounds', libMetaTail: 'Free for commercial use: play in the browser, download WAV or copy JavaScript.', noResults: 'No sound matches. Try another word or clear the filters.', reroll: 'New variation', details: 'Details', allIn: name => 'All ' + name.toLowerCase(), groupInstr: 'Eastern instruments', groupXianxia: 'Xianxia & magic', groupEast: 'Eastern & Xianxia', groupGeneral: 'General Game Sounds',
-    zipAll: n => 'Download all ' + n + ' as ZIP', zipPack: n => 'Download all ' + n + ' sounds as ZIP',
+    zipAll: n => 'Download all ' + n + ' as ZIP', zipPack: n => 'Download all ' + n + ' sounds as ZIP', itchPack: 'Also on itch.io',
     codeAll: n => 'Copy JavaScript for all ' + n, codePack: 'Copy JavaScript for the whole pack', editor: 'Make your own in the editor',
     fixedNote: (name, n) => 'Every press of New in the editor brews a different ' + name.toLowerCase() + '; these ' + n + ' are a fixed selection so the links stay the same.',
     goodFor: 'Good for', tipH: 'Tweaking tip', tipTail: ' Open any variant with Edit to change it with sliders.',
@@ -768,7 +769,7 @@ const UI = {
     navEditor: '音效编辑器', navLibrary: '音效库', navLab: '实验室', navMusic: '配乐', navPacks: '音效包', navAgents: '给 AI 用', switchLang: 'English',
     nVariants: n => n + ' 个变体', libCount: (k, n) => k + ' 类 × 每类 ' + n + ' 个变体', moreInfo: name => '关于' + name + '音效：适用场景、技巧和授权', aboutLib: '关于这个音效库',
     library: '音效库', packs: '音效包', category: '分类', filters: '筛选', categoriesH: '大类', searchPh: '搜索：剑、金币、雨、slash…', sortDefault: '排序：按大类', sortName: '排序：按名称', sortDur: '排序：按长短', clearAll: '清除筛选', showing: (n, m) => '显示 ' + n + ' / ' + m + ' 个音效', nSounds: n => n + ' 个免费音效', libMetaTail: '免费商用，可在线试听、下载 WAV 或复制 JavaScript。', noResults: '没有匹配的音效。换个词，或者清除筛选。', reroll: '换一个', details: '详情', allIn: name => '全部' + name, groupInstr: '东方乐器', groupXianxia: '仙侠', groupEast: '东方 / 修仙', groupGeneral: '通用游戏音效',
-    zipAll: n => '下载全部 ' + n + ' 个（ZIP）', zipPack: n => '下载全部 ' + n + ' 个音效（ZIP）',
+    zipAll: n => '下载全部 ' + n + ' 个（ZIP）', zipPack: n => '下载全部 ' + n + ' 个音效（ZIP）', itchPack: '在 itch.io 下载',
     codeAll: n => '复制全部 ' + n + ' 个的 JavaScript', codePack: '复制整个音效包的 JavaScript', editor: '在编辑器里自己调',
     fixedNote: (name, n) => '在编辑器里每按一次"重新生成"都会得到一个不同的' + name + '；这里的 ' + n + ' 个是固定的，方便分享链接。',
     goodFor: '适用场景', tipH: '调音小技巧', tipTail: '点任意一个变体的"编辑"，就能用滑杆细调。',

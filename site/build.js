@@ -241,6 +241,7 @@ function packPage(lang, slug) {
   <div class="lib-actions">
     <button class="btn primary" data-act="zip">${esc(u.zipPack(items.length))}</button>
     <button class="btn" data-act="code">${esc(u.codePack)}</button>
+    ${p.itch ? '<a class="btn" href="' + p.itch + '">' + esc(u.itchPack) + '</a>' : ''}
   </div>
 </div>
 <p class="lead">${esc(t.intro)}</p>

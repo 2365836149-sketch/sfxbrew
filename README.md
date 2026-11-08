@@ -50,6 +50,10 @@ npx sfxbrew hit --seed 42 --js src/sfx.js
 npx sfxbrew render my-patch.json --out boom.wav
 ```
 
+## Sound packs
+
+Ready-made WAV packs: [Xianxia & Wuxia Game Sound Pack on itch.io](https://2365836149-sketch.itch.io/xianxia-wuxia-sound-pack) (44 sounds), or download any pack as a ZIP from [sfxbrew.com/sounds](https://sfxbrew.com/sounds/).
+
 ## Library
 
 ```js
