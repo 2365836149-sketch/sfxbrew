@@ -58,8 +58,8 @@ if (/^#[A-Za-z]+(\.|$)/.test(location.hash) && location.hash !== '#agents') loca
     </a>
     <a class="tool" href="/sounds/" data-href-zh="/zh/sounds/">
       <b class="i18n" data-lang="en">Sound Library</b><b class="i18n" data-lang="zh" hidden>音效库</b>
-      <span class="i18n" data-lang="en">29 categories with 12 ready-made variations each, plus themed packs. Listen, download one WAV or the whole set as ZIP.</span>
-      <span class="i18n" data-lang="zh" hidden>29 类音效，每类 12 个现成变体，另有主题音效包。试听、单个下载 WAV 或整组下载 ZIP。</span>
+      <span class="i18n" data-lang="en">45 kinds of sounds with 12 ready-made variations each, plus themed packs. Listen, download one WAV or the whole set as ZIP.</span>
+      <span class="i18n" data-lang="zh" hidden>45 类音效，每类 12 个现成变体，另有主题音效包。试听、单个下载 WAV 或整组下载 ZIP。</span>
       <em class="i18n" data-lang="en">Browse →</em><em class="i18n" data-lang="zh" hidden>浏览 →</em>
     </a>
     <a class="tool" href="/lab/" data-href-zh="/zh/lab/">
@@ -88,8 +88,8 @@ if (/^#[A-Za-z]+(\.|$)/.test(location.hash) && location.hash !== '#agents') loca
       <p class="i18n" data-lang="zh" hidden>武侠、修仙游戏需要的剑气、古琴、琵琶、二胡、寺钟、铜锣、战鼓、符箓、天雷，在普通音效库里很难找到。</p>
     </section>
   </div>
-  <p class="license i18n" data-lang="en">Every sound and song you make here is yours: free for commercial use, no attribution required. <a href="/samples/CREDITS.md">Recording credits</a> · <a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
-  <p class="license i18n" data-lang="zh" hidden>在这里生成的所有音效和曲子都归你：可以免费商用，不需要署名。<a href="/samples/CREDITS.md">录音素材来源</a> · <a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
+  <p class="license i18n" data-lang="en">Every sound and song you make here is yours: free for commercial use, no attribution required. <a href="/privacy/">Privacy</a> · <a href="/samples/CREDITS.md">Recording credits</a> · <a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
+  <p class="license i18n" data-lang="zh" hidden>在这里生成的所有音效和曲子都归你：可以免费商用，不需要署名。<a href="/zh/privacy/">隐私政策</a> · <a href="/samples/CREDITS.md">录音素材来源</a> · <a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
 </main>
 
 <script src="/engine.js"></script>
@@ -139,5 +139,6 @@ if (/^#[A-Za-z]+(\.|$)/.test(location.hash) && location.hash !== '#agents') loca
   SFX.render(window.SFX_PRESETS.find(p => p.id === 'drum').gen(), 22050).then(buf => { const d = buf.getChannelData(0); SFXB.drawWave(cv, d, SFXB.trimLength(d, 22050)); });
 })();
 </script>
+<!--analytics--><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "a45dcf7d53464930b4757d7687c6b9b1"}'></script><!--/analytics-->
 </body>
 </html>

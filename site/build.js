@@ -19,6 +19,18 @@ const CAT = require('../catalog.js');
 const ENGINE = require('../engine.js')({});
 
 const ROOT = path.join(__dirname, '..');
+/* ---------------- 统计和广告开关 ----------------
+   analyticsToken：Cloudflare Web Analytics 的 token（不用 cookie，不需要同意弹窗）。留空 = 不加统计。
+   adsense：{ client: 'ca-pub-…', slot: '…' }。null = 不放广告，页面里什么都不输出。
+   开广告前必须先：AdSense 审核通过、开 Google 的同意弹窗（欧盟要求）、更新隐私政策的广告一节、加 /ads.txt。 */
+const ANALYTICS_TOKEN = 'a45dcf7d53464930b4757d7687c6b9b1';
+const ADSENSE = null;
+const analyticsTag = () => ANALYTICS_TOKEN
+  ? `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "${ANALYTICS_TOKEN}"}'></script>` : '';
+const adHead = () => ADSENSE ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE.client}" crossorigin="anonymous"></script>` : '';
+/* 广告位只放在音效库页面（列表下方），编辑器和实验室不放 */
+const adSlot = () => ADSENSE ? `<div class="ad-slot"><ins class="adsbygoogle" style="display:block" data-ad-client="${ADSENSE.client}" data-ad-slot="${ADSENSE.slot}" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script></div>` : '';
+const privacyUrl = lang => PREFIX[lang] + 'privacy/';
 const SITE = 'https://sfxbrew.com';
 const VARIANTS = 12;
 const TODAY = new Date().toISOString().slice(0, 10);
@@ -106,23 +118,25 @@ function libSide(lang, current) {
 }
 
 /* ---------------- 音效库页面外壳 ---------------- */
-function page(lang, { title, description, urlPath, altPath, body, data, side, sideHtml, scripts }) {
+function page(lang, { title, description, urlPath, altPath, body, data, side, sideHtml, scripts, active, noAds }) {
   const u = UI[lang];
   return `<!doctype html>
 <html lang="${HTML_LANG[lang]}">
 <head>
 ${headTags(lang, { title, description, urlPath, altPath })}
 <link rel="stylesheet" href="/style.css">
+${adHead()}
 </head>
 <body>
-${siteBar(lang, 'library', altPath)}
+${siteBar(lang, active || 'library', altPath)}
 <div class="lib-shell">
 <div class="lib-side-wrap">${sideHtml || libSide(lang, side)}</div>
 <main class="lib">
 ${body}
+${noAds ? '' : adSlot()}
 <footer class="foot">
   <p>${esc(u.footer)}</p>
-  <p class="foot-meta"><a href="/samples/CREDITS.md">${esc(u.credits)}</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a><a href="/llms.txt">llms.txt</a></p>
+  <p class="foot-meta"><a href="${privacyUrl(lang)}">${esc(PRIVACY[lang].h)}</a><a href="/samples/CREDITS.md">${esc(u.credits)}</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a><a href="/llms.txt">llms.txt</a></p>
 </footer>
 </main>
 </div>
@@ -130,6 +144,7 @@ ${data ? '<script type="application/json" id="lib-data">' + jsonForHtml(Object.a
 <script src="/engine.js"></script>
 <script src="/shared.js"></script>
 ${scripts || '<script src="/library.js"></script>'}
+${analyticsTag()}
 </body>
 </html>
 `;
@@ -424,7 +439,7 @@ ${siteBar(lang, 'lab', altPath)}
 <section class="st-about">
   <h1>${esc(st.aboutH)}</h1>
   ${st.aboutP.map(p => '<p>' + esc(p) + '</p>').join('\n  ')}
-  <p class="foot-meta"><a href="${PREFIX[lang]}sounds/">${esc(u.navLibrary)}</a><a href="/samples/CREDITS.md">${esc(u.credits)}</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
+  <p class="foot-meta"><a href="${PREFIX[lang]}sounds/">${esc(u.navLibrary)}</a><a href="${privacyUrl(lang)}">${esc(PRIVACY[lang].h)}</a><a href="/samples/CREDITS.md">${esc(u.credits)}</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
 </section>
 <script type="application/json" id="studio-data">${jsonForHtml(appData)}</script>
 <script src="/engine.js"></script>
@@ -436,6 +451,7 @@ ${siteBar(lang, 'lab', altPath)}
 <script src="/studio/smart.js"></script>
 <script src="/studio/roll.js"></script>
 <script src="/studio/app.js"></script>
+${analyticsTag()}
 </body>
 </html>
 `;
@@ -453,17 +469,55 @@ function musicRedirect(lang) {
 ` };
 }
 
+/* ---------------- 隐私政策 ---------------- */
+const PRIVACY = {
+  en: { h: 'Privacy', title: 'Privacy Policy | SFX Brew', desc: 'What SFX Brew stores and collects: no accounts, no tracking cookies, sounds made in your browser.', updated: 'Last updated',
+    body: [
+      ['Short version', 'SFX Brew has no accounts and sets no tracking cookies. Sounds and music are generated in your own browser; nothing you make is uploaded to us.'],
+      ['Stored in your browser', 'A few preferences are saved in your browser\'s local storage so the site remembers them: your language, which sound categories you have open, and your Lab project. They never leave your device, and clearing your browser data removes them.'],
+      ['Visitor statistics', 'We use Cloudflare Web Analytics to count page views. It does not use cookies or fingerprinting and does not track you across sites; we only see totals such as how many people visited a page and from which country.'],
+      ['Hosting', 'The site is hosted on GitHub Pages. Like any web server, GitHub receives your IP address when you load a page and may keep it in its logs for security. See the GitHub Privacy Statement.'],
+      ['Recordings and fonts', 'A few sounds play short CC0 recordings served from this site. No third-party fonts or embeds are loaded.'],
+      ['Advertising', 'There are no ads on the site right now. If we add them, this page will be updated first and you will be asked for consent before any advertising cookies are used.'],
+      ['Contact', 'Questions about this policy: open an issue on GitHub (github.com/2365836149-sketch/sfxbrew).']
+    ] },
+  zh: { h: '隐私政策', title: '隐私政策 | SFX Brew', desc: 'SFX Brew 存什么、收集什么：没有账号，没有追踪 cookie，声音都在你的浏览器里生成。', updated: '最后更新',
+    body: [
+      ['简单说', 'SFX Brew 没有账号系统，也不设置任何追踪 cookie。音效和配乐都在你自己的浏览器里生成，你做的东西不会上传给我们。'],
+      ['存在你浏览器里的东西', '为了记住你的设置，网站会在浏览器本地存储里保存几项内容：界面语言、编辑器里展开了哪些分类、实验室的工程。这些不会离开你的设备，清除浏览器数据就会删掉。'],
+      ['访问统计', '我们用 Cloudflare Web Analytics 统计页面访问量。它不用 cookie、不做指纹识别，也不跨网站追踪你；我们只能看到总数，比如某个页面有多少人访问、来自哪些国家。'],
+      ['托管', '网站托管在 GitHub Pages。和所有网站服务器一样，你打开页面时 GitHub 会收到你的 IP 地址，并可能出于安全原因记录在日志里，详见 GitHub 隐私声明。'],
+      ['录音和字体', '少数音效会播放本站提供的简短 CC0 录音。网站不加载任何第三方字体或嵌入内容。'],
+      ['广告', '网站目前没有广告。如果以后加广告，会先更新本页，并在使用任何广告 cookie 之前征得你的同意。'],
+      ['联系', '对本政策有疑问，可以在 GitHub 上提 issue（github.com/2365836149-sketch/sfxbrew）。']
+    ] }
+};
+function privacyPage(lang) {
+  const P = PRIVACY[lang];
+  const body = '<article class="prose"><h1>' + esc(P.h) + '</h1><p class="muted">' + esc(P.updated) + ': ' + TODAY + '</p>' +
+    P.body.map(([h, t]) => '<h2>' + esc(h) + '</h2><p>' + esc(t) + '</p>').join('') + '</article>';
+  return { file: PREFIX[lang].slice(1) + 'privacy/index.html', html: page(lang, { title: P.title, description: P.desc, urlPath: privacyUrl(lang), altPath: privacyUrl(other(lang)),
+    body, side: 'index', noAds: true, scripts: ' ' }) };
+}
+
+/* 首页和编辑器是手写的：把统计代码写进 <!--analytics--> 标记之间 */
+for (const f of ['index.html', 'editor/index.html']) {
+  const fp = path.join(ROOT, f), h = fs.readFileSync(fp, 'utf8');
+  if (!h.includes('<!--analytics-->')) throw new Error(f + ' 缺少 <!--analytics--><!--/analytics--> 标记');
+  fs.writeFileSync(fp, h.replace(/<!--analytics-->[\s\S]*?<!--\/analytics-->/, '<!--analytics-->' + analyticsTag() + '<!--/analytics-->'));
+}
+
 /* ---------------- 写文件 ---------------- */
 const missing = lib.PRESETS.filter(p => !SOUNDS[p.id]).map(p => p.id);
 if (missing.length) throw new Error('data.js 缺少这些预设的文案: ' + missing.join(', '));
 const out = [];
 LANGS.forEach(lang => {
-  out.push(searchPage(lang, null), ...usedCats().map(c => searchPage(lang, c)), labPage(lang), musicRedirect(lang), ...Object.keys(SOUNDS).map(id => soundPage(lang, id)), ...Object.keys(PACKS).map(slug => packPage(lang, slug)));
+  out.push(searchPage(lang, null), ...usedCats().map(c => searchPage(lang, c)), labPage(lang), musicRedirect(lang), privacyPage(lang), ...Object.keys(SOUNDS).map(id => soundPage(lang, id)), ...Object.keys(PACKS).map(slug => packPage(lang, slug)));
 });
-for (const dir of ['sounds', 'packs', 'zh', 'music', 'lab']) fs.rmSync(path.join(ROOT, dir), { recursive: true, force: true });
+for (const dir of ['sounds', 'packs', 'zh', 'music', 'lab', 'privacy']) fs.rmSync(path.join(ROOT, dir), { recursive: true, force: true });
 out.forEach(o => { lib.writeFile(path.join(ROOT, o.file), o.html); });
 
-const urls = ['/', '/editor/', ...LANGS.flatMap(l => [PREFIX[l] + 'sounds/', ...usedCats().map(c => catUrl(l, c)), PREFIX[l] + 'lab/', ...Object.keys(SOUNDS).map(id => soundUrl(l, id)), ...Object.keys(PACKS).map(k => packUrl(l, k))]), '/llms.txt'];
+const urls = ['/', '/editor/', ...LANGS.flatMap(l => [PREFIX[l] + 'sounds/', ...usedCats().map(c => catUrl(l, c)), PREFIX[l] + 'lab/', privacyUrl(l), ...Object.keys(SOUNDS).map(id => soundUrl(l, id)), ...Object.keys(PACKS).map(k => packUrl(l, k))]), '/llms.txt'];
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   urls.map(u => '  <url><loc>' + SITE + u + '</loc><lastmod>' + TODAY + '</lastmod></url>').join('\n') + '\n</urlset>\n');
 

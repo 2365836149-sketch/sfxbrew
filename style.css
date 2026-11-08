@@ -263,3 +263,11 @@ a.card-name:hover { text-decoration: underline; }
   .sq { width: 100%; flex: 1 1 100%; order: 5; }
   .lib { padding: 10px 12px 32px; }
 }
+
+/* 隐私政策等纯文字页 */
+.prose { max-width: 680px; line-height: 1.7; }
+.prose h1 { margin: 4px 0 2px; }
+.prose h2 { font-size: 16px; margin: 22px 0 6px; }
+.prose p { margin: 0 0 8px; }
+/* 广告位（只有 build.js 里开了 ADSENSE 才会出现） */
+.ad-slot { margin: 24px 0 8px; min-height: 90px; }
