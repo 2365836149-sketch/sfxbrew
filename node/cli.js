@@ -2,6 +2,9 @@
 /* SFX Brew · 命令行：npx sfxbrew coin --out sfx/coin.wav */
 'use strict';
 
+/* `sfxbrew mcp` 启动 MCP 服务器（MCP Registry 用 npx sfxbrew mcp 启动；sfxbrew-mcp 也一样） */
+if (process.argv[2] === 'mcp') { require('./mcp.js'); return; }
+
 const fs = require('fs');
 const path = require('path');
 const lib = require('./lib.js');
@@ -12,6 +15,7 @@ Usage:
   sfxbrew list [--json]                  list presets
   sfxbrew <preset> [options]             generate sound(s) from a preset
   sfxbrew render <patch.json> --out f.wav  render a custom patch
+  sfxbrew mcp                            run the MCP server (stdio)
 
 Options:
   --out <file.wav>     output file (default: ./<preset>.wav)

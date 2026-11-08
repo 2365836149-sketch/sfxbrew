@@ -1,6 +1,7 @@
 {
   "name": "sfxbrew",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "mcpName": "com.sfxbrew/sfxbrew",
   "description": "Procedural game sound effects for humans and AI agents: Eastern (wuxia/xianxia) and general SFX, rendered locally to WAV or drop-in JavaScript. CLI + MCP server.",
   "keywords": [
     "sound effects",
