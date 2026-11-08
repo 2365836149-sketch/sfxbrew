@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#a8322a"/><text x="32" y="45" font-size="38" text-anchor="middle" fill="#fff" font-family="Songti SC, Noto Serif SC, serif">灵</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#2f6b5a"/>
+  <path d="M26 12h12M28 12v13L16 46a5 5 0 0 0 4.4 7.5h23.2A5 5 0 0 0 48 46L36 25V12" fill="none" stroke="#fbf8f1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M21.5 40h21l4 7a3 3 0 0 1-2.6 4.5H20.1a3 3 0 0 1-2.6-4.5z" fill="#e8b04a"/>
+  <circle cx="28" cy="45" r="2.2" fill="#fbf8f1"/><circle cx="36" cy="43" r="1.6" fill="#fbf8f1"/><circle cx="33" cy="34" r="1.8" fill="#e8b04a"/>
+</svg>

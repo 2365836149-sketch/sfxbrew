@@ -1,13 +1,13 @@
-# Lingyin SFX
+# SFX Brew
 
 > Free procedural game sound effect generator. Eastern (wuxia/xianxia) and general game sounds, synthesized with Web Audio in the browser or locally in Node. Output is WAV or a dependency-free JavaScript snippet. Generated sounds are free for commercial use, no attribution required. No sign-up, no API key.
 
 ## Use it from an AI coding agent
 
-- MCP server (local, stdio, no network): `npx -y -p lingyin-sfx lingyin-sfx-mcp`
-  - Claude Code: `claude mcp add lingyin-sfx -- npx -y -p lingyin-sfx lingyin-sfx-mcp`
+- MCP server (local, stdio, no network): `npx -y -p sfxbrew sfxbrew-mcp`
+  - Claude Code: `claude mcp add sfxbrew -- npx -y -p sfxbrew sfxbrew-mcp`
   - Tools: `list_presets`, `generate_sfx` (writes WAV files, returns seeds and patch JSON), `render_patch` (custom patch to WAV), `get_js_code` (one JS snippet with playX() functions)
-- CLI: `npx lingyin-sfx <preset> --out assets/sfx/name.wav [--count n] [--seed n] [--js src/sfx.js]`; `npx lingyin-sfx list`
+- CLI: `npx sfxbrew <preset> --out assets/sfx/name.wav [--count n] [--seed n] [--js src/sfx.js]`; `npx sfxbrew list`
 
 ## Presets
 

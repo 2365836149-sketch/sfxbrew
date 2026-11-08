@@ -1,5 +1,5 @@
 /* ============================================================================
-   灵音 · 页面逻辑
+   SFX Brew · 页面逻辑
    ----------------------------------------------------------------------------
    状态：当前预设 id + 当前参数 patch。任何改动 → 防抖重新离线渲染 → 画波形。
    导出：WAV（16 位单声道 44.1k）、JS 代码（makeSfx 源码 + 参数）、10 个变体打包 zip。
@@ -65,7 +65,7 @@
   };
   let lang = (() => {
     let saved = null;
-    try { saved = localStorage.getItem('lingyin-lang'); } catch (e) { /* ignore */ }
+    try { saved = localStorage.getItem('sfxbrew-lang'); } catch (e) { /* ignore */ }
     return saved || ((navigator.language || '').startsWith('zh') ? 'zh' : 'en');
   })();
   const t = k => T[lang][k];
@@ -288,7 +288,7 @@
   }
   async function exportWav() {
     const buf = await SFX.render(patch, 44100);
-    download(wavBytes(buf), 'lingyin-' + slug() + '.wav', 'audio/wav');
+    download(wavBytes(buf), 'sfxbrew-' + slug() + '.wav', 'audio/wav');
   }
 
   /* ==================== 导出：zip（不压缩，够用） ==================== */
@@ -325,7 +325,7 @@
     }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(zip(files));
-    a.download = 'lingyin-' + slug() + '-pack.zip';
+    a.download = 'sfxbrew-' + slug() + '-pack.zip';
     document.body.appendChild(a); a.click(); a.remove();
     btn.disabled = false; btn.textContent = label;
   }
@@ -338,11 +338,11 @@
     const name = T.en.p[presetId].replace(/[^A-Za-z0-9]+/g, '');
     const fn = 'play' + name;
     const engine = makeSfx.toString().split('\n').map(s => s.replace(/\s+$/, '')).join('\n');
-    return '// ' + T.en.p[presetId] + ' sound — made with Lingyin SFX (free for commercial use)\n' +
+    return '// ' + T.en.p[presetId] + ' sound — made with SFX Brew (free for commercial use)\n' +
       '// Call ' + fn + '() after a user click/tap.\n' +
-      'const lingyinSfx = (' + engine + ')();\n' +
+      'const sfxBrew = (' + engine + ')();\n' +
       'const SOUND_' + name.toUpperCase() + ' = ' + JSON.stringify(round(patch)) + ';\n' +
-      'function ' + fn + '() { lingyinSfx.play(SOUND_' + name.toUpperCase() + '); }\n';
+      'function ' + fn + '() { sfxBrew.play(SOUND_' + name.toUpperCase() + '); }\n';
   }
   function showCode() {
     $('#code-text').value = codeFor();
@@ -393,7 +393,7 @@
   $('#code-copy').onclick = e => copy($('#code-text').value, e.currentTarget, t('copied'));
   $('#code-close').onclick = () => $('#code-dlg').close();
   $('#wave').onclick = () => SFX.play(patch);
-  $('#lang').onclick = () => { lang = lang === 'zh' ? 'en' : 'zh'; try { localStorage.setItem('lingyin-lang', lang); } catch (e) { /* ignore */ } applyLang(); };
+  $('#lang').onclick = () => { lang = lang === 'zh' ? 'en' : 'zh'; try { localStorage.setItem('sfxbrew-lang', lang); } catch (e) { /* ignore */ } applyLang(); };
   document.addEventListener('keydown', e => {
     if (e.target.closest('input, select, textarea, dialog[open]') && e.target.type !== 'range') return;
     if (e.code === 'Space') { e.preventDefault(); SFX.play(patch); }

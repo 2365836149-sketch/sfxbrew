@@ -1,5 +1,5 @@
 {
-  "name": "lingyin-sfx",
+  "name": "sfxbrew",
   "version": "0.1.0",
   "description": "Procedural game sound effects for humans and AI agents: Eastern (wuxia/xianxia) and general SFX, rendered locally to WAV or drop-in JavaScript. CLI + MCP server.",
   "keywords": [
@@ -19,8 +19,8 @@
   "license": "MIT",
   "main": "node/lib.js",
   "bin": {
-    "lingyin-sfx": "node/cli.js",
-    "lingyin-sfx-mcp": "node/mcp.js"
+    "sfxbrew": "node/cli.js",
+    "sfxbrew-mcp": "node/mcp.js"
   },
   "files": [
     "engine.js",
@@ -42,12 +42,12 @@
     "node-web-audio-api": "^2.2.0",
     "zod": "^4.6.7"
   },
-  "homepage": "https://2365836149-sketch.github.io/lingyin-sfx/",
+  "homepage": "https://2365836149-sketch.github.io/sfxbrew/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/2365836149-sketch/lingyin-sfx.git"
+    "url": "git+https://github.com/2365836149-sketch/sfxbrew.git"
   },
   "bugs": {
-    "url": "https://github.com/2365836149-sketch/lingyin-sfx/issues"
+    "url": "https://github.com/2365836149-sketch/sfxbrew/issues"
   }
 }

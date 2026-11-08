@@ -1,4 +1,4 @@
-# lingyin-sfx
+# sfxbrew
 
 Procedural game sound effects for humans **and AI coding agents**. Eastern (wuxia / xianxia) sounds plus the usual game sounds, synthesized locally, with no API keys, no network and no per-call cost.
 
@@ -12,7 +12,7 @@ Procedural game sound effects for humans **and AI coding agents**. Eastern (wuxi
 Claude Code:
 
 ```bash
-claude mcp add lingyin-sfx -- npx -y -p lingyin-sfx lingyin-sfx-mcp
+claude mcp add sfxbrew -- npx -y -p sfxbrew sfxbrew-mcp
 ```
 
 Other MCP clients (Cursor, Windsurf, Claude Desktop …):
@@ -20,7 +20,7 @@ Other MCP clients (Cursor, Windsurf, Claude Desktop …):
 ```json
 {
   "mcpServers": {
-    "lingyin-sfx": { "command": "npx", "args": ["-y", "-p", "lingyin-sfx", "lingyin-sfx-mcp"] }
+    "sfxbrew": { "command": "npx", "args": ["-y", "-p", "sfxbrew", "sfxbrew-mcp"] }
   }
 }
 ```
@@ -39,24 +39,24 @@ Then just ask: *"add a coin sound and a hit sound to my game"*.
 ## CLI
 
 ```bash
-npx lingyin-sfx list
-npx lingyin-sfx coin --out assets/sfx/coin.wav
-npx lingyin-sfx swordQi --count 5 --out assets/sfx/sword.wav
-npx lingyin-sfx hit --seed 42 --js src/sfx.js
-npx lingyin-sfx render my-patch.json --out boom.wav
+npx sfxbrew list
+npx sfxbrew coin --out assets/sfx/coin.wav
+npx sfxbrew swordQi --count 5 --out assets/sfx/sword.wav
+npx sfxbrew hit --seed 42 --js src/sfx.js
+npx sfxbrew render my-patch.json --out boom.wav
 ```
 
 ## Library
 
 ```js
-const sfx = require('lingyin-sfx');
+const sfx = require('sfxbrew');
 const { patch, seed } = sfx.generate('coin');
 const { bytes } = await sfx.renderWav(patch);
 ```
 
 ## Browser editor
 
-Tweak any sound with sliders and export WAV / JS in the [web editor](https://2365836149-sketch.github.io/lingyin-sfx/) (same engine).
+Tweak any sound with sliders and export WAV / JS in the [web editor](https://2365836149-sketch.github.io/sfxbrew/) (same engine).
 
 ## License
 

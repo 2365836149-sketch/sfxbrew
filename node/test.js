@@ -1,4 +1,4 @@
-/* 灵音 · 自测：npm test。启动真的 MCP 服务，用官方客户端把每个工具调一遍 */
+/* SFX Brew · 自测：npm test。启动真的 MCP 服务，用官方客户端把每个工具调一遍 */
 'use strict';
 
 const fs = require('fs');
@@ -9,7 +9,7 @@ const { Client } = require('@modelcontextprotocol/sdk/client/index.js');
 const { StdioClientTransport } = require('@modelcontextprotocol/sdk/client/stdio.js');
 
 (async () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'lingyin-test-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sfxbrew-test-'));
   const client = new Client({ name: 'test', version: '1' });
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(__dirname, 'mcp.js')], cwd: dir }));
   const json = r => JSON.parse(r.content[0].text);

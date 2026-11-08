@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /* ============================================================================
-   灵音 · MCP 服务（stdio，本地运行，零成本）
+   SFX Brew · MCP 服务（stdio，本地运行，零成本）
    ----------------------------------------------------------------------------
    给 Claude Code / Cursor 等 agent 用：
-     claude mcp add lingyin-sfx -- npx -y -p lingyin-sfx lingyin-sfx-mcp
+     claude mcp add sfxbrew -- npx -y -p sfxbrew sfxbrew-mcp
    工具：list_presets / generate_sfx / render_patch / get_js_code
    ★ 只写 .wav / .js 文件，防止 agent 传错路径把别的文件覆盖掉。
    ==========================================================================*/
@@ -16,7 +16,7 @@ const { z } = require('zod');
 const lib = require('./lib.js');
 const pkg = require('../package.json');
 
-const server = new McpServer({ name: 'lingyin-sfx', version: pkg.version });
+const server = new McpServer({ name: 'sfxbrew', version: pkg.version });
 
 const ok = obj => ({ content: [{ type: 'text', text: typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2) }] });
 const fail = msg => ({ content: [{ type: 'text', text: 'Error: ' + msg }], isError: true });

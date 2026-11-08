@@ -1,5 +1,5 @@
 /* ============================================================================
-   灵音 · Node 端公共库（命令行和 MCP 共用）
+   SFX Brew · Node 端公共库（命令行和 MCP 共用）
    ----------------------------------------------------------------------------
    ★ 合成用的是和网页完全相同的 engine.js / presets.js，渲染靠 node-web-audio-api
      提供的 OfflineAudioContext（Rust 实现的 Web Audio）。
@@ -17,7 +17,7 @@ const { OfflineAudioContext } = require('node-web-audio-api');
 const SFX = makeSfx({ OfflineAudioContext });
 
 /** 网站上线后填上，生成结果会附带"在网页里试听和微调"的链接 */
-const SITE_URL = process.env.LINGYIN_SITE_URL || 'https://2365836149-sketch.github.io/lingyin-sfx/';
+const SITE_URL = process.env.SFXBREW_SITE_URL || 'https://2365836149-sketch.github.io/sfxbrew/';
 
 /* 给 agent 看的预设说明：选预设靠这里的描述 */
 const META = {
@@ -146,14 +146,14 @@ const ENGINE_SRC = makeSfx.toString().split('\n').map(s => s.replace(/\s+$/, '')
 /** 一段独立可运行的 JS：引擎 + 若干声音 + 播放函数。sounds: [{name, patch}] */
 function jsCode(sounds) {
   const ident = s => s.replace(/[^A-Za-z0-9]+(.)?/g, (m, c) => c ? c.toUpperCase() : '').replace(/^[^A-Za-z_]/, '_$&');
-  let out = '// Sound effects made with Lingyin SFX (free for commercial use)\n' +
+  let out = '// Sound effects made with SFX Brew (free for commercial use)\n' +
     '// Call a play function after a user click/tap (browsers block audio before the first gesture).\n' +
-    'const lingyinSfx = (' + ENGINE_SRC + ')();\n';
+    'const sfxBrew = (' + ENGINE_SRC + ')();\n';
   sounds.forEach(s => {
     const n = ident(s.name);
     const fn = 'play' + n.charAt(0).toUpperCase() + n.slice(1);
     out += 'const SOUND_' + n.toUpperCase() + ' = ' + JSON.stringify(round(s.patch)) + ';\n' +
-      'function ' + fn + '() { lingyinSfx.play(SOUND_' + n.toUpperCase() + '); }\n';
+      'function ' + fn + '() { sfxBrew.play(SOUND_' + n.toUpperCase() + '); }\n';
   });
   return out;
 }

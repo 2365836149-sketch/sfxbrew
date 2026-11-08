@@ -1,17 +1,17 @@
 #!/usr/bin/env node
-/* 灵音 · 命令行：npx lingyin-sfx coin --out sfx/coin.wav */
+/* SFX Brew · 命令行：npx sfxbrew coin --out sfx/coin.wav */
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
 const lib = require('./lib.js');
 
-const HELP = `lingyin-sfx — procedural game sound effects, rendered locally
+const HELP = `sfxbrew — procedural game sound effects, rendered locally
 
 Usage:
-  lingyin-sfx list [--json]                  list presets
-  lingyin-sfx <preset> [options]             generate sound(s) from a preset
-  lingyin-sfx render <patch.json> --out f.wav  render a custom patch
+  sfxbrew list [--json]                  list presets
+  sfxbrew <preset> [options]             generate sound(s) from a preset
+  sfxbrew render <patch.json> --out f.wav  render a custom patch
 
 Options:
   --out <file.wav>     output file (default: ./<preset>.wav)
@@ -22,9 +22,9 @@ Options:
   --json               machine-readable output (paths, seeds, patches)
 
 Examples:
-  npx lingyin-sfx coin --out assets/sfx/coin.wav
-  npx lingyin-sfx swordQi --count 5 --out assets/sfx/sword.wav
-  npx lingyin-sfx hit --seed 42 --js src/sfx.js
+  npx sfxbrew coin --out assets/sfx/coin.wav
+  npx sfxbrew swordQi --count 5 --out assets/sfx/sword.wav
+  npx sfxbrew hit --seed 42 --js src/sfx.js
 `;
 
 function args(argv) {
@@ -88,4 +88,4 @@ async function main() {
   if (o.js) console.log('JS: ' + path.resolve(o.js));
 }
 
-main().catch(e => { console.error('lingyin-sfx: ' + e.message); process.exit(1); });
+main().catch(e => { console.error('sfxbrew: ' + e.message); process.exit(1); });
