@@ -18,7 +18,7 @@ const { StdioClientTransport } = require('@modelcontextprotocol/sdk/client/stdio
   assert.deepStrictEqual(tools, ['generate_sfx', 'get_js_code', 'list_presets', 'render_patch']);
 
   const presets = json(await client.callTool({ name: 'list_presets', arguments: {} }));
-  assert.strictEqual(presets.length, 28);
+  assert.strictEqual(presets.length, 29);
 
   const g = json(await client.callTool({ name: 'generate_sfx', arguments: { preset: 'hit', out_path: 'sfx/hit.wav', count: 3, seed: 7, js_path: 'src/sfx.js' } }));
   assert.strictEqual(g.sounds.length, 3);

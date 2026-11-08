@@ -11,7 +11,7 @@
 
 ## Presets
 
-Eastern: swordQi, guqin, bell, gong, spell, thunder, breakthrough, talisman, alchemy, chime, flute, qiGather, pipa, erhu, woodfish, drum
+Eastern: swordQi, guqin, bell, gong, spell, thunder, lightning, breakthrough, talisman, alchemy, chime, flute, qiGather, pipa, erhu, woodfish, drum
 General: coin, pickup, click, confirm, error, jump, hit, explosion, laser, powerUp, levelUp, whoosh
 
 Each call gives a new variation. Pass the returned seed to reproduce a sound exactly.

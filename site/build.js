@@ -82,7 +82,7 @@ ${body}
 </main>
 <footer class="foot">
   <div class="foot-links">${footerLinks}</div>
-  <p>${esc(u.footer)} SFX Brew · <a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a> · <a href="/llms.txt">llms.txt</a></p>
+  <p>${esc(u.footer)} SFX Brew · <a href="/samples/CREDITS.md">${esc(u.credits)}</a> · <a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a> · <a href="/llms.txt">llms.txt</a></p>
 </footer>
 ${data ? '<script type="application/json" id="lib-data">' + jsonForHtml(Object.assign({ i18n: { rendering: u.js.rendering('{i}', '{n}'), downloaded: u.js.downloaded, copied: u.js.copied, copyFailed: u.js.copyFailed } }, data)) + '</script>' : ''}
 <script src="/engine.js"></script>

@@ -11,10 +11,18 @@
 const fs = require('fs');
 const path = require('path');
 const makeSfx = require('../engine.js');
-const { PRESETS, mutate } = require('../presets.js');
+const { PRESETS, mutate, SAMPLES } = require('../presets.js');
 const { OfflineAudioContext } = require('node-web-audio-api');
 
-const SFX = makeSfx({ OfflineAudioContext });
+const SAMPLE_DIR = path.join(__dirname, '..', 'samples');
+const SFX = makeSfx({
+  OfflineAudioContext,
+  loadSample: name => {
+    if (!/^[a-z0-9-]+$/.test(name)) throw new Error('bad sample name ' + name);
+    const b = fs.readFileSync(path.join(SAMPLE_DIR, name + '.mp3'));
+    return b.buffer.slice(b.byteOffset, b.byteOffset + b.length);
+  }
+});
 
 /** 网站上线后填上，生成结果会附带"在网页里试听和微调"的链接 */
 const SITE_URL = process.env.SFXBREW_SITE_URL || 'https://sfxbrew.com/';
@@ -26,7 +34,7 @@ const META = {
   bell: ['Temple Bell', 'Deep temple bell with beating overtones and a wooden-beam strike, or a smaller bronze bell. Shrine, notification, meditation, quest complete.'],
   gong: ['Gong', 'Large shimmering tam-tam or a Chinese opera gong whose pitch bends after the hit. Battle start, boss entrance, big announcement.'],
   spell: ['Spell Cast', 'Rising whoosh plus a sparkling pentatonic bell arpeggio and echo. Magic casting, skill activation, buff.'],
-  thunder: ['Heavenly Thunder', 'Loud crack and rolling rumble. Lightning strike, heavenly tribulation, storm.'],
+  thunder: ['Heavenly Thunder', 'Brewing, rolling thunder rumble, near or distant. Heavenly tribulation build-up, storm ambience. Use Lightning for the strike itself.'],
   breakthrough: ['Breakthrough', 'Low bell, rumble and a rising plucked arpeggio. Cultivation realm breakthrough, major level up, prestige.'],
   talisman: ['Talisman Burn', 'Crackling paper burn with a rising tone. Talisman activation, fire charm, ignite.'],
   alchemy: ['Alchemy Bubble', 'Bubbling blips followed by a bell. Potion brewing, crafting success, pill refined.'],
@@ -36,7 +44,8 @@ const META = {
   pipa: ['Pipa', 'Bright plucked Chinese lute: single note, fast tremolo or strummed chord. Action accents, tension, Eastern UI.'],
   erhu: ['Erhu', 'Bowed two-string fiddle note with vibrato and sometimes a slide. Sad or emotional moments, character themes, dialogue.'],
   woodfish: ['Wooden Fish', 'Hollow wooden temple block knock, one to three hits. Monastery, chanting, clock tick, UI tap with an Eastern feel.'],
-  drum: ['War Drum', 'Chinese drum hit, one or two booms, small or large. Battle start, march, impact, turn change.'],
+  drum: ['War Drum', 'Rolling Chinese war drums: steady march, fast thundering roll, or an accelerating build-up, two drummers in a big hall. Battle start, siege, boss phase, tension.'],
+  lightning: ['Lightning', 'Lightning strike: crackling discharge, tearing zap, sharp crack and a short boom. Pair with Thunder for the distant rumble.'],
   coin: ['Coin', 'Two-note metallic ding. Coin, currency gained, purchase.'],
   pickup: ['Pickup', 'Quick upward chirp with a sparkle. Item pickup, collectible, gem.'],
   click: ['Click', 'Very short tactile tick. Button press, UI select, typing.'],
@@ -44,7 +53,7 @@ const META = {
   error: ['Error', 'Two dull low buzzy notes. Invalid action, denied, not enough resources.'],
   jump: ['Jump', 'Short rising boing with air. Character jump, bounce, hop.'],
   hit: ['Hit', 'Punchy thump with a crack. Melee hit, damage taken, impact, punch.'],
-  explosion: ['Explosion', 'Big boom with sub rumble and debris crackle. Explosion, bomb, destruction.'],
+  explosion: ['Explosion', 'Violent blast with saturated body, sub punch, debris and aftershock; sometimes a chain of blasts. Explosion, bomb, destruction.'],
   laser: ['Laser', 'Falling zappy pew. Gun shot, laser, projectile fire.'],
   powerUp: ['Power-up', 'Rising arpeggio or swelling sweep. Power-up collected, upgrade, buff gained.'],
   levelUp: ['Level Up', 'Bright arpeggio with a chord and bell. Level up, achievement, reward.'],
@@ -90,9 +99,11 @@ function round(p) {
 const DEFAULT_LAYER = {
   type: 'tone', wave: 'sine', freq: 440, freqEnd: 440, start: 0, attack: 0.005, decay: 0.3, vol: 0.5,
   filter: 'none', cutoff: 4000, cutoffEnd: 4000, q: 1, vib: 0, vibRate: 6, rep: 1, repGap: 0.1, repStep: 0, scale: 'penta',
-  slideTime: 0, sweepTime: 0, unison: 1, detune: 12, fmRatio: 2, fmIndex: 0, fmDecay: 0.1, bright: 0.5
+  slideTime: 0, sweepTime: 0, unison: 1, detune: 12, fmRatio: 2, fmIndex: 0, fmDecay: 0.1, bright: 0.5,
+  color: 'white', trem: 0, tremRate: 6, jitter: 0, pitchJitter: 0, freqPeak: 0, cutoffPeak: 0,
+  hold: 0, repAccel: 1, repGain: 1
 };
-const DEFAULT_FX = { reverb: 0, echo: 0, echoTime: 0.2, drive: 0, crush: 0, gain: 0.8 };
+const DEFAULT_FX = { reverb: 0, echo: 0, echoTime: 0.2, drive: 0, crush: 0, gain: 0.8, seed: 1 };
 
 /** 给 agent 的参数说明（MCP 工具描述里用） */
 const PATCH_DOC = `A patch is JSON: { layers: Layer[1..6], reverb 0-1, echo 0-0.9, echoTime s, drive 0-1, crush 0|1-16 bits, gain 0-1 }.
@@ -100,11 +111,19 @@ Layer fields (all optional, defaults in brackets):
   type: "tone"|"fm"|"string"|"pluck"|"bell"|"noise" ["tone"]; wave: "sine"|"triangle"|"square"|"sawtooth" (tone/fm/pluck)
   string: physically modelled plucked string (Karplus-Strong); bright 0-1 [0.5] = darker (guqin) to brighter (pipa); decay = ring time
   bell: partials = [[ratio, amplitude, decayMultiplier 0-1], ...] (max 16) for custom bells, gongs, wood blocks; default is a metal bar
+  sample: a CC0 recording; sample = one of ${Object.keys(SAMPLES).join(', ')}; pitch / pitchEnd semitones (slide over slideTime); offset s into the recording;
+          set hold ≈ recording length to let it ring naturally (lengths s: ${Object.entries(SAMPLES).map(([k, v]) => k + ' ' + v.length).join(', ')})
   freq, freqEnd: Hz, pitch slides exponentially from freq to freqEnd; slideTime: s the slide takes (0 = whole sound)
+  hold: s to stay at full volume before the decay starts (louder, more violent bodies)
+  repAccel: gap multiplier per repeat (<1 speeds up, e.g. 0.86 for an accelerating drum build-up); repGain: loudness multiplier per repeat (>1 crescendo)
+  freqPeak / cutoffPeak (Hz, 0 = off): go up to this value by the end of attack, then down to freqEnd / cutoffEnd (Doppler-like pass-by for swishes)
   start: s delay; attack: s; decay: s (exponential fade); vol: 0-1
   filter: "none"|"lowpass"|"highpass"|"bandpass"; cutoff, cutoffEnd: Hz; sweepTime: s (0 = whole); q: resonance
   vib: vibrato depth in cents; vibRate: Hz
   rep: number of repeats; repGap: s between repeats; repStep: pitch step per repeat; scale: "penta"|"chromatic" (unit of repStep)
+  jitter 0-1: random gaps (1 = Poisson-like) and loudness per repeat; pitchJitter: semitones of random pitch/cutoff per repeat (crackles, bubbles, debris)
+  noise layers: color "white"|"pink"|"brown"; any layer: trem 0-1 + tremRate Hz = wavering loudness (flames, rumble)
+  patch.seed: integer that fixes the random pattern of jitter
   unison: 1-5 stacked voices; detune: cents spread
   fmRatio, fmIndex, fmDecay: FM modulator ratio, depth and how fast the depth decays (type "fm" only)
 Tips: punchy impacts = short noise layer (decay ~0.01) + tone with fast slideTime (~0.04); metallic = fm or bell; keep total vol*gain under ~1.`;
@@ -115,9 +134,10 @@ function validatePatch(p) {
   const out = Object.assign({}, DEFAULT_FX, p, { layers: p.layers.map(l => Object.assign({}, DEFAULT_LAYER, l)) });
   out.layers.forEach(l => {
     l.attack = Math.max(0.0005, Math.min(4, +l.attack)); l.decay = Math.max(0.005, Math.min(10, +l.decay));
-    l.rep = Math.max(1, Math.min(32, Math.round(l.rep)));
+    l.rep = Math.max(1, Math.min(64, Math.round(l.rep)));
     ['freq', 'freqEnd', 'cutoff', 'cutoffEnd'].forEach(k => { l[k] = Math.max(1, Math.min(20000, +l[k])); });
     l.bright = Math.max(0, Math.min(1, +l.bright));
+    if (l.type === 'sample' && !SAMPLES[l.sample]) throw new Error('unknown sample "' + l.sample + '". Available: ' + Object.keys(SAMPLES).join(', '));
     if (l.partials != null) {
       if (!Array.isArray(l.partials) || l.partials.length > 16 || !l.partials.every(p => Array.isArray(p) && p.length >= 2 && p.every(x => typeof x === 'number' && isFinite(x))))
         throw new Error('partials must be up to 16 arrays of numbers [ratio, amplitude, decayMultiplier]');
@@ -160,6 +180,8 @@ function jsCode(sounds) {
   let out = '// Sound effects made with SFX Brew (free for commercial use)\n' +
     '// Call a play function after a user click/tap (browsers block audio before the first gesture).\n' +
     'const sfxBrew = (' + ENGINE_SRC + ')();\n';
+  if (sounds.some(s => (s.patch.layers || []).some(x => x.type === 'sample'))) out += '// Some of these sounds play short CC0 recordings, loaded on first use from https://sfxbrew.com/samples/ (credits: https://sfxbrew.com/samples/CREDITS.md).\n' +
+    '// To self-host, copy the .mp3 files (also in node_modules/sfxbrew/samples/) next to your game and call sfxBrew.setSampleBase("./sfx/").\n';
   sounds.forEach(s => {
     const n = ident(s.name);
     const fn = 'play' + n.charAt(0).toUpperCase() + n.slice(1);

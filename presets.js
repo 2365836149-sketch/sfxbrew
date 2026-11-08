@@ -15,24 +15,40 @@
   /* D 宫五声音阶上的音：deg 0 = D3 */
   const penta = deg => 146.83 * Math.pow(2, (12 * Math.floor(deg / 5) + [0, 2, 4, 7, 9][((deg % 5) + 5) % 5]) / 12);
 
+  /* 录音素材（samples/ 目录，CC0，来源见 samples/CREDITS.md）。length = 素材时长（秒），root = 实测音高 */
+  const SAMPLES = {
+    'drum-center-loud': { length: 2.7 }, 'drum-center-soft': { length: 2.7 }, 'drum-edge-loud': { length: 3.5 }, 'drum-rim': { length: 1.8 },
+    'lightning-1': { length: 6.5 }, 'lightning-2': { length: 7 },
+    'gong-1': { length: 10 }, 'gong-2': { length: 12 },
+    'erhu-d3': { length: 4.9, root: 295.4 }, 'erhu-f5': { length: 6, root: 697.2 }
+  };
+  /* 播放一段素材的音层：默认整段自然播放完（hold 撑到素材结尾，最后 0.15 秒淡出） */
+  const S = (name, o) => L(Object.assign({ type: 'sample', sample: name, pitch: 0, offset: 0, attack: 0.001, hold: Math.max(0, SAMPLES[name].length - 0.15), decay: 0.15, vol: 0.9 }, o));
+
   const L = o => Object.assign({
     type: 'tone', wave: 'sine', freq: 440, freqEnd: 440, start: 0, attack: 0.005, decay: 0.3, vol: 0.5,
     filter: 'none', cutoff: 4000, cutoffEnd: 4000, q: 1, vib: 0, vibRate: 6,
     rep: 1, repGap: 0.1, repStep: 0, scale: 'penta',
-    slideTime: 0, sweepTime: 0, unison: 1, detune: 12, fmRatio: 2, fmIndex: 0, fmDecay: 0.1
+    slideTime: 0, sweepTime: 0, unison: 1, detune: 12, fmRatio: 2, fmIndex: 0, fmDecay: 0.1,
+    bright: 0.5, color: 'white', trem: 0, tremRate: 6, jitter: 0, pitchJitter: 0, freqPeak: 0, cutoffPeak: 0,
+    hold: 0, repAccel: 1, repGain: 1
   }, o);
-  const P = (layers, fx) => Object.assign({ layers, reverb: 0, echo: 0, echoTime: 0.2, drive: 0, crush: 0, gain: 0.8 }, fx);
+  const P = (layers, fx) => Object.assign({ layers, reverb: 0, echo: 0, echoTime: 0.2, drive: 0, crush: 0, gain: 0.8, seed: ri(1, 999999) }, fx);
   const same = (o) => { o.freqEnd = o.freq; return o; };
 
   const PRESETS = [
     /* ---------------- 东方 ---------------- */
+    /* 剑气 / 挥剑：刀身划过耳边 = 粉红噪声的窄带，中心频率先升后降（多普勒，cutoffPeak），
+       音量先涨后落；加一点刀刃的哨音（同样先升后降）、低频的风压，大多数变体最后有金属余鸣。 */
     { id: 'swordQi', group: 'east', gen: () => {
-      const hi = r(3000, 6500);
-      return P([
-        L({ type: 'noise', filter: 'bandpass', cutoff: hi, cutoffEnd: r(700, 1500), q: r(2, 6), attack: r(0.01, 0.04), decay: r(0.25, 0.45), vol: 0.7 }),
-        L({ type: 'tone', wave: pick(['sawtooth', 'sine']), freq: r(1500, 2600), freqEnd: r(300, 600), filter: 'lowpass', cutoff: 5000, cutoffEnd: 1200, attack: 0.01, decay: r(0.2, 0.35), vol: 0.15 }),
-        same(L({ type: 'bell', freq: r(1800, 3200), start: r(0.03, 0.08), attack: 0.002, decay: r(0.6, 1.1), vol: r(0.08, 0.16) }))
-      ], { reverb: 0.25 });
+      const a = r(0.07, 0.14), d = r(0.18, 0.3), peak = r(3500, 6000);
+      const layers = [
+        L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: r(600, 900), cutoffPeak: peak, cutoffEnd: r(500, 800), q: r(1.8, 3.5), attack: a, decay: d, vol: 1 }),
+        L({ type: 'tone', wave: 'sine', freq: r(500, 800), freqPeak: r(1500, 2500), freqEnd: r(400, 700), attack: a, decay: d * 0.8, vol: r(0.03, 0.08) }),
+        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 300, cutoffPeak: 900, cutoffEnd: 250, attack: a, decay: d, vol: 0.35 })
+      ];
+      if (chance(0.7)) layers.push(same(L({ type: 'bell', freq: r(1800, 3000), partials: [[1, 1, 1], [2.32, 0.5, 0.6], [4.25, 0.3, 0.4], [6.63, 0.15, 0.3]], start: a * 0.9, attack: 0.002, decay: r(0.4, 0.8), vol: r(0.05, 0.1) })));
+      return P(layers, { reverb: 0.2, gain: 1.6 });
     } },
     /* 古琴：用 Karplus-Strong 弦振动（type 'string'）。三种弹法随机：
        散音（空弦，低沉）、按音带走手音（弹完手指在弦上滑，音高滑动 + 摩擦声）、泛音（轻点弦，空灵像钟）。 */
@@ -70,32 +86,39 @@
         L({ type: 'tone', freq: f * 0.5, freqEnd: f * 0.45, attack: 0.002, decay: 0.35, vol: 0.3 })
       ], { reverb: r(0.4, 0.5) });
     } },
-    /* 铜锣：大锣（tam-tam，几十个不和谐分音，高频后起的"嗡"用噪声带近似）或京剧锣（敲完音高往下掉或往上翘） */
+    /* 铜锣（真实录音）：大部分是一记重锣，变调改变锣的大小（越低越大）；
+       一部分做成京剧锣——敲完音高往下掉或往上翘（变速播放实现）；少数是滚奏渐强的锣。 */
     { id: 'gong', group: 'east', gen: () => {
-      if (chance(0.5)) {
-        const f = r(55, 95), parts = [[1, 1, 1]];
-        for (let i = 0; i < 9; i++) parts.push([+(1 + Math.pow(Math.random(), 1.4) * 11).toFixed(3), +(0.6 / (i + 1.5)).toFixed(3), +r(0.25, 0.9).toFixed(2)]);
-        return P([
-          same(L({ type: 'bell', freq: f, partials: parts, attack: 0.02, decay: r(5, 7.5), vol: 0.55, vib: r(8, 20), vibRate: r(2.5, 4.5) })),
-          L({ type: 'noise', filter: 'bandpass', cutoff: r(2500, 4000), cutoffEnd: r(1500, 2500), q: 0.8, attack: r(0.25, 0.5), decay: r(1.8, 2.8), vol: 0.12 }),
-          L({ type: 'noise', filter: 'lowpass', cutoff: 700, cutoffEnd: 80, attack: 0.002, decay: 0.5, vol: 0.35 })
-        ], { reverb: 0.4 });
+      const kind = pick(['hit', 'hit', 'opera', 'roll']);
+      if (kind === 'roll') return P([S('gong-2', { pitch: r(-2, 2), vol: 1 })], { reverb: 0.15, gain: 0.72 });
+      if (kind === 'opera') {
+        const p0 = r(3, 7);
+        return P([S('gong-1', { pitch: p0, pitchEnd: p0 + pick([-3, -2, 2, 3]), slideTime: r(0.25, 0.45), hold: r(1.5, 2.5), decay: 0.8, vol: 1 })], { reverb: 0.15, gain: 0.72 });
       }
-      const f = r(220, 480), bend = pick([0.82, 0.88, 1.12, 1.2]);
-      return P([
-        L({ type: 'bell', freq: f, freqEnd: f * bend, slideTime: r(0.25, 0.5), partials: [[1, 1, 1], [1.48, 0.45, 0.6], [2.21, 0.3, 0.45], [3.07, 0.2, 0.3], [4.3, 0.1, 0.2]], attack: 0.002, decay: r(1.4, 2.4), vol: 0.5 }),
-        L({ type: 'noise', filter: 'bandpass', cutoff: f * 6, cutoffEnd: f * 3, q: 1, attack: 0.0005, decay: r(0.15, 0.3), vol: 0.25 })
-      ], { reverb: 0.3 });
+      return P([S('gong-1', { pitch: r(-5, 2), hold: r(4, 7), decay: 2.5, vol: 1 })], { reverb: 0.2, gain: 0.72 });
     } },
     { id: 'spell', group: 'east', gen: () => P([
       L({ type: 'noise', filter: 'bandpass', cutoff: r(300, 600), cutoffEnd: r(3000, 6000), q: r(1, 3), attack: r(0.12, 0.25), decay: r(0.3, 0.5), vol: 0.3 }),
       same(L({ type: 'bell', freq: penta(ri(15, 19)), attack: 0.003, decay: r(0.7, 1.2), vol: 0.12, rep: ri(4, 7), repGap: r(0.05, 0.1), repStep: pick([1, 2]) }))
     ], { reverb: 0.45, echo: r(0.15, 0.3), echoTime: r(0.12, 0.22) }) },
-    { id: 'thunder', group: 'east', gen: () => P([
-      L({ type: 'noise', filter: 'lowpass', cutoff: r(2500, 5000), cutoffEnd: r(50, 90), attack: 0.004, decay: r(1.5, 2.6), vol: 0.9 }),
-      L({ type: 'tone', wave: 'sine', freq: r(55, 75), freqEnd: r(28, 35), attack: 0.01, decay: r(1, 1.6), vol: 0.5 }),
-      L({ type: 'noise', filter: 'highpass', cutoff: 2000, cutoffEnd: 2000, attack: 0.001, decay: 0.05, vol: 0.5, rep: ri(2, 4), repGap: r(0.03, 0.08) })
-    ], { reverb: 0.3, drive: r(0.2, 0.4) }) },
+    /* 天雷：近处是几声炸裂（白噪声 + 粉红噪声），远处只有滚雷；滚雷 = 同一声雷经过远近不同的路径
+       在随机时刻陆续到达（jitter=1 的低通噪声块，每块截止频率不同）+ 一层摇晃的超低频。 */
+    { id: 'thunder', group: 'east', gen: () => {
+      const dur = r(2.5, 4), far = chance(0.3);
+      const layers = [
+        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: r(500, 900), cutoffEnd: 200, start: far ? 0 : r(0.05, 0.2), attack: r(0.05, 0.15), decay: r(0.4, 0.8), vol: far ? 0.9 : 0.8, rep: ri(8, 14), repGap: dur / 10, jitter: 1, pitchJitter: 10 }),
+        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 120, cutoffEnd: 100, attack: far ? 0.4 : 0.1, decay: dur, vol: 0.7, trem: 0.5, tremRate: r(1, 2.5) })
+      ];
+      if (!far) layers.unshift(
+        L({ type: 'noise', filter: 'highpass', cutoff: 1500, cutoffEnd: 1500, attack: 0.0005, decay: r(0.05, 0.1), vol: 0.9, rep: ri(2, 4), repGap: 0.03, jitter: 0.8 }),
+        L({ type: 'noise', color: 'pink', filter: 'lowpass', cutoff: 6000, cutoffEnd: 800, attack: 0.001, decay: 0.35, vol: 0.7 }));
+      return P(layers, { reverb: 0.35, gain: 1 });
+    } },
+    /* 霹雳（真实录音）：两段近距离雷击实录，随机挑一段，音高在 -3~+1 个半音之间变化（越低越大越远）。 */
+    { id: 'lightning', group: 'east', gen: () => {
+      const name = pick(['lightning-1', 'lightning-2']), pitch = r(-3, 1);
+      return P([S(name, { pitch, vol: 1 })], { reverb: 0.12, gain: 0.72 });
+    } },
     { id: 'breakthrough', group: 'east', gen: () => {
       const d = ri(5, 8);
       return P([
@@ -104,17 +127,30 @@
         same(L({ type: 'string', freq: penta(d), bright: 0.45, filter: 'lowpass', cutoff: 3500, cutoffEnd: 1500, start: 0.25, attack: 0.001, decay: 1.6, vol: 0.35, rep: ri(5, 7), repGap: r(0.07, 0.11), repStep: 1 }))
       ], { reverb: 0.45 });
     } },
-    { id: 'talisman', group: 'east', gen: () => P([
-      L({ type: 'noise', filter: 'bandpass', cutoff: r(2500, 5000), cutoffEnd: r(2000, 4000), q: 2, attack: 0.001, decay: r(0.02, 0.04), vol: 0.45, rep: ri(6, 12), repGap: r(0.03, 0.06) }),
-      L({ type: 'noise', filter: 'highpass', cutoff: 1500, cutoffEnd: 5000, attack: r(0.15, 0.3), decay: r(0.4, 0.7), vol: 0.25 }),
-      L({ type: 'tone', wave: 'sine', freq: r(250, 400), freqEnd: r(900, 1500), attack: 0.3, decay: 0.3, vol: 0.1 })
-    ], { reverb: 0.25 }) },
-    { id: 'alchemy', group: 'east', gen: () => {
-      const n = ri(4, 6);
+    /* 符箓燃烧 / 火焰：真实的火 = 随机时刻爆出的大小不一的噼啪（jitter=1 近似泊松分布）
+       + 偶尔几下大的爆裂 + 粉红噪声的"呼呼"火苗声（震音让它忽大忽小）+ 棕色噪声的低沉底噪；
+       开头一下纸被点着的"噗"。 */
+    { id: 'talisman', group: 'east', gen: () => {
+      const dur = r(1.4, 2.2);
       return P([
-        L({ type: 'tone', wave: 'sine', freq: r(450, 700), freqEnd: r(900, 1300), attack: 0.005, decay: r(0.07, 0.12), vol: 0.18, rep: n, repGap: r(0.05, 0.09), repStep: pick([-2, 2, 3, -3]), scale: 'chromatic' }),
-        same(L({ type: 'bell', freq: penta(ri(14, 17)), start: n * 0.07 + 0.05, attack: 0.003, decay: r(1.5, 2.5), vol: 0.2 }))
-      ], { reverb: 0.3 });
+        L({ type: 'noise', filter: 'bandpass', cutoff: r(2500, 4500), cutoffEnd: r(2500, 4500), q: 1.5, start: 0.08, attack: 0.0005, decay: r(0.003, 0.008), vol: 0.9, rep: ri(28, 45), repGap: dur / 38, jitter: 1, pitchJitter: 12 }),
+        L({ type: 'noise', filter: 'highpass', cutoff: 700, cutoffEnd: 700, start: 0.2, attack: 0.0005, decay: r(0.015, 0.03), vol: 0.9, rep: ri(2, 5), repGap: dur / 4, jitter: 1, pitchJitter: 5 }),
+        L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: r(900, 1500), cutoffEnd: r(700, 1100), q: 0.7, attack: r(0.15, 0.3), decay: dur, vol: 0.3, trem: 0.6, tremRate: r(4, 8) }),
+        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 300, cutoffEnd: 200, attack: 0.2, decay: dur, vol: 0.45, trem: 0.4, tremRate: r(2, 4) }),
+        L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: 400, cutoffEnd: 3000, q: 1, attack: 0.04, decay: 0.25, vol: 0.35 })
+      ], { reverb: 0.12 });
+    } },
+    /* 冒泡：一个气泡 = 正弦波，音高在破裂瞬间快速上扬（Minnaert 共振，气泡越小音越高），几十毫秒就消失。
+       很多大小不同的气泡在随机时刻冒出来（jitter + pitchJitter），底下垫一层液体的低沉翻滚声。
+       一半的变体最后有一声"丹成"的钟。 */
+    { id: 'alchemy', group: 'east', gen: () => {
+      const n = ri(10, 20), gap = r(0.05, 0.09), f = r(380, 800), bell = chance(0.5);
+      const layers = [
+        L({ type: 'tone', wave: 'sine', freq: f, freqEnd: f * r(1.5, 2.1), attack: 0.001, decay: r(0.025, 0.06), vol: 0.45, filter: 'lowpass', cutoff: 3000, cutoffEnd: 3000, rep: n, repGap: gap, jitter: 0.9, pitchJitter: 8 }),
+        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 500, cutoffEnd: 400, attack: 0.1, decay: n * gap + 0.2, vol: 0.18, trem: 0.6, tremRate: r(5, 9) })
+      ];
+      if (bell) layers.push(same(L({ type: 'bell', freq: penta(ri(14, 17)), start: n * gap + 0.1, attack: 0.003, decay: r(1.5, 2.5), vol: 0.2 })));
+      return P(layers, { reverb: 0.18 });
     } },
     /* 风铃：金属管的分音（1 : 2.756 : 5.404 : 8.933）+ 一个微微失谐的副本产生闪烁 */
     { id: 'chime', group: 'east', gen: () => P([
@@ -154,15 +190,15 @@
       }
       return P([L(Object.assign(base, { freqEnd: chance(0.3) ? f * 1.06 : f, slideTime: 0.25, decay: r(0.7, 1.3), vol: 0.6 })), L(nail)], { reverb: 0.25 });
     } },
-    /* 二胡：拉弦 = 锯齿波（两个微失谐）过带通出鼻音 + 揉弦颤音 + 换把滑音 + 松香擦弦噪声 */
+    /* 二胡（真实录音）：两段二胡长音（实测 D4 和 F5），移调到 D 宫五声音阶上离原音最近的几个音（移调太多会失真）。
+       一部分变体滑进或滑出这个音（揉弦本来就在录音里）。音长随机 1~3 秒。 */
     { id: 'erhu', group: 'east', gen: () => {
-      const f = penta(ri(7, 13)), slide = pick([1, 1, 1.06, 1.122, 0.944]), st = r(0.15, 0.3);
-      const env = { attack: r(0.08, 0.16), decay: r(0.8, 1.4), vib: r(25, 45), vibRate: r(5, 6.5), freq: f, freqEnd: f * slide, slideTime: st };
-      return P([
-        L(Object.assign({ type: 'tone', wave: 'sawtooth', unison: 2, detune: 6, filter: 'bandpass', cutoff: r(900, 1300), cutoffEnd: r(900, 1300), q: 0.7, vol: 0.7 }, env)),
-        L(Object.assign({ type: 'tone', wave: 'sawtooth', filter: 'highpass', cutoff: 2500, cutoffEnd: 2500, vol: 0.06 }, env)),
-        L({ type: 'noise', filter: 'bandpass', cutoff: f * 4, cutoffEnd: f * 4, q: 4, attack: 0.1, decay: env.decay, vol: 0.04 })
-      ], { reverb: 0.3 });
+      const name = pick(['erhu-d3', 'erhu-f5']), root = SAMPLES[name].root;
+      const near = [];
+      for (let d = -5; d <= 25; d++) { const f = penta(d), st = 12 * Math.log2(f / root); if (Math.abs(st) <= 5) near.push(st); }
+      const pitch = pick(near), slide = pick([0, 0, 1, 2, -2]);
+      const len = r(1, Math.min(3, SAMPLES[name].length - 0.6));
+      return P([S(name, { pitch: slide > 0 ? pitch - slide : pitch, pitchEnd: slide > 0 ? pitch : pitch + (slide < 0 ? slide : 0), slideTime: r(0.15, 0.3), offset: r(0, 0.3), attack: r(0.04, 0.1), hold: len, decay: r(0.3, 0.6), vol: 1 })], { reverb: 0.3, gain: 0.85 });
     } },
     /* 木鱼：木头的分音（短、不和谐）+ 敲击的"咔"，偶尔连敲两三下 */
     { id: 'woodfish', group: 'east', gen: () => {
@@ -172,14 +208,34 @@
         L({ type: 'noise', filter: 'bandpass', cutoff: r(2000, 3500), cutoffEnd: 2000, q: 2, attack: 0.0005, decay: 0.01, vol: 0.5, rep: n, repGap: gap })
       ], { reverb: 0.18 });
     } },
-    /* 堂鼓 / 战鼓：低频正弦快速落音高（鼓腔）+ 鼓皮的噪声 + 一个鼓面泛音，偶尔"咚咚"两下 */
+    /* 战鼓（真实录音）：中国大鼓（dagu）的鼓心、鼓边、鼓框单击录音，由引擎编成节奏。
+       每一下都是一记重击，鼓声自然延续 2~3 秒，前后重叠就"绵延不绝"；降调 1~4 个半音让鼓更大更沉。
+       三种打法：行军（重击 + 反拍的鼓框）、擂鼓（不太快的连击，越来越响，最后一记鼓边重击收尾）、
+       催阵（两个鼓手，越敲越快越响）。大厅混响。 */
     { id: 'drum', group: 'east', gen: () => {
-      const big = chance(0.5), f = big ? r(50, 70) : r(80, 115), n = pick([1, 1, 2]), gap = r(0.15, 0.25);
+      const pitch = -r(1, 4), pattern = pick(['march', 'roll', 'build']);
+      const big = (name, o) => S(name, Object.assign({ pitch, pitchJitter: 0.4 }, o));
+      if (pattern === 'march') {
+        const n = ri(6, 9), gap = r(0.5, 0.7);
+        return P([
+          big('drum-center-loud', { rep: n, repGap: gap, vol: 0.9 }),
+          big('drum-rim', { start: gap / 2, rep: n - 1, repGap: gap, vol: 0.35 }),
+          big('drum-edge-loud', { start: gap * n, vol: 1 })
+        ], { reverb: 0.4, gain: 0.55 });
+      }
+      if (pattern === 'roll') {
+        const n = ri(14, 22), gap = r(0.13, 0.18);
+        return P([
+          big('drum-center-soft', { rep: n, repGap: gap, repGain: 1.07, jitter: 0.08, vol: 0.9 }),
+          big('drum-center-loud', { start: gap / 2, rep: n, repGap: gap, repGain: 1.07, jitter: 0.08, vol: 0.6, pitch: pitch - 2 }),
+          big('drum-edge-loud', { start: gap * n + 0.05, vol: 1 })
+        ], { reverb: 0.45, gain: 0.45 });
+      }
+      const n = ri(10, 14), gap = r(0.6, 0.75), acc = r(0.85, 0.89);
       return P([
-        L({ type: 'tone', freq: f * 1.6, freqEnd: f, slideTime: 0.06, attack: 0.001, decay: big ? r(0.7, 1.1) : r(0.35, 0.6), vol: 0.85, rep: n, repGap: gap }),
-        L({ type: 'noise', filter: 'lowpass', cutoff: 1800, cutoffEnd: 300, attack: 0.0005, decay: 0.08, vol: 0.35, rep: n, repGap: gap }),
-        L({ type: 'tone', wave: 'triangle', freq: f * 2.3, freqEnd: f * 2, slideTime: 0.05, attack: 0.001, decay: 0.15, vol: 0.18, rep: n, repGap: gap })
-      ], { reverb: big ? 0.3 : 0.2 });
+        big('drum-center-loud', { rep: n, repGap: gap, repAccel: acc, repGain: 1.09, vol: 0.9 }),
+        big('drum-edge-loud', { start: 0.03, rep: n, repGap: gap, repAccel: acc, repGain: 1.09, jitter: 0.06, vol: 0.55, pitch: pitch - 2 })
+      ], { reverb: 0.45, gain: 0.48 });
     } },
 
     /* ---------------- 通用 ----------------
@@ -232,16 +288,33 @@
       L({ type: 'tone', freq: r(160, 240), freqEnd: r(45, 60), slideTime: r(0.03, 0.06), attack: 0.001, decay: r(0.12, 0.2), vol: 0.95 }),
       L({ type: 'noise', filter: 'lowpass', cutoff: 5000, cutoffEnd: 400, sweepTime: 0.08, attack: 0.001, decay: r(0.08, 0.15), vol: 0.6 })
     ], { drive: r(0.35, 0.6), reverb: 0.08 }) },
-    { id: 'explosion', group: 'general', gen: () => P([
-      L({ type: 'noise', attack: 0.0005, decay: 0.03, vol: 1 }),
-      L({ type: 'tone', freq: r(80, 110), freqEnd: r(30, 40), slideTime: r(0.1, 0.2), attack: 0.002, decay: r(0.6, 0.9), vol: 1 }),
-      L({ type: 'noise', filter: 'lowpass', cutoff: r(1500, 3000), cutoffEnd: 60, sweepTime: r(0.4, 0.8), attack: 0.005, decay: r(1, 1.8), vol: 0.9 }),
-      L({ type: 'noise', filter: 'bandpass', cutoff: 3000, cutoffEnd: 2000, q: 2, start: 0.1, attack: 0.001, decay: 0.02, vol: 0.3, rep: ri(5, 9), repGap: r(0.05, 0.1) })
-    ], { drive: r(0.4, 0.7), reverb: 0.25 }) },
-    { id: 'laser', group: 'general', gen: () => P([
-      L({ type: 'fm', unison: 2, detune: 15, freq: r(1200, 2200), freqEnd: r(180, 350), slideTime: r(0.1, 0.18), fmRatio: pick([0.5, 1, 1.5]), fmIndex: r(2, 5), fmDecay: 0.1, attack: 0.001, decay: r(0.15, 0.25), vol: 0.45 }),
-      L({ type: 'noise', filter: 'highpass', cutoff: 4000, cutoffEnd: 4000, attack: 0.0005, decay: 0.05, vol: 0.2 })
-    ], { crush: chance(0.2) ? ri(6, 8) : 0, reverb: 0.08 }) },
+    /* 爆炸：爆炸瞬间的冲击（极短白噪声）+ 往下沉的超低频"咚" + 棕色噪声的主体轰鸣（截止频率慢慢降下）
+       + 中频的"轰" + 随机时刻落下的碎片（jitter + pitchJitter）+ 摇晃的长尾巴。不加失真，靠层次出力度。 */
+    { id: 'explosion', group: 'general', gen: () => {
+      /* 爆炸：剧烈 = 响度撑得住（hold 让主体在最响处停留）+ 失真带来的"撕裂"泛音 + 足够长的尾巴。
+         冲击（白噪声爆音）→ 往下沉的超低频重拳 → 棕色噪声主体（满频带开始，慢慢变闷）
+         → 中频的"轰"→ 随机落下的碎片 → 摇晃的余震。40% 的变体是连环爆炸。 */
+      const chain = chance(0.4), n = chain ? ri(2, 3) : 1, gap = r(0.25, 0.5);
+      const C = { rep: n, repGap: gap, jitter: chain ? 0.3 : 0, repGain: chain ? 0.8 : 1 };
+      return P([
+        L(Object.assign({ type: 'noise', attack: 0.0005, hold: 0.012, decay: 0.05, vol: 1 }, C)),
+        L(Object.assign({ type: 'tone', freq: r(110, 140), freqEnd: r(30, 38), slideTime: 0.16, attack: 0.001, hold: 0.06, decay: r(0.8, 1.1), vol: 1 }, C)),
+        L(Object.assign({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: r(5000, 8000), cutoffEnd: 90, sweepTime: r(0.8, 1.4), attack: 0.002, hold: r(0.15, 0.3), decay: r(1.8, 2.8), vol: 1 }, C)),
+        L(Object.assign({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: 700, cutoffEnd: 160, q: 0.5, attack: 0.003, hold: 0.1, decay: r(1, 1.5), vol: 0.8 }, C)),
+        L({ type: 'noise', filter: 'bandpass', cutoff: r(2000, 4000), cutoffEnd: 2000, q: 2, start: r(0.15, 0.3), attack: 0.0005, decay: r(0.005, 0.02), vol: 0.7, rep: ri(20, 40), repGap: r(0.04, 0.07), jitter: 1, pitchJitter: 12 }),
+        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 160, cutoffEnd: 110, start: 0.2, attack: 0.3, decay: r(2.5, 3.5), vol: 0.7, trem: 0.45, tremRate: r(1, 2) })
+      ], { reverb: 0.3, drive: 0.5, gain: 0.32 });
+    } },
+    /* 激光 / 能量枪：科幻电影里的"咻"本质上是一段极快下落的啁啾（chirp），几条几乎重合的啁啾叠在一起
+       （微小的随机音高差）产生"弹簧"般的金属感，加一点短回声。 */
+    { id: 'laser', group: 'general', gen: () => {
+      const f0 = r(2500, 4500), f1 = r(150, 350), st = r(0.08, 0.15);
+      return P([
+        L({ type: 'tone', wave: 'sine', freq: f0, freqEnd: f1, slideTime: st, attack: 0.001, decay: r(0.15, 0.25), vol: 0.5, rep: 3, repGap: r(0.003, 0.008), jitter: 0.3, pitchJitter: 1.5 }),
+        L({ type: 'tone', wave: 'sawtooth', freq: f0 * 0.5, freqEnd: f1 * 0.5, slideTime: st, filter: 'lowpass', cutoff: 3000, cutoffEnd: 500, attack: 0.001, decay: 0.15, vol: 0.12 }),
+        L({ type: 'noise', filter: 'highpass', cutoff: 5000, cutoffEnd: 5000, attack: 0.0005, decay: 0.02, vol: 0.3 })
+      ], { reverb: 0.12, echo: 0.2, echoTime: r(0.07, 0.11) });
+    } },
     { id: 'powerUp', group: 'general', gen: () => chance(0.5)
       ? P([
         same(L({ type: 'fm', unison: 2, detune: 10, freq: r(300, 450), fmRatio: 1, fmIndex: 1, fmDecay: 0.08, attack: 0.002, decay: 0.15, vol: 0.35, rep: 6, repGap: r(0.045, 0.06), repStep: 1, scale: 'penta' })),
@@ -259,12 +332,13 @@
         same(L({ type: 'bell', freq: penta(d + 10), start: 0.36, attack: 0.002, decay: 1.4, vol: 0.12 }))
       ], { reverb: 0.3 });
     } },
+    /* 挥动：两层空气声都"先升后降"（多普勒）：粉红噪声带通是主体，棕色噪声低通是风压。 */
     { id: 'whoosh', group: 'general', gen: () => {
-      const a = r(0.12, 0.25), d = r(0.2, 0.35);
+      const a = r(0.1, 0.22), d = r(0.18, 0.32);
       return P([
-        L({ type: 'noise', filter: 'bandpass', cutoff: r(250, 500), cutoffEnd: r(1500, 3000), q: r(1, 2.5), attack: a, decay: d, vol: 1 }),
-        L({ type: 'noise', filter: 'bandpass', cutoff: r(1500, 2500), cutoffEnd: r(4000, 7000), q: 3, attack: a, decay: d * 0.7, vol: 0.35 })
-      ]);
+        L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: r(300, 500), cutoffPeak: r(1500, 3500), cutoffEnd: r(250, 400), q: r(1, 2), attack: a, decay: d, vol: 1 }),
+        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 200, cutoffPeak: 700, cutoffEnd: 180, attack: a, decay: d, vol: 0.4 })
+      ], { reverb: 0.08, gain: 1.5 });
     } }
   ];
 
@@ -287,9 +361,10 @@
       if (l.bright != null) l.bright = Math.max(0, Math.min(1, l.bright * f()));
     });
     q.reverb = Math.min(1, q.reverb * f());
+    q.seed = Math.floor(Math.random() * 999999) + 1;
     return q;
   }
 
-  if (typeof window !== 'undefined') { window.SFX_PRESETS = PRESETS; window.SFX_MUTATE = mutate; }
-  if (typeof module !== 'undefined' && module.exports) module.exports = { PRESETS, mutate };
+  if (typeof window !== 'undefined') { window.SFX_PRESETS = PRESETS; window.SFX_MUTATE = mutate; window.SFX_SAMPLES = SAMPLES; }
+  if (typeof module !== 'undefined' && module.exports) module.exports = { PRESETS, mutate, SAMPLES };
 })();

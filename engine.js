@@ -10,6 +10,9 @@
 function makeSfx(env) {
   'use strict';
   var W = env || (typeof window !== 'undefined' ? window : {});
+  var sampleBase = (env && env.sampleBase) || W.SFXBREW_SAMPLE_BASE || 'https://sfxbrew.com/samples/';
+  var loadSample = env && env.loadSample;
+  var samples = {}, pending = {};
   var PENTA = [0, 2, 4, 7, 9];
   var ctx = null;
   var cache = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
@@ -34,9 +37,44 @@ function makeSfx(env) {
       var d = ir.getChannelData(ch);
       for (i = 0; i < len; i++) d[i] = (r() * 2 - 1) * Math.pow(1 - i / len, 3);
     }
-    a = { noise: nb, ir: ir };
+    var pb = c.createBuffer(1, sr * 2, sr), pd0 = pb.getChannelData(0), b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, w;
+    for (i = 0; i < pd0.length; i++) {
+      w = r() * 2 - 1;
+      b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759; b2 = 0.969 * b2 + w * 0.153852;
+      b3 = 0.8665 * b3 + w * 0.3104856; b4 = 0.55 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.016898;
+      pd0[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11; b6 = w * 0.115926;
+    }
+    var bb = c.createBuffer(1, sr * 2, sr), bd = bb.getChannelData(0), last = 0;
+    for (i = 0; i < bd.length; i++) { last = (last + 0.02 * (r() * 2 - 1)) / 1.02; bd[i] = last * 3.5; }
+    a = { noise: nb, pink: pb, brown: bb, ir: ir };
     if (cache) cache.set(c, a);
     return a;
+  }
+
+  /* Recorded samples (CC0, see sfxbrew.com/samples/CREDITS.md) are fetched once and shared. */
+  function sampleNames(p) {
+    var out = [], i, L;
+    for (i = 0; i < p.layers.length; i++) {
+      L = p.layers[i];
+      if (L.type === 'sample' && L.sample && out.indexOf(L.sample) < 0) out.push(L.sample);
+    }
+    return out;
+  }
+  function fetchSample(c, name) {
+    if (samples[name]) return Promise.resolve(samples[name]);
+    if (!pending[name]) {
+      var get = loadSample ? Promise.resolve(loadSample(name)) : fetch(sampleBase + name + '.mp3').then(function (r) {
+        if (!r.ok) throw new Error('sample ' + name + ': HTTP ' + r.status);
+        return r.arrayBuffer();
+      });
+      pending[name] = get.then(function (ab) { return c.decodeAudioData(ab); }).then(function (b) {
+        samples[name] = b; return b;
+      }, function (e) { delete pending[name]; throw e; });
+    }
+    return pending[name];
+  }
+  function ensure(c, p) {
+    return Promise.all(sampleNames(p).map(function (n) { return fetchSample(c, n); }));
   }
 
   function stepSemis(L, k) {
@@ -46,13 +84,36 @@ function makeSfx(env) {
     return 12 * oct + PENTA[idx];
   }
 
-  function layerEnd(L) {
-    return (L.start || 0) + (Math.max(1, L.rep || 1) - 1) * (L.repGap || 0) + L.attack + L.decay;
+  /* Event times for a layer's repeats. Without jitter they are evenly spaced and identical;
+     with jitter the gaps become random (Poisson-like at 1) and loudness varies, so crackles,
+     bubbles and debris stop sounding mechanical. pitchJitter (semitones) varies pitch and cutoff. */
+  function events(p, L, li) {
+    var n = Math.max(1, L.rep || 1), out = [], t = L.start || 0, k;
+    var jit = Math.max(0, Math.min(1, L.jitter || 0)), pj = L.pitchJitter || 0;
+    var r = (jit || pj) ? rng(((p.seed || 1) * 977 + li * 7919 + 13) | 0) : null;
+    for (k = 0; k < n; k++) {
+      var amp = 1, ratio = 1;
+      if (r) {
+        if (jit) amp = (1 - jit) + jit * Math.pow(r(), 2);
+        if (pj) ratio = Math.pow(2, (r() * 2 - 1) * pj / 12);
+      }
+      if (L.repGain > 0 && L.repGain !== 1) amp *= Math.pow(L.repGain, L.repGain > 1 ? k - (n - 1) : k);
+      out.push({ t: t, amp: amp, ratio: ratio });
+      var gap = (L.repGap || 0) * (L.repAccel > 0 ? Math.pow(L.repAccel, k) : 1);
+      if (jit) gap *= (1 - jit) + jit * Math.min(4, -Math.log(1 - r() * 0.999));
+      t += gap;
+    }
+    return out;
+  }
+
+  function layerEnd(p, L, li) {
+    var ev = events(p, L, li);
+    return ev[ev.length - 1].t + L.attack + (L.hold || 0) + L.decay;
   }
 
   function duration(p) {
     var end = 0, i;
-    for (i = 0; i < p.layers.length; i++) end = Math.max(end, layerEnd(p.layers[i]));
+    for (i = 0; i < p.layers.length; i++) end = Math.max(end, layerEnd(p, p.layers[i], i));
     var tail = 0;
     if (p.reverb > 0) tail = 0.6 + 1.9 * Math.min(1, p.reverb * 2);
     if (p.echo > 0) tail = Math.max(tail, p.echoTime * Math.log(0.001) / Math.log(Math.min(0.95, p.echo)));
@@ -66,7 +127,7 @@ function makeSfx(env) {
   }
 
   function stringBuffer(c, f, L, k) {
-    var sr = c.sampleRate, len = Math.ceil(sr * (L.attack + L.decay + 0.05));
+    var sr = c.sampleRate, len = Math.ceil(sr * (L.attack + (L.hold || 0) + L.decay + 0.05));
     var bright = L.bright == null ? 0.5 : Math.max(0, Math.min(1, L.bright));
     var blend = 0.5 * (1 - bright), w = 2 * Math.PI * f / sr;
     var pd = function (b) { return Math.atan2(b * Math.sin(w), (1 - b) + b * Math.cos(w)) / w; };
@@ -84,25 +145,39 @@ function makeSfx(env) {
     return buf;
   }
 
-  function voice(c, A, out, L, t, k) {
-    var ratio = Math.pow(2, stepSemis(L, k) / 12);
+  function voice(c, A, out, L, t, k, ev) {
+    var vj = ev ? ev.ratio : 1, va = ev ? ev.amp : 1;
+    var ratio = Math.pow(2, stepSemis(L, k) / 12) * vj;
     var f0 = Math.max(1, L.freq * ratio), f1 = Math.max(1, (L.freqEnd || L.freq) * ratio);
-    var tEnd = t + L.attack + L.decay, stopAt = tEnd + 0.05;
+    var hold = Math.max(0, L.hold || 0), tEnd = t + L.attack + hold + L.decay, stopAt = tEnd + 0.05;
     var tSlide = L.slideTime > 0 ? Math.min(tEnd, t + L.slideTime) : tEnd;
     var tSweep = L.sweepTime > 0 ? Math.min(tEnd, t + L.sweepTime) : tEnd;
     var g = c.createGain();
     g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(L.vol, t + L.attack);
+    g.gain.linearRampToValueAtTime(Math.max(0.0002, L.vol * va), t + L.attack);
+    if (hold) g.gain.setValueAtTime(Math.max(0.0002, L.vol * va), t + L.attack + hold);
     g.gain.exponentialRampToValueAtTime(0.0001, tEnd);
     g.connect(out);
-    var dst = g;
+    var dst = g, amp = g;
+    if (L.trem > 0) {
+      var tg = c.createGain(), tl = c.createOscillator(), td = c.createGain(), depth = Math.min(1, L.trem);
+      tg.gain.value = 1 - depth / 2; td.gain.value = depth / 2;
+      tl.frequency.value = L.tremRate || 6;
+      tl.connect(td); td.connect(tg.gain); tg.connect(g);
+      tl.start(t); tl.stop(stopAt);
+      dst = amp = tg;
+    }
     if (L.filter && L.filter !== 'none') {
       var f = c.createBiquadFilter();
       f.type = L.filter;
       f.Q.value = L.q || 1;
-      f.frequency.setValueAtTime(Math.max(20, L.cutoff), t);
-      if (L.cutoffEnd && L.cutoffEnd !== L.cutoff) f.frequency.exponentialRampToValueAtTime(Math.max(20, L.cutoffEnd), tSweep);
-      f.connect(g);
+      var cf = function (x) { return Math.min(20000, Math.max(20, x * vj)); };
+      f.frequency.setValueAtTime(cf(L.cutoff), t);
+      if (L.cutoffPeak > 0) {
+        f.frequency.exponentialRampToValueAtTime(cf(L.cutoffPeak), t + Math.max(0.002, L.attack));
+        f.frequency.exponentialRampToValueAtTime(cf(L.cutoffEnd || L.cutoff), tEnd);
+      } else if (L.cutoffEnd && L.cutoffEnd !== L.cutoff) f.frequency.exponentialRampToValueAtTime(cf(L.cutoffEnd), tSweep);
+      f.connect(amp);
       dst = f;
     }
     var lfoGain = null;
@@ -116,10 +191,24 @@ function makeSfx(env) {
     }
     if (L.type === 'noise') {
       var s = c.createBufferSource();
-      s.buffer = A.noise; s.loop = true;
+      s.buffer = L.color === 'pink' ? A.pink : L.color === 'brown' ? A.brown : A.noise; s.loop = true;
       if (lfoGain && s.detune) lfoGain.connect(s.detune);
       s.connect(dst);
       s.start(t, (k * 0.37) % 1.5); s.stop(stopAt);
+      return;
+    }
+    if (L.type === 'sample') {
+      var sb = samples[L.sample];
+      if (!sb) return;
+      var sp = c.createBufferSource(), semi = stepSemis(L, k);
+      var p0 = L.pitch || 0, p1 = L.pitchEnd == null ? p0 : L.pitchEnd;
+      var r0 = Math.pow(2, (p0 + semi) / 12) * vj, r1 = Math.pow(2, (p1 + semi) / 12) * vj;
+      sp.buffer = sb;
+      sp.playbackRate.setValueAtTime(r0, t);
+      if (r1 !== r0) sp.playbackRate.exponentialRampToValueAtTime(r1, tSlide);
+      if (lfoGain && sp.detune) lfoGain.connect(sp.detune);
+      sp.connect(dst);
+      sp.start(t, Math.max(0, L.offset || 0)); sp.stop(stopAt);
       return;
     }
     if (L.type === 'string') {
@@ -140,14 +229,17 @@ function makeSfx(env) {
       pg.gain.setValueAtTime(parts[i][1] / Math.sqrt(nv), t);
       if (L.type === 'bell' && (i > 0 || parts[i][2] != null)) {
         var dm = parts[i][2] != null ? Math.min(1, parts[i][2]) : 1 / Math.pow(r, 0.5);
-        pg.gain.exponentialRampToValueAtTime(0.0001, t + L.attack + Math.max(0.01, L.decay * dm));
+        pg.gain.exponentialRampToValueAtTime(0.0001, t + L.attack + hold + Math.max(0.01, L.decay * dm));
       }
       pg.connect(dst);
       for (var u = 0; u < nv; u++) {
         var o = c.createOscillator();
         o.type = (L.type === 'bell' || i > 0) ? 'sine' : (L.wave || 'sine');
         o.frequency.setValueAtTime(f0 * r, t);
-        if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1 * r, tSlide);
+        if (L.freqPeak > 0) {
+          o.frequency.exponentialRampToValueAtTime(L.freqPeak * ratio * r, t + Math.max(0.002, L.attack));
+          o.frequency.exponentialRampToValueAtTime(f1 * r, tEnd);
+        } else if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1 * r, tSlide);
         if (nv > 1) o.detune.value = spread * (u / (nv - 1) - 0.5) * 2;
         if (lfoGain) lfoGain.connect(o.detune);
         if (L.type === 'fm' && L.fmIndex > 0) {
@@ -200,7 +292,8 @@ function makeSfx(env) {
     }
     for (i = 0; i < p.layers.length; i++) {
       var L = p.layers[i], n = Math.max(1, L.rep || 1);
-      for (k = 0; k < n; k++) voice(c, A, pre, L, t0 + (L.start || 0) + k * (L.repGap || 0), k);
+      var ev = events(p, L, i);
+      for (k = 0; k < n; k++) voice(c, A, pre, L, t0 + ev[k].t, k, ev[k]);
     }
     return t0 + duration(p);
   }
@@ -214,14 +307,30 @@ function makeSfx(env) {
         ctx = new AC();
       }
       if (ctx.state === 'suspended') ctx.resume();
-      build(ctx, ctx.destination, p, ctx.currentTime + 0.02);
+      var go = function () { build(ctx, ctx.destination, p, ctx.currentTime + 0.02); };
+      var names = sampleNames(p), ready = true, i;
+      for (i = 0; i < names.length; i++) if (!samples[names[i]]) ready = false;
+      if (ready) { go(); return Promise.resolve(); }
+      return ensure(ctx, p).then(go);
     },
+    preload: function (p) {
+      if (!ctx) {
+        var AC = W.AudioContext || W.webkitAudioContext;
+        if (!AC) return Promise.resolve();
+        ctx = new AC();
+      }
+      return ensure(ctx, p);
+    },
+    setSampleBase: function (url) { sampleBase = url; },
+    sampleNames: sampleNames,
     render: function (p, sampleRate) {
       var sr = sampleRate || 44100;
       var OC = W.OfflineAudioContext || W.webkitOfflineAudioContext;
       var oc = new OC(1, Math.ceil(sr * duration(p)), sr);
-      build(oc, oc.destination, p, 0);
-      return oc.startRendering();
+      return ensure(oc, p).then(function () {
+        build(oc, oc.destination, p, 0);
+        return oc.startRendering();
+      });
     }
   };
 }

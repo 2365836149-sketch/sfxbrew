@@ -7,6 +7,9 @@
 (function () {
   'use strict';
 
+  /* 在我们自己的网站上，录音素材从同源的 /samples/ 加载（本地预览也能用）；导出给别人的代码默认从 sfxbrew.com 加载 */
+  if (!window.SFXBREW_SAMPLE_BASE) window.SFXBREW_SAMPLE_BASE = '/samples/';
+
   function trimLength(d, sr) {
     let end = d.length - 1;
     while (end > 0 && Math.abs(d[end]) < 0.0008) end--;
@@ -73,6 +76,9 @@
     let out = '// Sound effects made with SFX Brew — https://sfxbrew.com (free for commercial use)\n' +
       '// Call a play function after a user click/tap (browsers block audio before the first gesture).\n' +
       'const sfxBrew = (' + engine + ')();\n';
+    const usesSamples = sounds.some(s => (s.patch.layers || []).some(l => l.type === 'sample'));
+    if (usesSamples) out += '// Some of these sounds play short CC0 recordings, loaded on first use from https://sfxbrew.com/samples/ (credits: https://sfxbrew.com/samples/CREDITS.md).\n' +
+      '// To self-host, copy the .mp3 files next to your game and call sfxBrew.setSampleBase("./sfx/"). Call sfxBrew.preload(SOUND_X) early to avoid a delay on the first play.\n';
     sounds.forEach(s => {
       const id = s.name.replace(/[^A-Za-z0-9]+(.)?/g, (m, c) => c ? c.toUpperCase() : '').replace(/^[^A-Za-z_]/, '_$&');
       const fn = 'play' + id.charAt(0).toUpperCase() + id.slice(1);

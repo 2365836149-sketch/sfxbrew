@@ -28,6 +28,7 @@
     "node/lib.js",
     "node/cli.js",
     "node/mcp.js",
+    "samples/",
     "README.md",
     "LICENSE"
   ],

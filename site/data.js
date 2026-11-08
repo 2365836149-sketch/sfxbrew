@@ -57,15 +57,15 @@ const SOUNDS = {
     slug: 'erhu-sound-effect', related: ['flute', 'guqin', 'pipa', 'chime'],
     en: {
       name: 'Erhu', title: 'Free Erhu Sound Effects',
-      intro: 'Single bowed notes of the erhu, the two-string Chinese fiddle, with its nasal, voice-like tone, wide vibrato and the occasional slide into the note. It carries emotion better than any other sound here.',
+      intro: 'Single notes of the erhu, the two-string Chinese fiddle, from real recordings: the nasal, voice-like tone and the player\'s own vibrato. Each variation is moved to a nearby note of the pentatonic scale, and some slide into or out of the note.',
       uses: ['Sad or emotional story beats', 'Character themes and introductions', 'Game over or defeat screens', 'Dialogue with an Eastern setting'],
-      tip: 'A slower vibrato sounds more sorrowful; a faster one sounds more agitated.'
+      tip: 'Generate a few and play them one after another for a short, sad phrase.'
     },
     zh: {
       name: '二胡', title: '免费二胡音效',
-      intro: '二胡单音：带鼻音、像人声的音色，揉弦的颤音，有时还会滑进这个音。在所有音效里最能表达情绪。',
+      intro: '二胡单音，来自真实录音：带鼻音、像人声的音色和演奏者本身的揉弦。每个变体移到五声音阶上附近的某个音，有的会滑进或滑出这个音。',
       uses: ['悲伤、感人的剧情', '角色主题、角色登场', '游戏失败、结束画面', '东方背景的对话'],
-      tip: '颤音慢一点更哀伤，快一点更激动。'
+      tip: '多生成几个连着播放，就是一小段哀伤的乐句。'
     }
   },
   woodfish: {
@@ -84,18 +84,18 @@ const SOUNDS = {
     }
   },
   drum: {
-    slug: 'war-drum-sound-effect', related: ['gong', 'thunder', 'hit', 'pipa'],
+    slug: 'war-drum-sound-effect', related: ['gong', 'thunder', 'lightning', 'pipa'],
     en: {
-      name: 'War Drum', title: 'Free War Drum & Chinese Drum Sound Effects',
-      intro: 'Chinese drum hits, from a small tanggu to a large war drum: a deep body that drops in pitch, the slap of the skin and a short overtone. Some variations hit twice. Loud and physical, built for moments that should feel like a battle is starting.',
-      uses: ['Battle start and army marches', 'Turn changes in strategy games', 'Heavy impacts and stomps', 'Countdowns before a fight'],
-      tip: 'Play two large hits a beat apart, then a gong, for a classic battle opening.'
+      name: 'War Drum', title: 'Free War Drum Sound Effects',
+      intro: 'Rolling Chinese war drums built from real recordings of a dagu, the big Chinese bass drum: heavy center strokes, ringing edge strokes and rim shots, arranged into a steady march, a thundering roll that keeps growing, or a call to battle that speeds up until it hammers. Every hit rings for seconds and overlaps the next, in a large hall.',
+      uses: ['Battle start and army charges', 'Sieges and boss phases', 'Rising tension before a duel', 'Victory or rally moments'],
+      tip: 'End a build-up with a gong or a Lightning strike for a dramatic battle opening.'
     },
     zh: {
-      name: '战鼓', title: '免费战鼓 / 堂鼓音效',
-      intro: '中国鼓的击打声，从小堂鼓到大战鼓：低沉、音高往下落的鼓腔，鼓皮的拍击声，加一个短短的泛音。有的变体会"咚咚"敲两下。响亮、有分量，适合"要开打了"的时刻。',
-      uses: ['战斗开始、行军', '策略游戏的回合切换', '重击、跺地', '开战前的倒计时'],
-      tip: '两下大鼓隔一拍，再接一声锣，就是经典的开战。'
+      name: '战鼓', title: '免费战鼓音效',
+      intro: '用中国大鼓（dagu）的真实录音编排的擂鼓：鼓心的重击、鼓边的回响、鼓框的脆响，组成匀速的行军鼓、越滚越响的擂鼓，或者越敲越快、越敲越猛的催阵鼓。每一下都余音数秒、前后交叠，在大厅里回荡。',
+      uses: ['开战、冲锋', '攻城、Boss 换阶段', '对决前的紧张蓄势', '胜利、鼓舞士气'],
+      tip: '催阵鼓的最后接一声锣或一道霹雳，就是很有气势的开战。'
     }
   },
   bell: {
@@ -117,13 +117,13 @@ const SOUNDS = {
     slug: 'gong-sound-effect', related: ['bell', 'drum', 'thunder', 'breakthrough'],
     en: {
       name: 'Gong', title: 'Free Gong Sound Effects',
-      intro: 'Two kinds of gong. The large tam-tam has dozens of clashing overtones and a shimmer that swells after the hit. The Chinese opera gong is smaller, and its pitch bends noticeably downward or upward right after it is struck, the sound behind every Peking opera entrance.',
+      intro: 'Built from real recordings of a struck gong and a gong roll. Most variations are a single heavy hit, pitched down for a huge tam-tam or up for a smaller gong. Others imitate the Chinese opera gong, whose pitch bends down or up right after the hit, and a few are a roll that swells to a crash.',
       uses: ['Battle start and round announcements', 'Boss entrances', 'Comedic or dramatic beats (opera gong)', 'Martial arts tournament scenes'],
       tip: 'Opera gongs with a rising bend sound playful; falling ones sound like a dramatic entrance.'
     },
     zh: {
       name: '铜锣', title: '免费铜锣音效',
-      intro: '两种锣：大锣（tam-tam），几十个互相打架的泛音，敲完后还会"涨"起一层嗡鸣；京剧锣更小，敲完音高会明显往下掉或往上翘，京剧里角色登场就是这个声音。',
+      intro: '用真实的锣声录音和滚锣录音做成。大多数变体是一记重锣：降调就是巨大的大锣，升调就是小一些的锣；有的模仿京剧锣，敲完音高往下掉或往上翘；少数是越滚越响、最后炸开的滚锣。',
       uses: ['战斗开始、回合宣告', 'Boss 登场', '搞笑或戏剧性的节点（京剧锣）', '比武大会场景'],
       tip: '音高往上翘的京剧锣听着俏皮，往下掉的像隆重登场。'
     }
@@ -144,18 +144,33 @@ const SOUNDS = {
     }
   },
   thunder: {
-    slug: 'thunder-sound-effect', related: ['explosion', 'gong', 'drum', 'breakthrough'],
+    slug: 'thunder-sound-effect', related: ['lightning', 'explosion', 'gong', 'drum'],
     en: {
-      name: 'Thunder', title: 'Free Thunder & Lightning Sound Effects',
-      intro: 'A loud crack followed by a rolling rumble. In xianxia games this is the heavenly tribulation; elsewhere it is simply lightning hitting close by.',
-      uses: ['Lightning spells and strikes', 'Heavenly tribulation in cultivation games', 'Storm ambience accents', 'Dramatic reveals'],
-      tip: 'Delay the rumble layer by a fraction of a second to make the storm feel further away.'
+      name: 'Thunder', title: 'Free Thunder Rumble Sound Effects',
+      intro: 'Brewing, rolling thunder: rumbles arrive at random moments from different distances, the way one thunderclap reaches you along many paths, over a low, wobbling bed. Some variations are close with a few cracks up front, others are distant rumble only. For the strike itself, use Lightning.',
+      uses: ['Heavenly tribulation building up in cultivation games', 'Storm ambience and weather', 'Ominous moments before a boss', 'Combine with Lightning for a full strike'],
+      tip: 'Play Lightning first and this a moment later to get a strike followed by its echoing rumble.'
     },
     zh: {
-      name: '天雷', title: '免费雷声 / 天劫音效',
-      intro: '一声炸响，接着滚滚的闷雷。在修仙游戏里就是渡劫的天雷，在别的游戏里就是一道近处劈下来的闪电。',
-      uses: ['雷系法术、雷击', '修仙游戏的渡劫', '暴风雨场景的点缀', '戏剧性的揭晓时刻'],
-      tip: '把闷雷那一层延迟零点几秒，雷就像是在远处。'
+      name: '天雷', title: '免费雷声（滚雷）音效',
+      intro: '酝酿中的滚滚雷声：一声雷经过远近不同的路径传到耳边，所以闷雷在随机时刻一阵阵滚来，底下垫着一层摇晃的超低频。有的变体在近处、开头有几声炸裂，有的只是远处的闷雷。闪电劈下来的那一下，请用"霹雳"。',
+      uses: ['修仙游戏里天劫的酝酿', '暴风雨、天气氛围', 'Boss 登场前的不祥预兆', '和"霹雳"一起用，就是完整的雷击'],
+      tip: '先播"霹雳"，稍后接这个，就是一道闪电劈下、雷声滚滚而去。'
+    }
+  },
+  lightning: {
+    slug: 'lightning-strike-sound-effect', related: ['thunder', 'explosion', 'spell', 'drum'],
+    en: {
+      name: 'Lightning', title: 'Free Lightning Strike Sound Effects',
+      intro: 'Real recordings of lightning striking close by: the deafening crack and the roar that follows, each variation pitched slightly up or down so it sounds bigger, smaller or further away. Fast and violent where Thunder is slow and brooding.',
+      uses: ['Lightning spells and skills', 'The moment a heavenly tribulation strikes', 'Electric traps and storms', 'Dramatic cuts and reveals'],
+      tip: 'Layer it over a Thunder rumble for the full storm, or over an Explosion for a lightning-powered blast.'
+    },
+    zh: {
+      name: '霹雳', title: '免费闪电霹雳音效',
+      intro: '近距离雷击的真实录音：震耳欲聋的炸裂和紧随其后的轰鸣。每个变体的音高略有升降，听起来更大、更小或更远。和缓慢酝酿的"天雷"相反，它又快又猛。',
+      uses: ['雷系法术、技能', '天劫劈下的瞬间', '电击陷阱、暴风雨', '戏剧性的转场和揭晓'],
+      tip: '叠在"天雷"上就是完整的暴风雨；叠在"爆炸"上就是雷电加持的爆炸。'
     }
   },
   breakthrough: {
@@ -354,18 +369,18 @@ const SOUNDS = {
     }
   },
   explosion: {
-    slug: 'explosion-sound-effect', related: ['hit', 'thunder', 'drum', 'laser'],
+    slug: 'explosion-sound-effect', related: ['hit', 'lightning', 'thunder', 'drum'],
     en: {
       name: 'Explosion', title: 'Free Explosion Sound Effects',
-      intro: 'Big booms with a sub-bass drop, a long rumble and scattered debris crackles. Loud on purpose: mix them down a little if your game has many at once.',
-      uses: ['Bombs, grenades and barrels', 'Destroying enemies or buildings', 'Spell impacts', 'Cinematic hits in trailers'],
-      tip: 'Shorten the rumble layer for small pops; lengthen it for distant artillery.'
+      intro: 'Violent blasts: a sharp shockwave, a sub-bass punch, a saturated body that stays at full force before it fades, a mid-range roar, debris raining down at random and a wobbling aftershock. Some variations are a chain of two or three explosions.',
+      uses: ['Bombs, grenades and barrels', 'Destroying enemies or buildings', 'Big spell impacts', 'Cinematic hits in trailers'],
+      tip: 'These are loud on purpose; turn them down a little if your game has many at once.'
     },
     zh: {
       name: '爆炸', title: '免费爆炸音效',
-      intro: '大爆炸：超低频往下沉，长长的轰鸣，再加四散的碎片噼啪声。故意做得很响，游戏里同时爆炸很多的话，把音量压低一点。',
-      uses: ['炸弹、手雷、油桶', '摧毁敌人、建筑', '法术命中', '预告片里的重音'],
-      tip: '轰鸣层缩短就是小爆竹，拉长就是远处的炮火。'
+      intro: '剧烈的爆炸：尖锐的冲击波，超低频的重拳，带失真撕裂感、在最响处停留片刻的主体轰鸣，中频的"轰"，随机落下的碎片，最后是摇晃的余震。有的变体是两三声连环爆炸。',
+      uses: ['炸弹、手雷、油桶', '摧毁敌人、建筑', '大招命中', '预告片里的重音'],
+      tip: '故意做得很响，游戏里同时爆炸很多的话，把音量压低一点。'
     }
   },
   laser: {
@@ -433,7 +448,7 @@ const SOUNDS = {
 /* 主题包：每个包由若干预设组成，每个预设取 count 个变体 */
 const PACKS = {
   'xianxia-game-sound-pack': {
-    items: [['swordQi', 3], ['guqin', 4], ['pipa', 2], ['erhu', 2], ['flute', 2], ['bell', 2], ['gong', 2], ['woodfish', 2], ['drum', 2], ['spell', 2], ['thunder', 2], ['breakthrough', 2], ['talisman', 2], ['alchemy', 2], ['chime', 2], ['qiGather', 2], ['coin', 1], ['click', 1], ['confirm', 1], ['error', 1], ['hit', 2], ['levelUp', 1]],
+    items: [['swordQi', 3], ['guqin', 4], ['pipa', 2], ['erhu', 2], ['flute', 2], ['bell', 2], ['gong', 2], ['woodfish', 2], ['drum', 2], ['spell', 2], ['thunder', 2], ['lightning', 2], ['breakthrough', 2], ['talisman', 2], ['alchemy', 2], ['chime', 2], ['qiGather', 2], ['coin', 1], ['click', 1], ['confirm', 1], ['error', 1], ['hit', 2], ['levelUp', 1]],
     en: {
       name: 'Xianxia & Wuxia Game Sound Pack', title: 'Free Xianxia & Wuxia Game Sound Pack',
       intro: 'Everything a cultivation or martial-arts game needs to sound Eastern: guqin, pipa, erhu and bamboo flute, temple bells, gongs, wooden fish and war drums, sword qi, talismans, potions, thunder tribulations and breakthroughs, plus the everyday UI sounds to go with them. All free for commercial use.'
@@ -467,7 +482,7 @@ const UI = {
     goodFor: 'Good for', tipH: 'Tweaking tip', tipTail: ' Open any variant with Edit to change it with sliders.',
     agentH: 'Generate them from code or an AI agent', agentP1: 'The same sounds are available from the command line:',
     agentP2: (name) => 'Or let Claude Code, Cursor or any MCP client add them to your project, then ask for "' + name.toLowerCase() + ' sounds":',
-    licenseH: 'License', licenseP: 'Free for commercial and non-commercial use. No attribution, no sign-up. The sounds are synthesized from scratch, not recorded, so there are no third-party rights attached.',
+    licenseH: 'License', licenseP: 'Free for commercial and non-commercial use. No attribution, no sign-up. Most sounds are synthesized from scratch; the few that use recordings use CC0 (public domain) recordings, so there are no third-party rights attached.',
     related: 'Related sounds', morePacks: 'More packs', allCats: 'All sound categories', edit: 'Edit', more: 'More', play: 'Play',
     packSounds: n => n + ' sounds', soundsWord: 'sounds',
     libTitle: 'Free Game Sound Effects Library', libLead: (k, n) => k + ' kinds of sound effects for games, each with ' + n + ' ready-made variations. Press play to listen, download WAV files, or copy a JavaScript snippet that plays them with no audio files at all. Everything is synthesized in your browser and free for commercial use.',
@@ -477,7 +492,7 @@ const UI = {
     soundMetaDesc: (first, n) => first + ' ' + n + ' free variations to play, download as WAV or copy as JavaScript. Free for commercial use.',
     packMetaTitle: (t, n) => t + ' — ' + n + ' Royalty-Free Sounds | SFX Brew',
     packMetaDesc: (first, n) => first + ' ' + n + ' sounds, free download as WAV or JavaScript.',
-    footer: 'Every sound on this site is synthesized in your browser and free for commercial use, no attribution required.',
+    footer: 'Every sound on this site is made in your browser, from synthesis or a few CC0 recordings, and free for commercial use, no attribution required.', credits: 'Recording credits',
     js: { rendering: (i, n) => 'Rendering ' + i + ' / ' + n + '…', downloaded: 'Downloaded ✓', copied: 'Copied — paste it into your game ✓', copyFailed: 'Copy failed' }
   },
   zh: {
@@ -489,7 +504,7 @@ const UI = {
     goodFor: '适用场景', tipH: '调音小技巧', tipTail: '点任意一个变体的"编辑"，就能用滑杆细调。',
     agentH: '用代码或 AI agent 生成', agentP1: '同样的音效也可以用命令行生成：',
     agentP2: (name) => '或者让 Claude Code、Cursor 等支持 MCP 的工具直接加进你的项目，然后跟它说"加几个' + name + '音效"：',
-    licenseH: '授权', licenseP: '可免费用于商业和非商业用途，不需要署名，不需要注册。所有声音都是从零合成的，不是录音，不涉及任何第三方版权。',
+    licenseH: '授权', licenseP: '可免费用于商业和非商业用途，不需要署名，不需要注册。大部分声音是从零合成的；少数用到录音的，用的都是 CC0（公有领域）录音，不涉及任何第三方版权。',
     related: '相关音效', morePacks: '更多音效包', allCats: '全部音效分类', edit: '编辑', more: '更多', play: '播放',
     packSounds: n => n + ' 个音效', soundsWord: '个音效',
     libTitle: '免费游戏音效库', libLead: (k, n) => '共 ' + k + ' 类游戏音效，每类 ' + n + ' 个现成的变体。点播放试听，下载 WAV，或者复制一段 JavaScript，不用任何音频文件就能在游戏里播放。全部在你的浏览器里实时合成，可以免费商用。',
@@ -499,7 +514,7 @@ const UI = {
     soundMetaDesc: (first, n) => first + n + ' 个免费变体，可试听、下载 WAV 或复制 JavaScript，免费商用。',
     packMetaTitle: (t, n) => t + '：' + n + ' 个免费可商用音效 | SFX Brew',
     packMetaDesc: (first, n) => first + '共 ' + n + ' 个音效，免费下载 WAV 或 JavaScript。',
-    footer: '本站所有声音都在你的浏览器里实时合成，可免费商用，不需要署名。',
+    footer: '本站所有声音都在你的浏览器里实时生成（合成或少量 CC0 录音素材），可免费商用，不需要署名。', credits: '录音素材来源',
     js: { rendering: (i, n) => '渲染中 ' + i + ' / ' + n + '…', downloaded: '已下载 ✓', copied: '已复制，粘贴到游戏里就能用 ✓', copyFailed: '复制失败' }
   }
 };
