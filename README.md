@@ -12,7 +12,7 @@ Procedural game sound effects for humans **and AI coding agents**. Eastern (wuxi
 Claude Code:
 
 ```bash
-claude mcp add sfxbrew -- npx -y -p sfxbrew sfxbrew-mcp
+claude mcp add sfxbrew -- npx -y sfxbrew mcp
 ```
 
 Other MCP clients (Cursor, Windsurf, Claude Desktop …):
@@ -20,7 +20,7 @@ Other MCP clients (Cursor, Windsurf, Claude Desktop …):
 ```json
 {
   "mcpServers": {
-    "sfxbrew": { "command": "npx", "args": ["-y", "-p", "sfxbrew", "sfxbrew-mcp"] }
+    "sfxbrew": { "command": "npx", "args": ["-y", "sfxbrew", "mcp"] }
   }
 }
 ```

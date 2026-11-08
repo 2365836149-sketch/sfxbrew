@@ -271,3 +271,9 @@ a.card-name:hover { text-decoration: underline; }
 .prose p { margin: 0 0 8px; }
 /* 广告位（只有 build.js 里开了 ADSENSE 才会出现） */
 .ad-slot { margin: 24px 0 8px; min-height: 90px; }
+
+/* 首页常见问题 */
+.faq { margin: 28px 0 8px; }
+.faq details { border-bottom: 1px solid var(--line); padding: 8px 0; }
+.faq summary { cursor: pointer; font-weight: 600; }
+.faq details p { margin: 6px 0 2px; color: var(--ink-2); line-height: 1.65; }
