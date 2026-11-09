@@ -283,9 +283,14 @@ a.card-name:hover { text-decoration: underline; }
 
 /* ---------------- 实验室 · 文字生成音效（/lab/sfx/） ---------------- */
 .ts { max-width: 760px; margin: 0 auto; padding: 20px 16px 32px; }
-.ts-switch { display: flex; gap: 4px; margin-bottom: 18px; font-size: 13px; }
-.ts-switch a, .ts-switch span { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line); color: var(--ink-2); text-decoration: none; }
-.ts-switch .on { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+/* 实验室切换栏（编曲工作室 / 文字生成音效 / 文字作曲），两个实验室页面共用 */
+.lab-nav { display: flex; gap: 4px; padding: 8px 16px; border-bottom: 1px solid var(--line); background: var(--paper); font-size: 13px; overflow-x: auto; scrollbar-width: none; }
+.lab-nav::-webkit-scrollbar { display: none; }
+.lab-tab { flex: none; padding: 4px 12px; border-radius: 999px; border: 1px solid transparent; color: var(--ink-2); text-decoration: none; white-space: nowrap; }
+a.lab-tab:hover { border-color: var(--line-2); color: var(--ink); }
+.lab-tab.on { border-color: var(--accent); color: var(--accent); font-weight: 600; background: var(--bg); }
+.lab-tab.off { opacity: .55; cursor: default; }
+.lab-tab i { font-style: normal; font-size: 11px; margin-left: 2px; padding: 0 5px; border-radius: 999px; background: var(--fill); color: var(--ink-2); }
 .ts h1 { font-family: var(--serif); font-size: 28px; margin: 0 0 6px; }
 .ts-beta { font-family: var(--font); font-size: 12px; font-weight: 600; vertical-align: middle; padding: 2px 8px; border-radius: 99px; background: var(--seal); color: var(--seal-ink); }
 .ts-sub { color: var(--ink-2); margin: 0 0 18px; }

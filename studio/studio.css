@@ -28,7 +28,6 @@
 /* ---------- 顶栏 ---------- */
 .st-top { min-width: 0; display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-bottom: 1px solid var(--st-line-2); background: var(--st-head); min-height: 46px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
 .st-top::-webkit-scrollbar { display: none; }
-.st-exp { height: 28px; border: 1px solid var(--st-line-2); border-radius: 6px; background: var(--st-bg); padding: 0 6px; font-weight: 600; color: var(--accent); }
 .st-title { width: 150px; min-width: 90px; border: 1px solid transparent; background: transparent; border-radius: 6px; padding: 4px 6px; font-weight: 600; }
 .st-title:hover, .st-title:focus { border-color: var(--st-line-2); background: var(--st-bg); outline: none; }
 .st-group { display: flex; align-items: center; gap: 4px; }

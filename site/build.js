@@ -407,6 +407,16 @@ ${cat ? '' : `<details class="more-info"><summary>${esc(u.aboutLib)}</summary><p
   };
 }
 
+/* ---------------- 实验室切换栏（编曲工作室 / 文字生成音效 / 文字作曲，两个实验室页面共用） ---------------- */
+function labNav(lang, active) {
+  const st = STUDIO[lang], t = TEXTSFX[lang];
+  const tab = (key, href, label, badge) => (key === active
+    ? '<span class="lab-tab on" aria-current="page">' : (href ? '<a class="lab-tab" href="' + href + '">' : '<span class="lab-tab off" aria-disabled="true">')) +
+    esc(label) + (badge ? ' <i>' + esc(badge) + '</i>' : '') + (key !== active && href ? '</a>' : '</span>');
+  return '<nav class="lab-nav" aria-label="' + esc(UI[lang].navLab) + '">' +
+    tab('studio', PREFIX[lang] + 'lab/', st.expStudio) + tab('sfx', textSfxUrl(lang), t.h, t.beta) + tab('music', null, st.expTextShort, st.soon) + '</nav>';
+}
+
 /* ---------------- 配乐页 = 编曲工作室（满屏工具，说明文字在下面） ---------------- */
 function labPage(lang) {
   const st = STUDIO[lang], u = UI[lang], m = MUSIC[lang];
@@ -449,9 +459,9 @@ ${alt('zh', paths.zh)}
 </head>
 <body class="st-page">
 ${siteBar(lang, 'lab', altPath)}
+${labNav(lang, 'studio')}
 <div class="st-app">
 <header class="st-top">
-  <select id="st-exp" class="st-exp" aria-label="${esc(u.navLab)}" onchange="if(this.value)location.href=this.value"><option value="" selected>${esc(st.expStudio)}</option><option value="${textSfxUrl(lang)}">${esc(st.expSfx)}</option><option disabled>${esc(st.expText)}</option></select>
   <input id="st-title" class="st-title" placeholder="${esc(st.untitled)}" spellcheck="false" aria-label="${esc(st.untitled)}">
   <div class="st-group">${btn('st-home', st.toStart, ICON.home)}${btn('st-play', st.play, ICON.play, 'st-playbtn')}${btn('st-loop', st.loop, ICON.loop)}${btn('st-metro', st.metronome, ICON.metro)}</div>
   <div class="st-lcd" aria-live="off"><b id="st-bar">1.1</b><span id="st-time">0:00.0</span></div>
@@ -553,8 +563,8 @@ ${headTags(lang, { title: t.title, description: t.metaDesc, urlPath, altPath })}
 </head>
 <body>
 ${siteBar(lang, 'lab', altPath)}
+${labNav(lang, 'sfx')}
 <main class="ts">
-  <div class="ts-switch"><a href="${PREFIX[lang]}lab/">${esc(st.expStudio)}</a><span class="on">${esc(st.expSfx)}</span></div>
   <h1>${esc(t.h)} <span class="ts-beta">${esc(t.beta)}</span></h1>
   <p class="ts-sub">${esc(t.sub)}</p>
   <p id="ts-offline" class="ts-offline" hidden>${esc(t.offline)}</p>

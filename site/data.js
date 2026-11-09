@@ -884,7 +884,7 @@ const STUDIO = {
   en: {
     title: 'SFX Brew Lab — Free Online Music Studio for Game Soundtracks',
     metaDesc: 'A free music studio in your browser for game soundtracks: multitrack timeline, piano roll, drum grid and mixer with guqin, pipa, bamboo flute, erhu, bells and war drums. Generate a full arrangement from a mood, edit every note, export WAV, loops and stems. Free for commercial use.',
-    untitled: 'Untitled song', expStudio: 'Music studio', expText: 'Text to music (coming soon)', expSfx: 'Text to sound effect (beta)', newProject: 'New', exportBtn: 'Export',
+    untitled: 'Untitled song', expStudio: 'Music studio', expText: 'Text to music (coming soon)', expSfx: 'Text to sound effect (beta)', expTextShort: 'Text to music', soon: 'soon', newProject: 'New', exportBtn: 'Export',
     play: 'Play', stop: 'Stop', toStart: 'Go to start', loop: 'Cycle (C)', metronome: 'Metronome (K)', undo: 'Undo (⌘Z)', redo: 'Redo (⇧⌘Z)',
     tempo: 'Tempo', key: 'Key', mode: 'Mode', scaleLock: 'Pentatonic lock', scaleLockTip: 'Only show notes of the pentatonic scale in the piano roll',
     zoomIn: 'Zoom in', zoomOut: 'Zoom out', addTrack: '+ Track', loopLane: 'Cycle', barsLane: 'Bar', secLane: 'Sections', chordLane: 'Chords',
@@ -918,7 +918,7 @@ const STUDIO = {
   zh: {
     title: 'SFX Brew 实验室：免费在线编曲工作室（游戏配乐 / 民乐音色）',
     metaDesc: '在浏览器里免费做游戏配乐的编曲工作室：多轨时间线、钢琴卷帘、鼓网格、混音，音色有古琴、琵琶、竹笛、二胡、钟磬和战鼓。按情绪一键生成完整编曲，每个音都能改，导出 WAV、无缝循环和分轨，免费商用。',
-    untitled: '未命名', expStudio: '编曲工作室', expText: '文字作曲（即将推出）', expSfx: '文字生成音效（测试版）', newProject: '新建', exportBtn: '导出',
+    untitled: '未命名', expStudio: '编曲工作室', expText: '文字作曲（即将推出）', expSfx: '文字生成音效（测试版）', expTextShort: '文字作曲', soon: '即将推出', newProject: '新建', exportBtn: '导出',
     play: '播放', stop: '停止', toStart: '回到开头', loop: '循环（C）', metronome: '节拍器（K）', undo: '撤销（⌘Z）', redo: '重做（⇧⌘Z）',
     tempo: '速度', key: '主音', mode: '调式', scaleLock: '五声锁定', scaleLockTip: '钢琴卷帘里只显示五声音阶内的音',
     zoomIn: '放大', zoomOut: '缩小', addTrack: '+ 音轨', loopLane: '循环', barsLane: '小节', secLane: '段落', chordLane: '和弦',
