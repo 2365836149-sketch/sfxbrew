@@ -13,11 +13,26 @@ const path = require('path');
 const makeSfx = require('../engine.js');
 const { PRESETS, mutate, SAMPLES } = require('../presets.js');
 const CATALOG = require('../catalog.js');
-const { OfflineAudioContext } = require('node-web-audio-api');
+
+/* 原生音频模块用到时才加载：精简版 Linux 没装 ALSA(libasound2) 时，
+   MCP 服务和 list_presets 照常可用，只有渲染 WAV 时才报出清楚的错误 */
+let _OAC;
+function loadAudio() {
+  if (_OAC) return _OAC;
+  try {
+    _OAC = require('node-web-audio-api').OfflineAudioContext;
+  } catch (e) {
+    const hint = /libasound/.test(e.message)
+      ? ' Install the ALSA runtime library first, e.g. "sudo apt-get install libasound2" (Debian/Ubuntu; "libasound2t64" on newer releases) or "apk add alsa-lib" (Alpine).'
+      : '';
+    throw new Error('Could not load the audio renderer (node-web-audio-api): ' + e.message.split('\n')[0] + '.' + hint);
+  }
+  return _OAC;
+}
 
 const SAMPLE_DIR = path.join(__dirname, '..', 'samples');
 const SFX = makeSfx({
-  OfflineAudioContext,
+  get OfflineAudioContext() { return loadAudio(); },
   loadSample: name => {
     if (!/^[a-z0-9-]+$/.test(name)) throw new Error('bad sample name ' + name);
     const b = fs.readFileSync(path.join(SAMPLE_DIR, name + '.mp3'));
