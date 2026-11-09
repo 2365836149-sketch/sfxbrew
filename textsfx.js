@@ -11,6 +11,15 @@
   const $ = s => document.querySelector(s);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const audio = new Audio();
+  /* 本次打开页面的一次性编号：只用来把这次访问里的操作串起来（不存、不跨访问） */
+  const SID = Array.from(crypto.getRandomValues(new Uint8Array(9)), b => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[b % 62]).join('') + 'x0';
+  const rid = url => (String(url).match(/([0-9a-f]{8}_[0-9a-z_]+)\.wav$/) || [])[1];
+  /* 上报播放/下载/选中/赞/踩（用来改进生成效果）；失败不影响使用 */
+  function track(gid, url, type) {
+    const result = rid(url);
+    if (!gid || !result) return;
+    try { fetch(API + '/api/event', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ gid, result, type, sid: SID }) }).catch(() => {}); } catch (e) {}
+  }
   let current = null, busy = false, captchaOn = true;
 
   /* ---------- 点数兑换码（Lemon Squeezy license key），只存在本浏览器 ---------- */
@@ -44,6 +53,7 @@
   async function post(path, body) {
     let r;
     try {
+      body.sid = SID; body.lang = D.lang;
       if (licenseKey) body.license_key = licenseKey; else body.turnstile = await token();
       r = await fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     } catch (e) {
@@ -157,14 +167,24 @@
         : T.synth;
       row.innerHTML = '<button class="play ts-play" aria-label="' + esc(T.play) + '">▶</button>' +
         '<div class="ts-info"><div class="ts-bar"><i style="width:' + Math.max(6, r.score / top * 100) + '%"></i></div><small>' + esc(T.match) + ' ' + Math.round(r.score * 100) + ' · ' + cr + '</small></div>' +
+        '<span class="ts-rate"><button class="ts-up" aria-label="' + esc(T.up) + '" title="' + esc(T.up) + '">👍</button><button class="ts-down" aria-label="' + esc(T.down) + '" title="' + esc(T.down) + '">👎</button></span>' +
         '<button class="btn ts-dl">' + esc(T.download) + '</button><button class="btn ts-pick">' + esc(T.pick) + '</button>';
-      row.querySelector('.ts-play').onclick = () => { audio.src = url; audio.play(); };
-      row.querySelector('.ts-dl').onclick = e => download(url, 'sfxbrew-' + slug(res.clap_text || label) + '-' + (i + 1) + '.wav', e.currentTarget);
+      row.querySelector('.ts-play').onclick = () => { audio.src = url; audio.play(); track(res.gid, r.url, 'play'); };
+      row.querySelector('.ts-dl').onclick = e => { download(url, 'sfxbrew-' + slug(res.clap_text || label) + '-' + (i + 1) + '.wav', e.currentTarget); track(res.gid, r.url, 'download'); };
+      ['up', 'down'].forEach(k => {
+        const b = row.querySelector('.ts-' + k);
+        b.onclick = () => {
+          if (row.dataset.rated) return;                 // 每个结果只能评一次
+          row.dataset.rated = k; b.classList.add('on'); row.querySelector('.ts-rate').classList.add('done');
+          track(res.gid, r.url, k);
+        };
+      });
       row.querySelector('.ts-pick').onclick = () => {
         if (busy) return;
         document.querySelectorAll('.ts-row.on').forEach(x => x.classList.remove('on'));
         row.classList.add('on');
-        current = { patch: r.patch, clap_text: res.clap_text };
+        current = { patch: r.patch, clap_text: res.clap_text, parent: rid(r.url) ? { gid: res.gid, result: rid(r.url) } : null };
+        track(res.gid, r.url, 'pick');
         showRefine(d);
       };
       d.append(row);
@@ -182,7 +202,7 @@
       const t = f.querySelector('input').value.trim(); if (!t || busy) return;
       const b = f.querySelector('button');
       setBusy(true, b, T.refining);
-      try { const res = await post('/api/refine', { text: t, patch: current.patch, clap_text: current.clap_text }); f.remove(); addTurn(t, res, true); }
+      try { const res = await post('/api/refine', { text: t, patch: current.patch, clap_text: current.clap_text, parent: current.parent }); f.remove(); addTurn(t, res, true); }
       catch (err) { errorBox(f.parentNode, err.message); }
       setBusy(false, b.isConnected ? b : null, T.refine);
     };

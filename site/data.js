@@ -963,7 +963,7 @@ const TEXTSFX = {
     examples: ['a heavy wooden door creaking open', 'slime jumping and landing', 'sci-fi door sliding open', 'footsteps in deep snow', '8-bit treasure chest opening', 'sword drawn from its sheath', 'distant temple bell at night'],
     refinePh: 'What should change? e.g. darker, shorter tail, more metallic', refine: 'Refine', refining: 'Refining…', pick: 'Refine this', download: 'WAV', play: 'Play',
     match: 'match', recFrom: 'Recordings', synth: 'Synthesized', you: 'You', refineOf: 'Change:',
-    notice: 'Beta: runs on a single machine and may be offline or slow. What you type is sent to DeepSeek (an AI service in China) to interpret it, and kept without your IP for 30 days to improve the tool.',
+    notice: 'Beta: runs on a single machine and may be offline or slow. What you type is sent to DeepSeek (an AI service in China) to interpret it. Your descriptions, the generated sound settings and what you do with the results (play, download, rate) are kept without your IP for up to 2 years to improve and train our sound models.',
     privacy: 'Privacy policy', left: '{n} free generations left today', offline: 'The generator is offline right now (it runs on a single machine during the beta). Please try again later.',
     keptPrev: 'That change moved it further from the description, so the previous version is kept first.', mild: 'The change was too strong, so a gentler version was used.',
     errors: { per_minute: 'Too many requests. Wait a minute and try again.', per_day: 'You have used today\'s free generations. Come back tomorrow.', daily_global: 'Today\'s beta quota for everyone is used up. Come back tomorrow.',
@@ -972,6 +972,7 @@ const TEXTSFX = {
     keyH: 'Have a credit key?', keyPh: 'SFXB-XXXXX-XXXXX-XXXXX-XXXXX', keyUse: 'Use key', keyClear: 'Remove',
     keyNote: 'Each generation or refinement uses 1 credit. With a key there is no daily limit and no captcha. The key is kept in this browser; paste it to use your credits on another device.',
     buyH: 'Need more?', buy: '{n} credits · {price}', buying: 'Opening checkout…',
+    up: 'Good match', down: 'Not what I wanted',
     paidH: 'Payment received. Your credit key:', paidNote: 'It is saved in this browser. Copy it somewhere safe to use it on another device.', copy: 'Copy', copied: 'Copied',
     creditsLeft: '{n} credits left on your key',
     keyErrors: { license_invalid: 'This key is not valid (or the payment was refunded).', no_credits: 'Your key has no credits left.', not_paid: 'The payment has not gone through yet. Reload this page in a minute.', payment_error: 'Payment service error. If you were charged, email contact@sfxbrew.com and we will send your key.' }
@@ -985,7 +986,7 @@ const TEXTSFX = {
     examples: ['推开一扇沉重的旧木门', '史莱姆跳跃落地', '科幻飞船的自动门打开', '在厚雪里走几步', '8-bit 风格的开宝箱', '拔剑出鞘', '雨夜里远处的寺庙钟声'],
     refinePh: '说说怎么改：再闷一点 / 尾巴短点 / 更有金属感', refine: '修改', refining: '修改中…', pick: '选这个继续改', download: 'WAV', play: '播放',
     match: '贴近度', recFrom: '录音素材', synth: '合成', you: '你', refineOf: '修改：',
-    notice: '测试版：后端只跑在一台机器上，可能离线或较慢。你输入的文字会发送给 DeepSeek（位于中国的 AI 服务）来理解，并在不记录 IP 的情况下保存 30 天用于改进。',
+    notice: '测试版：后端只跑在一台机器上，可能离线或较慢。你输入的文字会发送给 DeepSeek（位于中国的 AI 服务）来理解。你的描述、生成的声音参数以及你对结果的操作（播放、下载、评价）会在不记录 IP 的情况下保存最多 2 年，用于改进和训练我们的音效模型。',
     privacy: '隐私政策', left: '今天还能免费生成 {n} 次', offline: '生成服务暂时离线（测试期间只跑在一台机器上），请稍后再来。',
     keptPrev: '这次改动反而离描述更远，第一个保留的是上一版。', mild: '原方案改得太猛，已自动换成温和一点的版本。',
     errors: { per_minute: '请求太频繁，请过一分钟再试。', per_day: '你今天的免费次数用完了，明天再来吧。', daily_global: '今天全站的测试名额已经用完，明天再来吧。',
@@ -994,6 +995,7 @@ const TEXTSFX = {
     keyH: '有点数兑换码？', keyPh: 'SFXB-XXXXX-XXXXX-XXXXX-XXXXX', keyUse: '使用', keyClear: '移除',
     keyNote: '每次生成或修改扣 1 点，用兑换码不受每日次数限制，也不用人机验证。兑换码保存在这个浏览器里，换设备时粘贴进来即可。',
     buyH: '不够用？', buy: '{n} 点 · {price}', buying: '正在打开付款页…',
+    up: '挺像的', down: '不是我要的',
     paidH: '付款成功，你的兑换码：', paidNote: '已保存在这个浏览器里。请另外复制保存，换设备时要用。', copy: '复制', copied: '已复制',
     creditsLeft: '兑换码还剩 {n} 点',
     keyErrors: { license_invalid: '兑换码无效（或这笔付款已退款）。', no_credits: '兑换码的点数用完了。', not_paid: '付款还没完成，请过一分钟刷新本页。', payment_error: '付款服务出错。如果已经扣款，请发邮件到 contact@sfxbrew.com，我们会把兑换码发给你。' }
