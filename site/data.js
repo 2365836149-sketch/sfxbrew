@@ -972,7 +972,7 @@ const TEXTSFX = {
     keyH: 'Have a credit key?', keyPh: 'SFXB-XXXXX-XXXXX-XXXXX-XXXXX', keyUse: 'Use key', keyClear: 'Remove',
     keyNote: 'Each generation or refinement uses 1 credit. With a key there is no daily limit and no captcha. The key is kept in this browser; paste it to use your credits on another device.',
     buyH: 'Need more?', buy: '{n} credits · {price}', buying: 'Opening checkout…',
-    up: 'Good match', down: 'Not what I wanted',
+    up: 'Good match', down: 'Not what I wanted', ai: 'AI generated · Powered by Stability AI',
     paidH: 'Payment received. Your credit key:', paidNote: 'It is saved in this browser. Copy it somewhere safe to use it on another device.', copy: 'Copy', copied: 'Copied',
     creditsLeft: '{n} credits left on your key',
     keyErrors: { license_invalid: 'This key is not valid (or the payment was refunded).', no_credits: 'Your key has no credits left.', not_paid: 'The payment has not gone through yet. Reload this page in a minute.', payment_error: 'Payment service error. If you were charged, email contact@sfxbrew.com and we will send your key.' }
@@ -995,7 +995,7 @@ const TEXTSFX = {
     keyH: '有点数兑换码？', keyPh: 'SFXB-XXXXX-XXXXX-XXXXX-XXXXX', keyUse: '使用', keyClear: '移除',
     keyNote: '每次生成或修改扣 1 点，用兑换码不受每日次数限制，也不用人机验证。兑换码保存在这个浏览器里，换设备时粘贴进来即可。',
     buyH: '不够用？', buy: '{n} 点 · {price}', buying: '正在打开付款页…',
-    up: '挺像的', down: '不是我要的',
+    up: '挺像的', down: '不是我要的', ai: 'AI 生成 · Powered by Stability AI',
     paidH: '付款成功，你的兑换码：', paidNote: '已保存在这个浏览器里。请另外复制保存，换设备时要用。', copy: '复制', copied: '已复制',
     creditsLeft: '兑换码还剩 {n} 点',
     keyErrors: { license_invalid: '兑换码无效（或这笔付款已退款）。', no_credits: '兑换码的点数用完了。', not_paid: '付款还没完成，请过一分钟刷新本页。', payment_error: '付款服务出错。如果已经扣款，请发邮件到 contact@sfxbrew.com，我们会把兑换码发给你。' }

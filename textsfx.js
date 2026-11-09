@@ -164,7 +164,7 @@
       const row = document.createElement('div'); row.className = 'ts-row';
       const cr = (r.credits || []).length
         ? T.recFrom + ': ' + r.credits.map(c => '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.title) + '</a> (' + esc(c.author) + ')').join(', ')
-        : T.synth;
+        : (r.tag === 'sa3' ? esc(T.ai) : T.synth);
       row.innerHTML = '<button class="play ts-play" aria-label="' + esc(T.play) + '">▶</button>' +
         '<div class="ts-info"><div class="ts-bar"><i style="width:' + Math.max(6, r.score / top * 100) + '%"></i></div><small>' + esc(T.match) + ' ' + Math.round(r.score * 100) + ' · ' + cr + '</small></div>' +
         '<span class="ts-rate"><button class="ts-up" aria-label="' + esc(T.up) + '" title="' + esc(T.up) + '">👍</button><button class="ts-down" aria-label="' + esc(T.down) + '" title="' + esc(T.down) + '">👎</button></span>' +
