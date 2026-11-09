@@ -13,6 +13,7 @@ const path = require('path');
 const makeSfx = require('../engine.js');
 const { PRESETS, mutate, SAMPLES } = require('../presets.js');
 const CATALOG = require('../catalog.js');
+const EXPORT = require('../export.js');
 
 /* 原生音频模块用到时才加载：精简版 Linux 没装 ALSA(libasound2) 时，
    MCP 服务和 list_presets 照常可用，只有渲染 WAV 时才报出清楚的错误 */
@@ -99,7 +100,7 @@ function listPresets(opts) {
   return PRESETS.map(p => {
     const e = CATALOG.ENTRIES[p.id];
     const tags = [].concat(...['style', 'material', 'mood'].map(d => e.tags[d] || []));
-    return { id: p.id, name: META[p.id][0], group: p.group, category: e.cat, categories: CATALOG.catsOf(p.id), tags, description: META[p.id][1], _kw: e.kw };
+    return { id: p.id, name: META[p.id][0], group: p.group, category: e.cat, categories: CATALOG.catsOf(p.id), tags, description: META[p.id][1], loopable: EXPORT.LOOPABLE.includes(p.id) || undefined, _kw: e.kw };
   }).filter(x => (!opts.category || x.categories.includes(opts.category)) &&
     words.every(w => [x.id, x.name, x.description, x._kw, x.categories.join(' '), x.tags.join(' ')].join(' ').toLowerCase().includes(w)))
     .map(x => { delete x._kw; return x; });
@@ -193,6 +194,40 @@ async function renderWav(patch, sampleRate) {
   return encodeWav(buf.getChannelData(0), sr);
 }
 
+/** 无缝循环 WAV（带 smpl 循环点）。preset 决定做法（连续铺底 / 错开叠放），见 export.js */
+async function renderLoop(patch, opt) {
+  opt = opt || {};
+  const sr = opt.sampleRate || 44100;
+  const d = await EXPORT.makeLoop(SFX.render, patch, { seconds: opt.seconds || 10, preset: opt.preset, samples: SAMPLES, mutate, sampleRate: sr });
+  return { bytes: Buffer.from(EXPORT.encodeWav(d, sr, { loop: true })), seconds: d.length / sr };
+}
+
+/**
+ * 游戏引擎包：outDir/sfxbrew-<name>/ 下写 wav/（多个变体或循环）、godot/*.tres、unity/SfxBrewPlayer.cs、web/*.js、README.txt。
+ * 一次性音效：count 个变体（默认 8）；循环：count 个不同的循环（默认 2），每个约 loopSeconds 秒。
+ */
+async function exportPack(opt) {
+  const preset = opt.preset, loop = !!opt.loopSeconds;
+  if (loop && preset && !EXPORT.LOOPABLE.includes(preset)) throw new Error('"' + preset + '" is not a loopable preset. Loopable: ' + EXPORT.LOOPABLE.join(', '));
+  const name = (opt.name || preset || 'sound').replace(/[^A-Za-z0-9-]+/g, '-');
+  const count = Math.max(1, Math.min(loop ? 6 : 30, opt.count || (loop ? 2 : 8)));
+  const wavs = [], items = [];
+  for (let i = 0; i < count; i++) {
+    let patch, seed = null;
+    if (opt.patch) patch = i ? mutate(opt.patch, 0.12) : opt.patch;
+    else { const g = generate(preset, opt.seed == null ? null : opt.seed + i); patch = g.patch; seed = g.seed; }
+    const r = loop ? await renderLoop(patch, { seconds: opt.loopSeconds, preset }) : await renderWav(patch);
+    const file = name + '-' + String(i + 1).padStart(2, '0') + '.wav';
+    wavs.push({ name: file, data: r.bytes });
+    items.push({ file, seed, seconds: +r.seconds.toFixed(2), patch });
+  }
+  const usesSamples = items.some(x => x.patch.layers.some(l => l.type === 'sample'));
+  const files = EXPORT.packFiles({ name, title: META[preset] ? META[preset][0] : name, wavs, loop, seconds: opt.loopSeconds, samples: usesSamples, link: preset ? editorLink(preset, items[0].patch) : null });
+  const dir = path.resolve(opt.outDir || '.');
+  files.forEach(f => writeFile(path.join(dir, f.name), f.data));
+  return { folder: path.join(dir, 'sfxbrew-' + name), files: files.map(f => path.join(dir, f.name)), sounds: items.map(x => ({ file: x.file, seed: x.seed, seconds: x.seconds })) };
+}
+
 function trimLength(d, sr) {
   let end = d.length - 1;
   while (end > 0 && Math.abs(d[end]) < 0.0008) end--;
@@ -244,4 +279,4 @@ function writeFile(file, bytes) {
   return path.resolve(file);
 }
 
-module.exports = { PRESETS, CATALOG, META, PATCH_DOC, listPresets, generate, validatePatch, renderWav, jsCode, editorLink, writeFile, SITE_URL };
+module.exports = { PRESETS, CATALOG, META, PATCH_DOC, LOOPABLE: EXPORT.LOOPABLE, listPresets, generate, validatePatch, renderWav, renderLoop, exportPack, jsCode, editorLink, writeFile, SITE_URL };

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sound Effect Editor — Free Game SFX Generator | SFX Brew</title>
-<meta name="description" content="Make royalty-free game sound effects in your browser: pick a preset, mutate it, make it heavier or farther, fine-tune layers, then export WAV, a 10-sound pack or drop-in JavaScript. Free for commercial use.">
+<meta name="description" content="Make royalty-free game sound effects in your browser: pick a preset, mutate it, make it heavier or farther, fine-tune layers, then export WAV, seamless loops, a game-engine pack (Godot, Unity, web) or drop-in JavaScript. Free for commercial use.">
 <link rel="canonical" href="https://sfxbrew.com/editor/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/style.css">
@@ -46,6 +46,11 @@
       <button id="btn-code" class="btn seal" data-t="code"></button>
       <button id="btn-share" class="btn" data-t="share"></button>
     </div>
+    <div id="loop-row" class="looprow" hidden>
+      <span class="looprow-h" data-t="loop"></span>
+      <div id="loop-seg" class="demo-chips seg"></div>
+      <span class="muted small" data-t="loopHint"></span>
+    </div>
     <div class="box">
       <div class="box-h"><span data-t="tweakLabel"></span><button id="btn-undo" class="link" data-t="undo" disabled></button></div>
       <div id="tweak-buttons" class="tweak-grid"></div>
@@ -80,6 +85,7 @@
 <script src="/presets.js"></script>
 <script src="/catalog.js"></script>
 <script src="/shared.js"></script>
+<script src="/export.js"></script>
 <script src="/app.js"></script>
 <!--analytics--><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "a45dcf7d53464930b4757d7687c6b9b1"}'></script><!--/analytics-->
 </body>

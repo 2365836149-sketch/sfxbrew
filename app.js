@@ -2,7 +2,8 @@
    SFX Brew · 页面逻辑
    ----------------------------------------------------------------------------
    状态：当前预设 id + 当前参数 patch。任何改动 → 防抖重新离线渲染 → 画波形。
-   导出：WAV（16 位单声道 44.1k）、JS 代码（makeSfx 源码 + 参数）、10 个变体打包 zip。
+   导出：WAV（16 位单声道 44.1k）、JS 代码（makeSfx 源码 + 参数）、游戏引擎包 zip（变体或无缝循环 + Godot / Unity / 网页播放文件，见 export.js）。
+   环境音等可循环的预设多一行「循环」：选 10/30/60 秒后，播放、下载 WAV、导出都变成无缝循环。
    参数会写进网址的 # 后面，复制网址就能分享同一个声音。
    ==========================================================================*/
 (function () {
@@ -33,7 +34,8 @@
       heroSub: 'Free for commercial use. Generated in your browser. Press one and listen.',
       heroLibrary: 'Browse the sound library', heroPack: 'Xianxia sound pack', heroAgents: 'Use it from Claude Code / Cursor →',
       east: 'Eastern', general: 'General', allCats: 'All categories',
-      play: 'Play', mutate: 'Mutate', fresh: 'New', wav: 'WAV', code: 'Copy JS', pack: 'Pack ×10', share: 'Share link',
+      play: 'Play', mutate: 'Mutate', fresh: 'New', wav: 'WAV', code: 'Copy JS', pack: 'Engine pack', packTitle: 'Zip with WAV variations (or loops) plus Godot, Unity and web player files', share: 'Share link',
+      loop: 'Loop', loopOff: 'Off', loopHint: 'Seamless loop. The WAV carries a loop point (Godot, FMOD, Wwise, GameMaker).', stop: 'Stop', looping: 'loop',
       copied: 'Copied!', linkCopied: 'Link copied', packing: 'Rendering…',
       layers: 'Layers', addLayer: '+ Layer', delLayer: 'Remove this layer', effects: 'Effects', advanced: 'Fine-tune',
       codeTitle: 'Drop-in JavaScript', codeHint: 'Zero dependencies. Paste into your game and call the play function after a click or tap (browsers block audio before the first user gesture).',
@@ -75,7 +77,8 @@
       heroSub: '免费可商用，在浏览器里生成。点一个，听听看。',
       heroLibrary: '浏览音效库', heroPack: '修仙音效包', heroAgents: '在 Claude Code / Cursor 里用 →',
       east: '东方', general: '通用', allCats: '全部大类',
-      play: '播放', mutate: '变体', fresh: '重新生成', wav: '下载 WAV', code: '复制 JS', pack: '打包 10 个', share: '分享链接',
+      play: '播放', mutate: '变体', fresh: '重新生成', wav: '下载 WAV', code: '复制 JS', pack: '导出到引擎', packTitle: '打包下载：多个变体（或循环）的 WAV + Godot、Unity、网页的播放文件', share: '分享链接',
+      loop: '循环', loopOff: '关', loopHint: '无缝循环，WAV 带循环点（Godot、FMOD、Wwise、GameMaker 能直接识别）。', stop: '停止', looping: '循环',
       copied: '已复制！', linkCopied: '链接已复制', packing: '渲染中…',
       layers: '音层', addLayer: '+ 音层', delLayer: '删除这一层', effects: '效果', advanced: '精细调节',
       codeTitle: '可直接粘贴的 JavaScript', codeHint: '不依赖任何库。粘贴进你的游戏，在用户点击或触摸之后调用播放函数（浏览器不允许在第一次操作前出声）。',
@@ -132,6 +135,9 @@
 
   /* ==================== 状态 ==================== */
   let presetId = 'swordQi', patch = null, layerIdx = 0, recent = [], buffer = null;
+  /* 循环：loopSec = 0 关；loopNode = 正在播放的循环；loopCache 避免同一个声音反复渲染 */
+  const EXP = window.SFX_EXPORT;
+  let loopSec = 0, loopNode = null, loopCache = null, loopBusy = false;
 
   /* ==================== 预设列表：按 catalog.js 的大类分组 ==================== */
   const CAT = window.SFX_CATALOG;
@@ -278,7 +284,8 @@
     writeHash();
     clearTimeout(renderTimer);
     renderTimer = setTimeout(redraw, 80);
-    if (commit) SFX.play(patch);
+    if (loopNode) { stopLoop(); if (commit) playLoop(); }
+    else if (commit) playCurrent();
   }
 
   async function redraw() {
@@ -300,8 +307,9 @@
     patch = p; layerIdx = 0;
     renderPresets(); renderControls();
     $('#sound-name').textContent = T[lang].p[presetId];
+    renderLoopRow();
     changed(false);
-    if (play) SFX.play(patch);
+    if (play) playCurrent();
   }
   function remember() {
     if (!patch) return;
@@ -325,26 +333,98 @@
     $('#history-wrap').hidden = !recent.length;
   }
 
+  /* ==================== 循环 ==================== */
+  const looping = () => loopSec > 0 && EXP.LOOPABLE.includes(presetId);
+  function renderLoopRow() {
+    const row = $('#loop-row');
+    row.hidden = !EXP.LOOPABLE.includes(presetId);
+    if (row.hidden) { if (loopNode) stopLoop(); return; }
+    const seg = $('#loop-seg');
+    seg.innerHTML = '';
+    [0].concat(EXP.LOOP_SECONDS).forEach(sec => {
+      const b = document.createElement('button');
+      b.textContent = sec ? sec + (lang === 'zh' ? ' 秒' : ' s') : t('loopOff');
+      b.className = sec === loopSec ? 'on' : '';
+      b.onclick = () => { loopSec = sec; stopLoop(); renderLoopRow(); if (sec) playLoop(); };
+      seg.appendChild(b);
+    });
+  }
+  function buildLoop(p, sec) {
+    return EXP.makeLoop(SFX.render, p, { seconds: sec, preset: presetId, samples: window.SFX_SAMPLES, mutate: window.SFX_MUTATE, sampleRate: 44100 });
+  }
+  async function loopData() {
+    const key = presetId + '|' + loopSec + '|' + JSON.stringify(patch);
+    if (loopCache && loopCache.key === key) return loopCache.data;
+    const data = await buildLoop(patch, loopSec);
+    loopCache = { key, data };
+    return data;
+  }
+  function setPlayLabel() { $('#btn-play').textContent = loopNode ? '■ ' + t('stop') : t('play'); }
+  function stopLoop() {
+    if (!loopNode) return;
+    const { src, g, ctx } = loopNode;
+    loopNode = null;
+    g.gain.setTargetAtTime(0, ctx.currentTime, 0.06);
+    src.stop(ctx.currentTime + 0.4);
+    setPlayLabel();
+  }
+  async function playLoop() {
+    if (loopBusy) return;
+    loopBusy = true;
+    const btn = $('#btn-play');
+    btn.textContent = t('packing');
+    try {
+      const d = await loopData(), ctx = SFX.context();
+      if (ctx.state === 'suspended') await ctx.resume();
+      stopLoop();
+      const b = ctx.createBuffer(1, d.length, 44100);
+      b.copyToChannel(d, 0);
+      const src = ctx.createBufferSource(), g = ctx.createGain();
+      src.buffer = b; src.loop = true;
+      g.gain.setValueAtTime(0, ctx.currentTime); g.gain.linearRampToValueAtTime(1, ctx.currentTime + 0.3);
+      src.connect(g).connect(ctx.destination);
+      src.start();
+      loopNode = { src, g, ctx };
+      SFXB.drawWave($('#wave'), d, d.length);
+      $('#dur').textContent = (d.length / 44100).toFixed(1) + ' s · ' + t('looping');
+    } finally { loopBusy = false; setPlayLabel(); }
+  }
+  /* 播放按钮 / 空格 / 点波形：循环模式下开关循环，否则播一次 */
+  function playCurrent() {
+    if (looping()) { if (loopNode) stopLoop(); else playLoop(); }
+    else SFX.play(patch);
+  }
+
   /* ==================== 导出：WAV ==================== */
   const wavBytes = SFXB.wavBytes, download = SFXB.download;
   const slug = () => T.en.p[presetId].toLowerCase().replace(/[^a-z0-9]+/g, '-');
   async function exportWav() {
+    if (looping()) { download(EXP.encodeWav(await loopData(), 44100, { loop: true }), 'sfxbrew-' + slug() + '-loop.wav', 'audio/wav'); return; }
     const buf = await SFX.render(patch, 44100);
     download(wavBytes(buf), 'sfxbrew-' + slug() + '.wav', 'audio/wav');
   }
 
-  /* ==================== 导出：zip（不压缩，够用） ==================== */
+  /* ==================== 导出：游戏引擎包（zip，不压缩） ====================
+     一次性音效：当前声音 + 9 个同预设的新变体；循环：当前声音的循环 + 一个微调过的循环。
+     附带 Godot 的随机播放资源、Unity 播放脚本、网页播放 JS 和说明，见 export.js */
   const zip = SFXB.zip;
   async function exportPack() {
     const btn = $('#btn-pack'), label = btn.textContent;
     btn.disabled = true; btn.textContent = t('packing');
-    const gen = PRESETS.find(p => p.id === presetId).gen, files = [];
-    for (let i = 1; i <= 10; i++) {
-      const p = i === 1 ? patch : gen();
-      files.push({ name: slug() + '-' + String(i).padStart(2, '0') + '.wav', data: wavBytes(await SFX.render(p, 44100)) });
-    }
-    SFXB.downloadBlob(zip(files), 'sfxbrew-' + slug() + '-pack.zip');
-    btn.disabled = false; btn.textContent = label;
+    try {
+      const loop = looping(), name = slug(), wavs = [], patches = [];
+      const gen = PRESETS.find(p => p.id === presetId).gen, n = loop ? 2 : 10;
+      for (let i = 0; i < n; i++) {
+        const p = i === 0 ? patch : loop ? window.SFX_MUTATE(patch, 0.12) : gen();
+        patches.push(p);
+        const data = loop ? EXP.encodeWav(i === 0 ? await loopData() : await buildLoop(p, loopSec), 44100, { loop: true }) : wavBytes(await SFX.render(p, 44100));
+        wavs.push({ name: name + '-' + String(i + 1).padStart(2, '0') + '.wav', data });
+        btn.textContent = t('packing') + ' ' + (i + 1) + '/' + n;
+      }
+      const samples = patches.some(p => p.layers.some(l => l.type === 'sample'));
+      const files = EXP.packFiles({ name, title: T.en.p[presetId], wavs, loop, seconds: loopSec, samples, link: location.href });
+      SFXB.downloadBlob(zip(files), 'sfxbrew-' + name + (loop ? '-loop' : '') + '.zip');
+    } finally { btn.disabled = false; btn.textContent = label; }
   }
 
   /* ==================== 导出：JS 代码 ==================== */
@@ -439,11 +519,12 @@
       el.setAttribute('href', lang === 'zh' ? el.dataset.hrefZh : el.dataset.hrefEn);
     });
     $('#preset-search').placeholder = t('search');
-    if (patch) { renderPresets(); renderControls(); renderHistory(); renderTweaks(); $('#sound-name').textContent = T[lang].p[presetId]; }
+    $('#btn-pack').title = t('packTitle');
+    if (patch) { renderPresets(); renderControls(); renderHistory(); renderTweaks(); renderLoopRow(); setPlayLabel(); $('#sound-name').textContent = T[lang].p[presetId]; }
   }
 
   /* ==================== 启动 ==================== */
-  $('#btn-play').onclick = () => SFX.play(patch);
+  $('#btn-play').onclick = playCurrent;
   $('#btn-undo').onclick = undo;
   $('#preset-search').addEventListener('input', filterPresets);
   $('#preset-cat').addEventListener('change', filterPresets);
@@ -459,11 +540,11 @@
   $('#btn-share').onclick = e => copy(location.href, e.currentTarget, t('linkCopied'));
   $('#code-copy').onclick = e => copy($('#code-text').value, e.currentTarget, t('copied'));
   $('#code-close').onclick = () => $('#code-dlg').close();
-  $('#wave').onclick = () => SFX.play(patch);
+  $('#wave').onclick = playCurrent;
   $('#lang').onclick = () => { lang = lang === 'zh' ? 'en' : 'zh'; try { localStorage.setItem('sfxbrew-lang', lang); } catch (e) { /* ignore */ } applyLang(); };
   document.addEventListener('keydown', e => {
     if (e.target.closest('input, select, textarea, dialog[open]') && e.target.type !== 'range') return;
-    if (e.code === 'Space') { e.preventDefault(); SFX.play(patch); }
+    if (e.code === 'Space') { e.preventDefault(); playCurrent(); }
     else if (e.key === 'm' || e.key === 'M') mutate();
     else if (e.key === 'n' || e.key === 'N') fresh();
   });

@@ -3,8 +3,8 @@
    SFX Brew · MCP 服务（stdio，本地运行，零成本）
    ----------------------------------------------------------------------------
    给 Claude Code / Cursor 等 agent 用：
-     claude mcp add sfxbrew -- npx -y -p sfxbrew sfxbrew-mcp
-   工具：list_presets / generate_sfx / render_patch / get_js_code
+     claude mcp add sfxbrew -- npx -y sfxbrew mcp
+   工具：list_presets / generate_sfx / render_patch / get_js_code / export_pack
    ★ 只写 .wav / .js 文件，防止 agent 传错路径把别的文件覆盖掉。
    ==========================================================================*/
 'use strict';
@@ -49,18 +49,21 @@ server.registerTool('generate_sfx', {
     count: z.number().int().min(1).max(20).optional().describe('Number of variants to write (default 1). Useful to let the user pick, or for randomized playback.'),
     seed: z.number().int().optional().describe('Seed for a reproducible result; variant i uses seed + i'),
     mutate: z.number().min(0).max(1).optional().describe('Extra random tweak amount on top of the seeded result, 0-1 (e.g. 0.15)'),
-    js_path: z.string().optional().describe('Also write a dependency-free .js file with play functions for these sounds (Web Audio, no audio files needed)')
+    js_path: z.string().optional().describe('Also write a dependency-free .js file with play functions for these sounds (Web Audio, no audio files needed)'),
+    loop_seconds: z.number().min(3).max(120).optional().describe('Write a seamless loop of about this many seconds instead of a one-shot (the WAV carries a loop point). Only for loopable presets: ' + lib.LOOPABLE.join(', ') + '. Use for background ambience.')
   },
   annotations: { destructiveHint: false }
-}, async ({ preset, out_path, count, seed, mutate, js_path }) => {
+}, async ({ preset, out_path, count, seed, mutate, js_path, loop_seconds }) => {
   try {
     checkExt(out_path, '.wav');
     if (js_path) checkExt(js_path, '.js');
+    if (loop_seconds && !lib.LOOPABLE.includes(preset)) throw new Error('"' + preset + '" is not loopable. Loopable presets: ' + lib.LOOPABLE.join(', '));
+    if (loop_seconds && js_path) throw new Error('js_path is for one-shots; for a loop use export_pack (it writes a web player that loops the WAV)');
     const n = count || 1, sounds = [];
     for (let i = 0; i < n; i++) {
       const g = lib.generate(preset, seed == null ? null : seed + i, mutate ? { mutate } : null);
       const file = n === 1 ? out_path : out_path.replace(/\.wav$/i, '-' + String(i + 1).padStart(2, '0') + '.wav');
-      const { bytes, seconds } = await lib.renderWav(g.patch);
+      const { bytes, seconds } = loop_seconds ? await lib.renderLoop(g.patch, { seconds: loop_seconds, preset }) : await lib.renderWav(g.patch);
       sounds.push({ file: lib.writeFile(file, bytes), seconds: +seconds.toFixed(3), seed: g.seed, patch: g.patch, edit_in_browser: lib.editorLink(preset, g.patch) || undefined });
     }
     let js;
@@ -115,6 +118,27 @@ server.registerTool('get_js_code', {
     });
     const seeds = list.filter(s => s.seed != null).map(s => s.name + ': seed ' + s.seed).join(', ');
     return ok((seeds ? '// ' + seeds + '\n' : '') + lib.jsCode(list));
+  } catch (e) { return fail(e.message); }
+});
+
+server.registerTool('export_pack', {
+  title: 'Export a game-engine sound pack',
+  description: 'Write a ready-to-use folder for game engines: several WAV variations of one preset (or several seamless loops), ' +
+    'a Godot 4 AudioStreamRandomizer (.tres, plays a random variation each time), a Unity SfxBrewPlayer.cs component, ' +
+    'a plain Web Audio .js player and a README. Loop WAVs carry a loop point that Godot, FMOD, Wwise and GameMaker read. ' +
+    'Writes <out_dir>/sfxbrew-<preset>/. For Godot, out_dir should be the project root (res://) so the .tres paths resolve.',
+  inputSchema: {
+    preset: z.enum(presetIds).describe('Preset id, see list_presets'),
+    out_dir: z.string().describe('Directory to create the sfxbrew-<preset> folder in, e.g. "." for a Godot project root or "Assets/Audio" for Unity'),
+    count: z.number().int().min(1).max(30).optional().describe('Number of variations (default 8) or loops (default 2, max 6)'),
+    loop_seconds: z.number().min(3).max(120).optional().describe('Make seamless loops of about this many seconds. Only for: ' + lib.LOOPABLE.join(', ')),
+    seed: z.number().int().optional().describe('Seed for reproducible results; variation i uses seed + i')
+  },
+  annotations: { destructiveHint: false }
+}, async ({ preset, out_dir, count, loop_seconds, seed }) => {
+  try {
+    const r = await lib.exportPack({ preset, outDir: out_dir, count, loopSeconds: loop_seconds, seed });
+    return ok(r);
   } catch (e) { return fail(e.message); }
 });
 

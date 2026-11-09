@@ -15,6 +15,8 @@ Usage:
   sfxbrew list [--json]                  list presets
   sfxbrew <preset> [options]             generate sound(s) from a preset
   sfxbrew render <patch.json> --out f.wav  render a custom patch
+  sfxbrew pack <preset> [--out dir]      game-engine pack: WAV variations + Godot .tres,
+                                         Unity script, web JS, README (add --loop for loops)
   sfxbrew mcp                            run the MCP server (stdio)
 
 Options:
@@ -22,6 +24,8 @@ Options:
   --count <n>          generate n variants: <name>-01.wav, <name>-02.wav ...
   --seed <n>           reproducible result (printed after every run)
   --mutate <0-1>       small random tweak on top of the seeded result
+  --loop <seconds>     seamless loop of about this length (ambience: rain, wind, campfire,
+                       stream, caveDrip, thunder, chime, drum, monsterGrowl). WAV carries a loop point
   --js <file.js>       also write a drop-in JavaScript file that plays the sound(s)
   --json               machine-readable output (paths, seeds, patches)
 
@@ -29,6 +33,9 @@ Examples:
   npx sfxbrew coin --out assets/sfx/coin.wav
   npx sfxbrew swordQi --count 5 --out assets/sfx/sword.wav
   npx sfxbrew hit --seed 42 --js src/sfx.js
+  npx sfxbrew rain --loop 30 --out assets/sfx/rain-loop.wav
+  npx sfxbrew pack swordQi --count 8 --out assets/sfx
+  npx sfxbrew pack campfire --loop 20 --out assets/sfx
 `;
 
 function args(argv) {
@@ -53,8 +60,20 @@ async function main() {
     if (o.json) { console.log(JSON.stringify(list, null, 2)); return; }
     for (const g of ['east', 'general']) {
       console.log(g === 'east' ? '\nEastern' : '\nGeneral');
-      list.filter(p => p.group === g).forEach(p => console.log('  ' + p.id.padEnd(13) + p.description));
+      list.filter(p => p.group === g).forEach(p => console.log('  ' + p.id.padEnd(13) + (p.loopable ? '[loop] ' : '') + p.description));
     }
+    return;
+  }
+
+  const loopSec = o.loop != null ? Math.max(3, Math.min(120, parseFloat(o.loop === true ? '10' : o.loop))) : 0;
+
+  if (cmd === 'pack') {
+    const preset = o._[1];
+    if (!preset) throw new Error('pack needs a preset, e.g. sfxbrew pack swordQi');
+    const r = await lib.exportPack({ preset, count: o.count ? parseInt(o.count, 10) : null, loopSeconds: loopSec, seed: o.seed != null ? parseInt(o.seed, 10) : null, outDir: o.out || '.' });
+    if (o.json) { console.log(JSON.stringify(r, null, 2)); return; }
+    console.log(r.folder + '/');
+    r.files.forEach(f => console.log('  ' + path.relative(r.folder, f)));
     return;
   }
 
@@ -78,7 +97,8 @@ async function main() {
 
   const results = [];
   for (const it of items) {
-    const { bytes, seconds } = await lib.renderWav(it.patch);
+    if (loopSec && it.preset !== 'custom' && !lib.LOOPABLE.includes(it.preset)) throw new Error('"' + it.preset + '" is not loopable. Loopable: ' + lib.LOOPABLE.join(', '));
+    const { bytes, seconds } = loopSec ? await lib.renderLoop(it.patch, { seconds: loopSec, preset: it.preset }) : await lib.renderWav(it.patch);
     const file = lib.writeFile(it.out, bytes);
     results.push({ file, preset: it.preset, seed: it.seed, seconds: +seconds.toFixed(3), patch: it.patch, edit: lib.editorLink(it.preset, it.patch) });
   }

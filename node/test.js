@@ -16,7 +16,7 @@ const lib = require('./lib.js');
   const json = r => JSON.parse(r.content[0].text);
 
   const tools = (await client.listTools()).tools.map(t => t.name).sort();
-  assert.deepStrictEqual(tools, ['generate_sfx', 'get_js_code', 'list_presets', 'render_patch']);
+  assert.deepStrictEqual(tools, ['export_pack', 'generate_sfx', 'get_js_code', 'list_presets', 'render_patch']);
 
   const presets = json(await client.callTool({ name: 'list_presets', arguments: {} }));
   assert.strictEqual(presets.length, lib.PRESETS.length);
@@ -48,6 +48,29 @@ const lib = require('./lib.js');
   assert.ok(bad.isError, 'refuses non-.wav path');
   const bad2 = await client.callTool({ name: 'render_patch', arguments: { patch: { layers: [] }, out_path: 'x.wav' } });
   assert.ok(bad2.isError, 'refuses empty patch');
+
+  /* 无缝循环：带 smpl 循环点，首尾接得上，长度接近要求 */
+  const lp = json(await client.callTool({ name: 'generate_sfx', arguments: { preset: 'rain', out_path: 'loops/rain.wav', loop_seconds: 8, seed: 3 } }));
+  const lb = fs.readFileSync(lp.sounds[0].file);
+  assert.ok(lb.includes(Buffer.from('smpl')), 'loop WAV has a smpl chunk');
+  const n = lb.readUInt32LE(40) / 2, s0 = lb.readInt16LE(44), s1 = lb.readInt16LE(44 + (n - 1) * 2);
+  let step = 0; for (let i = 1; i < n; i++) step += Math.abs(lb.readInt16LE(44 + i * 2) - lb.readInt16LE(42 + i * 2)); step /= n;
+  assert.ok(Math.abs(s1 - s0) < step * 6, 'loop end joins loop start');
+  assert.ok(lp.sounds[0].seconds > 6 && lp.sounds[0].seconds < 14, 'loop length near request');
+  const notLoop = await client.callTool({ name: 'generate_sfx', arguments: { preset: 'coin', out_path: 'c.wav', loop_seconds: 5 } });
+  assert.ok(notLoop.isError, 'refuses loop for one-shot presets');
+
+  /* 引擎包：WAV + Godot + Unity + 网页 + README */
+  const pk = json(await client.callTool({ name: 'export_pack', arguments: { preset: 'swordQi', out_dir: 'game', count: 3, seed: 5 } }));
+  const rel = pk.files.map(f => path.relative(path.dirname(pk.folder), f)).sort();
+  assert.deepStrictEqual(rel, ['sfxbrew-swordQi/README.txt', 'sfxbrew-swordQi/godot/swordQi.tres', 'sfxbrew-swordQi/unity/SfxBrewPlayer.cs',
+    'sfxbrew-swordQi/wav/swordQi-01.wav', 'sfxbrew-swordQi/wav/swordQi-02.wav', 'sfxbrew-swordQi/wav/swordQi-03.wav', 'sfxbrew-swordQi/web/swordQi.js']);
+  const tres = fs.readFileSync(path.join(dir, 'game/sfxbrew-swordQi/godot/swordQi.tres'), 'utf8');
+  assert.ok(tres.includes('streams_count = 3') && tres.includes('res://sfxbrew-swordQi/wav/swordQi-03.wav'), 'godot randomizer');
+  new Function('document', 'location', fs.readFileSync(path.join(dir, 'game/sfxbrew-swordQi/web/swordQi.js'), 'utf8') + '; if (typeof playSwordQi !== "function") throw new Error("missing");')({ currentScript: null }, { href: 'http://x/web/a.js' });
+  const pl = json(await client.callTool({ name: 'export_pack', arguments: { preset: 'campfire', out_dir: 'game', loop_seconds: 6 } }));
+  assert.strictEqual(pl.sounds.length, 2);
+  new Function('document', 'location', fs.readFileSync(path.join(dir, 'game/sfxbrew-campfire/web/campfire.js'), 'utf8') + '; if (typeof startCampfire !== "function" || typeof stopCampfire !== "function") throw new Error("missing");')({ currentScript: null }, { href: 'http://x/web/a.js' });
 
   await client.close();
   fs.rmSync(dir, { recursive: true, force: true });

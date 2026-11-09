@@ -33,12 +33,23 @@ Tools:
 | `generate_sfx` | Write one or more WAV variants (and optionally a `.js` file with play functions) |
 | `render_patch` | Render a hand-tuned patch JSON |
 | `get_js_code` | One drop-in JS snippet with `playX()` functions for several sounds |
+| `export_pack` | A game-engine folder: WAV variations or seamless loops + Godot `.tres`, Unity script, web player, README |
 
 Then just ask: *"add a coin sound and a hit sound to my game"*.
 
 ## Agent skill
 
 A free SKILL.md that teaches your agent when and how to use SFX Brew: [skills/sfxbrew/SKILL.md](skills/sfxbrew/SKILL.md), also installable from [Agensi](https://www.agensi.io/skills/sfx-brew-game-sound-effects).
+
+## Seamless loops and engine packs
+
+Ambience and sustained sounds (rain, wind, campfire, stream, cave drip, thunder, wind chimes, war drums, monster growl) can be rendered as **seamless loops** of 10 to 120 seconds. The loop is stitched from several slightly different takes with equal-power crossfades, so it doesn't repeat every few seconds, and the WAV carries a loop point that Godot, FMOD, Wwise and GameMaker pick up automatically.
+
+An **engine pack** is a folder (or a zip from the web editor) with WAV variations or loops plus:
+
+- `godot/<name>.tres`: an `AudioStreamRandomizer` that plays a random variation each time (Godot 4)
+- `unity/SfxBrewPlayer.cs`: drop on a GameObject, drag in the clips, call `Play()` (or tick Loop)
+- `web/<name>.js`: plain Web Audio player, `playX()` or `startX()` / `stopX()` for loops
 
 ## CLI
 
@@ -48,6 +59,9 @@ npx sfxbrew coin --out assets/sfx/coin.wav
 npx sfxbrew swordQi --count 5 --out assets/sfx/sword.wav
 npx sfxbrew hit --seed 42 --js src/sfx.js
 npx sfxbrew render my-patch.json --out boom.wav
+npx sfxbrew rain --loop 30 --out assets/sfx/rain-loop.wav   # seamless loop with a WAV loop point
+npx sfxbrew pack swordQi --count 8 --out .                   # Godot / Unity / web pack
+npx sfxbrew pack campfire --loop 20 --out .
 ```
 
 ## Sound packs
