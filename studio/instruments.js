@@ -27,7 +27,7 @@
       { id: 'guqin', zh: '古琴', en: 'Guqin', kind: 'melodic', range: [36, 84], make: n => I.guqin(hz(n.p), n.dur, n.v) },
       { id: 'pipa', zh: '琵琶', en: 'Pipa', kind: 'melodic', range: [45, 88], make: n => I.pipa(hz(n.p), n.dur, n.v, n.dur >= 1.2) },
       { id: 'flute', zh: '竹笛', en: 'Bamboo flute', kind: 'melodic', range: [60, 96], make: n => I.flute(hz(n.p), n.dur, n.v) },
-      { id: 'erhu', zh: '二胡', en: 'Erhu', kind: 'melodic', range: [55, 88], samples: ['erhu-d3', 'erhu-f5'], make: n => I.erhu(hz(n.p), n.dur, n.v, 0) },
+      { id: 'erhu', zh: '二胡', en: 'Erhu', kind: 'melodic', range: [62, 83], samples: ['erhu-n-d4', 'erhu-n-d4b', 'erhu-n-f4', 'erhu-n-gs4', 'erhu-n-gs4b', 'erhu-n-b4', 'erhu-n-c5', 'erhu-n-d5', 'erhu-n-e5', 'erhu-n-f5', 'erhu-n-gs5', 'erhu-n-b5'], make: n => I.erhu(hz(n.p), n.dur, n.v, 0) },
       { id: 'bass', zh: '拨奏低音', en: 'Plucked bass', kind: 'melodic', range: [28, 60], make: n => I.bass(hz(n.p), n.dur, n.v) },
       { id: 'pad', zh: '柔和长音', en: 'Soft pad', kind: 'melodic', range: [40, 84], make: n => I.pad([hz(n.p)], n.dur, n.v * 1.6) },
       { id: 'drone', zh: '持续低音', en: 'Drone', kind: 'melodic', range: [28, 60], make: n => I.drone(hz(n.p), Math.max(3, n.dur), n.v) },

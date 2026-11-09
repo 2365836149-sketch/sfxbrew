@@ -215,6 +215,12 @@ function makeSfx(env) {
       lfo.frequency.value = L.vibRate || 6;
       lfoGain = c.createGain();
       lfoGain.gain.value = L.vib;
+      if (L.vibDelay > 0) {
+        /* delayed vibrato: hold the pitch steady first, then ease the wobble in, like a bowed or blown note */
+        lfoGain.gain.setValueAtTime(0, t);
+        lfoGain.gain.setValueAtTime(0, t + L.vibDelay);
+        lfoGain.gain.linearRampToValueAtTime(L.vib, t + L.vibDelay + 0.35);
+      }
       lfo.connect(lfoGain);
       lfo.start(t); lfo.stop(stopAt);
     }
@@ -290,6 +296,12 @@ function makeSfx(env) {
     var A = assets(c), i, k;
     var pre = c.createGain(); pre.gain.value = p.gain == null ? 0.8 : p.gain;
     var node = pre;
+    /* optional low cut (p.hp, Hz): clears rumble and mud from instruments that don't need the bottom end */
+    if (p.hp > 0) {
+      var hpf = c.createBiquadFilter();
+      hpf.type = 'highpass'; hpf.frequency.value = p.hp; hpf.Q.value = 0.6;
+      node.connect(hpf); node = hpf;
+    }
     if (p.drive > 0) {
       var kd = 1 + p.drive * 10, th = Math.tanh(kd);
       var ws = c.createWaveShaper();
@@ -307,7 +319,14 @@ function makeSfx(env) {
       var a = Math.abs(x), s = x < 0 ? -1 : 1;
       return a < 0.7 ? x : s * (0.7 + 0.3 * Math.tanh((a - 0.7) / 0.3));
     });
-    comp.connect(dest);
+    /* optional stereo position (p.pan, -1 left .. 1 right) */
+    var outNode = dest;
+    if (p.pan && c.createStereoPanner) {
+      var pn = c.createStereoPanner();
+      pn.pan.value = Math.max(-1, Math.min(1, p.pan));
+      pn.connect(dest); outNode = pn;
+    }
+    comp.connect(outNode);
     node.connect(comp);
     if (p.reverb > 0) {
       var cv = c.createConvolver(), wet = c.createGain();

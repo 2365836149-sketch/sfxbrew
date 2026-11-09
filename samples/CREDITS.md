@@ -46,3 +46,13 @@ crossfaded into their start so they loop seamlessly.
 | monster-growl.mp3 (take 4) | [Monster Roar 2.wav](https://freesound.org/people/quadraslayer/sounds/398908/) | quadraslayer | CC0 |
 | campfire.mp3 (2 loops) | [1103campfire1.wav](https://freesound.org/people/moxobna/sounds/62487/) (11.5–17 s, 18–23.5 s) | moxobna | CC0 |
 | stream.mp3 (2 loops) | [Stream River Water Up Close](https://freesound.org/people/jackthemurray/sounds/433589/) (18–23.5 s, 28–33.5 s) | jackthemurray | CC0 |
+
+## Multisampled instruments (music engine)
+
+| Files | Original | Recordist | License |
+|---|---|---|---|
+| erhu-n-d4, erhu-n-f4, erhu-n-gs4, erhu-n-b4, erhu-n-d5, erhu-n-f5, erhu-n-gs5, erhu-n-b5 | [Chinese Erhu pack](https://freesound.org/people/tarane468/packs/26451/) (sounds 467479, 467478, 467477, 467476, 467483, 467482, 467481, 467480) | tarane468 | CC0 |
+| erhu-n-d4b, erhu-n-gs4b, erhu-n-c5, erhu-n-e5 | [Erhu Violin pack](https://freesound.org/people/tarane468/packs/32043/) (sounds 569841, 569840, 569839, 569838; file names are an octave low, pitches here are measured) | tarane468 | CC0 |
+| str-vc-*, str-va-*, str-vn-* (section sustain, vibrato, soft), str-vcspic-* (cello section spiccato) | [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) — Cello / Viola / Violin Section | Versilian Studios (Sam Gossner) | CC0 |
+
+Processing for these: trimmed to the attack, mono, peak-normalized to -1 dBFS, 6 s with a 0.9 s fade (spiccato 1.2 s), 96–128 kbps MP3. Pitches were measured; VSCO file names are an octave below scientific pitch notation.
