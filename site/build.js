@@ -14,7 +14,7 @@
 const fs = require('fs');
 const path = require('path');
 const lib = require('../node/lib.js');
-const { SOUNDS, PACKS, UI, MUSIC, STUDIO, CAT_COPY } = require('./data.js');
+const { SOUNDS, PACKS, UI, MUSIC, STUDIO, CAT_COPY, TEXTSFX } = require('./data.js');
 const CAT = require('../catalog.js');
 const ENGINE = require('../engine.js')({});
 
@@ -31,6 +31,11 @@ const adHead = () => ADSENSE ? `<script async src="https://pagead2.googlesyndica
 /* 广告位只放在音效库页面（列表下方），编辑器和实验室不放 */
 const adSlot = () => ADSENSE ? `<div class="ad-slot"><ins class="adsbygoogle" style="display:block" data-ad-client="${ADSENSE.client}" data-ad-slot="${ADSENSE.slot}" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script></div>` : '';
 const privacyUrl = lang => PREFIX[lang] + 'privacy/';
+/* 文字生成音效（测试版）：后端在本机 sfx-pro，经 Cloudflare Tunnel 暴露成 API_BASE。
+   TURNSTILE_SITEKEY：Cloudflare Turnstile 的站点密钥（公开的）。留空 = 用 Cloudflare 的测试密钥（总是通过，只适合本地）。 */
+const API_BASE = 'https://api.sfxbrew.com';
+const TURNSTILE_SITEKEY = '0x4AAAAAAF51qx0EEEg_ckOM';
+const textSfxUrl = lang => PREFIX[lang] + 'lab/sfx/';
 const SITE = 'https://sfxbrew.com';
 const VARIANTS = 12;
 const TODAY = new Date().toISOString().slice(0, 10);
@@ -446,7 +451,7 @@ ${alt('zh', paths.zh)}
 ${siteBar(lang, 'lab', altPath)}
 <div class="st-app">
 <header class="st-top">
-  <select id="st-exp" class="st-exp" aria-label="${esc(u.navLab)}"><option>${esc(st.expStudio)}</option><option disabled>${esc(st.expText)}</option></select>
+  <select id="st-exp" class="st-exp" aria-label="${esc(u.navLab)}" onchange="if(this.value)location.href=this.value"><option value="" selected>${esc(st.expStudio)}</option><option value="${textSfxUrl(lang)}">${esc(st.expSfx)}</option><option disabled>${esc(st.expText)}</option></select>
   <input id="st-title" class="st-title" placeholder="${esc(st.untitled)}" spellcheck="false" aria-label="${esc(st.untitled)}">
   <div class="st-group">${btn('st-home', st.toStart, ICON.home)}${btn('st-play', st.play, ICON.play, 'st-playbtn')}${btn('st-loop', st.loop, ICON.loop)}${btn('st-metro', st.metronome, ICON.metro)}</div>
   <div class="st-lcd" aria-live="off"><b id="st-bar">1.1</b><span id="st-time">0:00.0</span></div>
@@ -534,6 +539,45 @@ ${analyticsTag()}
   return { file: PREFIX[lang].slice(1) + 'lab/index.html', html };
 }
 
+/* ---------------- 文字生成音效（测试版） ---------------- */
+function textSfxPage(lang) {
+  const t = TEXTSFX[lang], u = UI[lang], st = STUDIO[lang];
+  const urlPath = textSfxUrl(lang), altPath = textSfxUrl(other(lang));
+  const data = { lang, api: API_BASE, sitekey: TURNSTILE_SITEKEY, i18n: t };
+  const html = `<!doctype html>
+<html lang="${HTML_LANG[lang]}">
+<head>
+${headTags(lang, { title: t.title, description: t.metaDesc, urlPath, altPath })}
+<link rel="stylesheet" href="/style.css">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+</head>
+<body>
+${siteBar(lang, 'lab', altPath)}
+<main class="ts">
+  <div class="ts-switch"><a href="${PREFIX[lang]}lab/">${esc(st.expStudio)}</a><span class="on">${esc(st.expSfx)}</span></div>
+  <h1>${esc(t.h)} <span class="ts-beta">${esc(t.beta)}</span></h1>
+  <p class="ts-sub">${esc(t.sub)}</p>
+  <p id="ts-offline" class="ts-offline" hidden>${esc(t.offline)}</p>
+  <form id="ts-form" class="ts-form"><input id="ts-q" type="text" maxlength="300" placeholder="${esc(t.ph)}" autocomplete="off" aria-label="${esc(t.h)}"><button id="ts-go" class="btn primary big">${esc(t.go)}</button></form>
+  <div class="ts-ex"><span>${esc(t.examplesH)}</span>${t.examples.map(x => '<button type="button" class="ts-chip">' + esc(x) + '</button>').join('')}</div>
+  <p class="ts-note">${esc(t.notice)} <a href="${privacyUrl(lang)}">${esc(t.privacy)}</a></p>
+  <p id="ts-left" class="ts-left"></p>
+  <div id="ts-cf" class="ts-cf"></div>
+  <div id="ts-log"></div>
+  <p class="ts-note">${esc(t.license)}</p>
+</main>
+<footer class="foot">
+  <p class="foot-meta"><a href="${PREFIX[lang]}sounds/">${esc(u.navLibrary)}</a><a href="${privacyUrl(lang)}">${esc(PRIVACY[lang].h)}</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
+</footer>
+<script type="application/json" id="ts-data">${jsonForHtml(data)}</script>
+<script src="/textsfx.js"></script>
+${analyticsTag()}
+</body>
+</html>
+`;
+  return { file: PREFIX[lang].slice(1) + 'lab/sfx/index.html', html };
+}
+
 /* 旧地址 /music/ 搬到 /lab/：留一个跳转页（canonical 指向新地址） */
 function musicRedirect(lang) {
   const to = PREFIX[lang] + 'lab/';
@@ -549,21 +593,25 @@ function musicRedirect(lang) {
 const PRIVACY = {
   en: { h: 'Privacy', title: 'Privacy Policy | SFX Brew', desc: 'What SFX Brew stores and collects: no accounts, no tracking cookies, sounds made in your browser.', updated: 'Last updated',
     body: [
-      ['Short version', 'SFX Brew has no accounts and sets no tracking cookies. Sounds and music are generated in your own browser; nothing you make is uploaded to us.'],
+      ['Short version', 'SFX Brew has no accounts and sets no tracking cookies. Sounds and music are generated in your own browser; nothing you make is uploaded to us. The one exception is the Text to sound effect beta in the Lab, described below.'],
+      ['Text to sound effect (beta)', 'When you use Lab → Text to sound effect, the description you type (and any change you ask for) is sent to our server, which runs on a machine we operate in Germany and is reached through Cloudflare. To interpret it, the text is passed to DeepSeek, an AI service operated in China; please do not type personal information. The server uses your IP address only in memory to enforce rate limits and forgets it within a day. We keep the text you typed and the result scores, without your IP address, for 30 days to improve the tool, then delete them. The generated audio files are deleted after 2 hours.'],
+      ['Bot protection', 'The Text to sound effect page uses Cloudflare Turnstile to block automated abuse. Turnstile checks your browser when you press Generate and does not set advertising or tracking cookies. See the Cloudflare Turnstile privacy addendum.'],
       ['Stored in your browser', 'A few preferences are saved in your browser\'s local storage so the site remembers them: your language, which sound categories you have open, and your Lab project. They never leave your device, and clearing your browser data removes them.'],
       ['Visitor statistics', 'We use Cloudflare Web Analytics to count page views. It does not use cookies or fingerprinting and does not track you across sites; we only see totals such as how many people visited a page and from which country.'],
       ['Hosting', 'The site is hosted on GitHub Pages. Like any web server, GitHub receives your IP address when you load a page and may keep it in its logs for security. See the GitHub Privacy Statement.'],
-      ['Recordings and fonts', 'A few sounds play short CC0 recordings served from this site. No third-party fonts or embeds are loaded.'],
+      ['Recordings and fonts', 'A few sounds play short CC0 recordings served from this site. No third-party fonts are loaded; the only third-party embed is Cloudflare Turnstile on the Text to sound effect page.'],
       ['Advertising', 'There are no ads on the site right now. If we add them, this page will be updated first and you will be asked for consent before any advertising cookies are used.'],
       ['Contact', 'Questions about this policy or your data: email contact@sfxbrew.com, or open an issue on GitHub (github.com/2365836149-sketch/sfxbrew).']
     ] },
   zh: { h: '隐私政策', title: '隐私政策 | SFX Brew', desc: 'SFX Brew 存什么、收集什么：没有账号，没有追踪 cookie，声音都在你的浏览器里生成。', updated: '最后更新',
     body: [
-      ['简单说', 'SFX Brew 没有账号系统，也不设置任何追踪 cookie。音效和配乐都在你自己的浏览器里生成，你做的东西不会上传给我们。'],
+      ['简单说', 'SFX Brew 没有账号系统，也不设置任何追踪 cookie。音效和配乐都在你自己的浏览器里生成，你做的东西不会上传给我们。唯一的例外是实验室里的「文字生成音效」测试版，见下文。'],
+      ['文字生成音效（测试版）', '使用「实验室 → 文字生成音效」时，你输入的描述（以及修改要求）会发送到我们的服务器。服务器是我们在德国自己运营的一台机器，经 Cloudflare 访问。为了理解描述，这段文字会转交给 DeepSeek（位于中国的 AI 服务），请不要输入个人信息。服务器只在内存里用你的 IP 地址做频率限制，一天之内就会忘掉。我们会保存你输入的文字和结果评分（不含 IP 地址）30 天用于改进工具，然后删除。生成的音频文件 2 小时后删除。'],
+      ['防机器人', '「文字生成音效」页面使用 Cloudflare Turnstile 拦截自动化滥用。它在你点「生成」时检查浏览器环境，不设置广告或追踪 cookie，详见 Cloudflare Turnstile 隐私附录。'],
       ['存在你浏览器里的东西', '为了记住你的设置，网站会在浏览器本地存储里保存几项内容：界面语言、编辑器里展开了哪些分类、实验室的工程。这些不会离开你的设备，清除浏览器数据就会删掉。'],
       ['访问统计', '我们用 Cloudflare Web Analytics 统计页面访问量。它不用 cookie、不做指纹识别，也不跨网站追踪你；我们只能看到总数，比如某个页面有多少人访问、来自哪些国家。'],
       ['托管', '网站托管在 GitHub Pages。和所有网站服务器一样，你打开页面时 GitHub 会收到你的 IP 地址，并可能出于安全原因记录在日志里，详见 GitHub 隐私声明。'],
-      ['录音和字体', '少数音效会播放本站提供的简短 CC0 录音。网站不加载任何第三方字体或嵌入内容。'],
+      ['录音和字体', '少数音效会播放本站提供的简短 CC0 录音。网站不加载第三方字体；唯一的第三方嵌入是「文字生成音效」页面的 Cloudflare Turnstile。'],
       ['广告', '网站目前没有广告。如果以后加广告，会先更新本页，并在使用任何广告 cookie 之前征得你的同意。'],
       ['联系', '对本政策或你的数据有疑问，可以发邮件到 contact@sfxbrew.com，或者在 GitHub 上提 issue（github.com/2365836149-sketch/sfxbrew）。']
     ] }
@@ -588,12 +636,12 @@ const missing = lib.PRESETS.filter(p => !SOUNDS[p.id]).map(p => p.id);
 if (missing.length) throw new Error('data.js 缺少这些预设的文案: ' + missing.join(', '));
 const out = [];
 LANGS.forEach(lang => {
-  out.push(searchPage(lang, null), ...usedCats().map(c => searchPage(lang, c)), labPage(lang), musicRedirect(lang), privacyPage(lang), ...Object.keys(SOUNDS).map(id => soundPage(lang, id)), ...Object.keys(PACKS).map(slug => packPage(lang, slug)));
+  out.push(searchPage(lang, null), ...usedCats().map(c => searchPage(lang, c)), labPage(lang), textSfxPage(lang), musicRedirect(lang), privacyPage(lang), ...Object.keys(SOUNDS).map(id => soundPage(lang, id)), ...Object.keys(PACKS).map(slug => packPage(lang, slug)));
 });
 for (const dir of ['sounds', 'packs', 'zh', 'music', 'lab', 'privacy']) fs.rmSync(path.join(ROOT, dir), { recursive: true, force: true });
 out.forEach(o => { lib.writeFile(path.join(ROOT, o.file), o.html); });
 
-const urls = ['/', '/editor/', ...LANGS.flatMap(l => [PREFIX[l] + 'sounds/', ...usedCats().map(c => catUrl(l, c)), PREFIX[l] + 'lab/', privacyUrl(l), ...Object.keys(SOUNDS).map(id => soundUrl(l, id)), ...Object.keys(PACKS).map(k => packUrl(l, k))]), '/llms.txt'];
+const urls = ['/', '/editor/', ...LANGS.flatMap(l => [PREFIX[l] + 'sounds/', ...usedCats().map(c => catUrl(l, c)), PREFIX[l] + 'lab/', textSfxUrl(l), privacyUrl(l), ...Object.keys(SOUNDS).map(id => soundUrl(l, id)), ...Object.keys(PACKS).map(k => packUrl(l, k))]), '/llms.txt'];
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   urls.map(u => '  <url><loc>' + SITE + u + '</loc><lastmod>' + TODAY + '</lastmod></url>').join('\n') + '\n</urlset>\n');
 

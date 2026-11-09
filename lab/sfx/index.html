@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text to Sound Effect (beta) | SFX Brew Lab</title>
+<meta name="description" content="Describe a game sound effect in words and get three candidates, built from synthesis and real CC0 recordings and ranked by an AI listener. Refine it by saying what to change. Free beta.">
+<link rel="canonical" href="https://sfxbrew.com/lab/sfx/">
+<link rel="alternate" hreflang="en" href="https://sfxbrew.com/lab/sfx/">
+<link rel="alternate" hreflang="zh-Hans" href="https://sfxbrew.com/zh/lab/sfx/">
+<link rel="alternate" hreflang="x-default" href="https://sfxbrew.com/lab/sfx/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Text to Sound Effect (beta) | SFX Brew Lab">
+<meta property="og:description" content="Describe a game sound effect in words and get three candidates, built from synthesis and real CC0 recordings and ranked by an AI listener. Refine it by saying what to change. Free beta.">
+<meta property="og:url" content="https://sfxbrew.com/lab/sfx/">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/style.css">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+</head>
+<body>
+<header class="bar">
+  <a class="bar-brand" href="/"><img src="/favicon.svg" alt=""><span>SFX Brew</span></a>
+  <nav class="bar-tabs"><a href="/editor/">SFX Editor</a><a href="/sounds/">Sound Library</a><a href="/lab/" class="on" aria-current="page">Lab</a></nav>
+  <span class="bar-spacer"></span>
+  <a class="bar-link hide-sm" href="/#agents">For AI agents</a>
+  <a class="bar-link" href="/zh/lab/sfx/" hreflang="zh-Hans" lang="zh-CN">中文</a>
+</header>
+<main class="ts">
+  <div class="ts-switch"><a href="/lab/">Music studio</a><span class="on">Text to sound effect (beta)</span></div>
+  <h1>Text to sound effect <span class="ts-beta">beta</span></h1>
+  <p class="ts-sub">Describe the sound you need. An AI picks synth presets and real CC0 recordings, renders a batch of variations, listens to them and keeps the three closest. Pick one and say what to change.</p>
+  <p id="ts-offline" class="ts-offline" hidden>The generator is offline right now (it runs on a single machine during the beta). Please try again later.</p>
+  <form id="ts-form" class="ts-form"><input id="ts-q" type="text" maxlength="300" placeholder="e.g. a heavy wooden door creaking open" autocomplete="off" aria-label="Text to sound effect"><button id="ts-go" class="btn primary big">Generate</button></form>
+  <div class="ts-ex"><span>Try</span><button type="button" class="ts-chip">a heavy wooden door creaking open</button><button type="button" class="ts-chip">slime jumping and landing</button><button type="button" class="ts-chip">sci-fi door sliding open</button><button type="button" class="ts-chip">footsteps in deep snow</button><button type="button" class="ts-chip">8-bit treasure chest opening</button><button type="button" class="ts-chip">sword drawn from its sheath</button><button type="button" class="ts-chip">distant temple bell at night</button></div>
+  <p class="ts-note">Beta: runs on a single machine and may be offline or slow. What you type is sent to DeepSeek (an AI service in China) to interpret it, and kept without your IP for 30 days to improve the tool. <a href="/privacy/">Privacy policy</a></p>
+  <p id="ts-left" class="ts-left"></p>
+  <div id="ts-cf" class="ts-cf"></div>
+  <div id="ts-log"></div>
+  <p class="ts-note">Results are free to use in your games. Recordings are CC0 from Freesound.</p>
+</main>
+<footer class="foot">
+  <p class="foot-meta"><a href="/sounds/">Sound Library</a><a href="/privacy/">Privacy</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
+</footer>
+<script type="application/json" id="ts-data">{"lang":"en","api":"https://api.sfxbrew.com","sitekey":"0x4AAAAAAF51qx0EEEg_ckOM","i18n":{"title":"Text to Sound Effect (beta) | SFX Brew Lab","metaDesc":"Describe a game sound effect in words and get three candidates, built from synthesis and real CC0 recordings and ranked by an AI listener. Refine it by saying what to change. Free beta.","h":"Text to sound effect","beta":"beta","sub":"Describe the sound you need. An AI picks synth presets and real CC0 recordings, renders a batch of variations, listens to them and keeps the three closest. Pick one and say what to change.","ph":"e.g. a heavy wooden door creaking open","go":"Generate","going":"Working…","examplesH":"Try","examples":["a heavy wooden door creaking open","slime jumping and landing","sci-fi door sliding open","footsteps in deep snow","8-bit treasure chest opening","sword drawn from its sheath","distant temple bell at night"],"refinePh":"What should change? e.g. darker, shorter tail, more metallic","refine":"Refine","refining":"Refining…","pick":"Refine this","download":"WAV","play":"Play","match":"match","recFrom":"Recordings","synth":"Synthesized","you":"You","refineOf":"Change:","notice":"Beta: runs on a single machine and may be offline or slow. What you type is sent to DeepSeek (an AI service in China) to interpret it, and kept without your IP for 30 days to improve the tool.","privacy":"Privacy policy","left":"{n} free generations left today","offline":"The generator is offline right now (it runs on a single machine during the beta). Please try again later.","keptPrev":"That change moved it further from the description, so the previous version is kept first.","mild":"The change was too strong, so a gentler version was used.","errors":{"per_minute":"Too many requests. Wait a minute and try again.","per_day":"You have used today's free generations. Come back tomorrow.","daily_global":"Today's beta quota for everyone is used up. Come back tomorrow.","busy":"Busy right now, please try again in a moment.","captcha":"Verification failed. Reload the page and try again.","empty":"Type a description first.","origin":"Request blocked.","server":"Generation failed. Try describing it differently.","network":"Could not reach the generator. It may be offline."},"license":"Results are free to use in your games. Recordings are CC0 from Freesound."}}</script>
+<script src="/textsfx.js"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "a45dcf7d53464930b4757d7687c6b9b1"}'></script>
+</body>
+</html>

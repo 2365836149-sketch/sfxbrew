@@ -884,7 +884,7 @@ const STUDIO = {
   en: {
     title: 'SFX Brew Lab — Free Online Music Studio for Game Soundtracks',
     metaDesc: 'A free music studio in your browser for game soundtracks: multitrack timeline, piano roll, drum grid and mixer with guqin, pipa, bamboo flute, erhu, bells and war drums. Generate a full arrangement from a mood, edit every note, export WAV, loops and stems. Free for commercial use.',
-    untitled: 'Untitled song', expStudio: 'Music studio', expText: 'Text to music (coming soon)', newProject: 'New', exportBtn: 'Export',
+    untitled: 'Untitled song', expStudio: 'Music studio', expText: 'Text to music (coming soon)', expSfx: 'Text to sound effect (beta)', newProject: 'New', exportBtn: 'Export',
     play: 'Play', stop: 'Stop', toStart: 'Go to start', loop: 'Cycle (C)', metronome: 'Metronome (K)', undo: 'Undo (⌘Z)', redo: 'Redo (⇧⌘Z)',
     tempo: 'Tempo', key: 'Key', mode: 'Mode', scaleLock: 'Pentatonic lock', scaleLockTip: 'Only show notes of the pentatonic scale in the piano roll',
     zoomIn: 'Zoom in', zoomOut: 'Zoom out', addTrack: '+ Track', loopLane: 'Cycle', barsLane: 'Bar', secLane: 'Sections', chordLane: 'Chords',
@@ -918,7 +918,7 @@ const STUDIO = {
   zh: {
     title: 'SFX Brew 实验室：免费在线编曲工作室（游戏配乐 / 民乐音色）',
     metaDesc: '在浏览器里免费做游戏配乐的编曲工作室：多轨时间线、钢琴卷帘、鼓网格、混音，音色有古琴、琵琶、竹笛、二胡、钟磬和战鼓。按情绪一键生成完整编曲，每个音都能改，导出 WAV、无缝循环和分轨，免费商用。',
-    untitled: '未命名', expStudio: '编曲工作室', expText: '文字作曲（即将推出）', newProject: '新建', exportBtn: '导出',
+    untitled: '未命名', expStudio: '编曲工作室', expText: '文字作曲（即将推出）', expSfx: '文字生成音效（测试版）', newProject: '新建', exportBtn: '导出',
     play: '播放', stop: '停止', toStart: '回到开头', loop: '循环（C）', metronome: '节拍器（K）', undo: '撤销（⌘Z）', redo: '重做（⇧⌘Z）',
     tempo: '速度', key: '主音', mode: '调式', scaleLock: '五声锁定', scaleLockTip: '钢琴卷帘里只显示五声音阶内的音',
     zoomIn: '放大', zoomOut: '缩小', addTrack: '+ 音轨', loopLane: '循环', barsLane: '小节', secLane: '段落', chordLane: '和弦',
@@ -951,4 +951,41 @@ const STUDIO = {
   }
 };
 
-module.exports = { SOUNDS, PACKS, UI, MUSIC, STUDIO, CAT_COPY };
+
+/* 文字生成音效（测试版，/lab/sfx/）界面文字。后端是本机 sfx-pro，经 Cloudflare Tunnel 到 api.sfxbrew.com */
+const TEXTSFX = {
+  en: {
+    title: 'Text to Sound Effect (beta) | SFX Brew Lab',
+    metaDesc: 'Describe a game sound effect in words and get three candidates, built from synthesis and real CC0 recordings and ranked by an AI listener. Refine it by saying what to change. Free beta.',
+    h: 'Text to sound effect', beta: 'beta',
+    sub: 'Describe the sound you need. An AI picks synth presets and real CC0 recordings, renders a batch of variations, listens to them and keeps the three closest. Pick one and say what to change.',
+    ph: 'e.g. a heavy wooden door creaking open', go: 'Generate', going: 'Working…', examplesH: 'Try',
+    examples: ['a heavy wooden door creaking open', 'slime jumping and landing', 'sci-fi door sliding open', 'footsteps in deep snow', '8-bit treasure chest opening', 'sword drawn from its sheath', 'distant temple bell at night'],
+    refinePh: 'What should change? e.g. darker, shorter tail, more metallic', refine: 'Refine', refining: 'Refining…', pick: 'Refine this', download: 'WAV', play: 'Play',
+    match: 'match', recFrom: 'Recordings', synth: 'Synthesized', you: 'You', refineOf: 'Change:',
+    notice: 'Beta: runs on a single machine and may be offline or slow. What you type is sent to DeepSeek (an AI service in China) to interpret it, and kept without your IP for 30 days to improve the tool.',
+    privacy: 'Privacy policy', left: '{n} free generations left today', offline: 'The generator is offline right now (it runs on a single machine during the beta). Please try again later.',
+    keptPrev: 'That change moved it further from the description, so the previous version is kept first.', mild: 'The change was too strong, so a gentler version was used.',
+    errors: { per_minute: 'Too many requests. Wait a minute and try again.', per_day: 'You have used today\'s free generations. Come back tomorrow.', daily_global: 'Today\'s beta quota for everyone is used up. Come back tomorrow.',
+      busy: 'Busy right now, please try again in a moment.', captcha: 'Verification failed. Reload the page and try again.', empty: 'Type a description first.', origin: 'Request blocked.', server: 'Generation failed. Try describing it differently.', network: 'Could not reach the generator. It may be offline.' },
+    license: 'Results are free to use in your games. Recordings are CC0 from Freesound.'
+  },
+  zh: {
+    title: '文字生成音效（测试版）| SFX Brew 实验室',
+    metaDesc: '用文字描述想要的游戏音效，AI 结合合成预设和真实 CC0 录音生成一批变体，自动试听挑出最贴近的三个，还能用一句话继续修改。免费测试中。',
+    h: '文字生成音效', beta: '测试版',
+    sub: '描述你想要的声音。AI 会挑选合成预设和真实 CC0 录音，生成一批变体，自己试听后留下最贴近的三个。选一个，再说说怎么改。',
+    ph: '比如：推开一扇沉重的旧木门', go: '生成', going: '生成中…', examplesH: '试试',
+    examples: ['推开一扇沉重的旧木门', '史莱姆跳跃落地', '科幻飞船的自动门打开', '在厚雪里走几步', '8-bit 风格的开宝箱', '拔剑出鞘', '雨夜里远处的寺庙钟声'],
+    refinePh: '说说怎么改：再闷一点 / 尾巴短点 / 更有金属感', refine: '修改', refining: '修改中…', pick: '选这个继续改', download: 'WAV', play: '播放',
+    match: '贴近度', recFrom: '录音素材', synth: '合成', you: '你', refineOf: '修改：',
+    notice: '测试版：后端只跑在一台机器上，可能离线或较慢。你输入的文字会发送给 DeepSeek（位于中国的 AI 服务）来理解，并在不记录 IP 的情况下保存 30 天用于改进。',
+    privacy: '隐私政策', left: '今天还能免费生成 {n} 次', offline: '生成服务暂时离线（测试期间只跑在一台机器上），请稍后再来。',
+    keptPrev: '这次改动反而离描述更远，第一个保留的是上一版。', mild: '原方案改得太猛，已自动换成温和一点的版本。',
+    errors: { per_minute: '请求太频繁，请过一分钟再试。', per_day: '你今天的免费次数用完了，明天再来吧。', daily_global: '今天全站的测试名额已经用完，明天再来吧。',
+      busy: '现在有点忙，请稍等片刻再试。', captcha: '人机验证没通过，请刷新页面再试。', empty: '先写一句描述。', origin: '请求被拒绝。', server: '生成失败，换个说法试试。', network: '连不上生成服务，可能暂时离线。' },
+    license: '结果可以免费用在你的游戏里。录音素材来自 Freesound，均为 CC0。'
+  }
+};
+
+module.exports = { SOUNDS, PACKS, UI, MUSIC, STUDIO, CAT_COPY, TEXTSFX };
