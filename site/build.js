@@ -88,6 +88,12 @@ function siteBar(lang, active, altPath) {
   <a class="bar-link" href="${altPath}" hreflang="${HREFLANG[other(lang)]}" lang="${HTML_LANG[other(lang)]}">${esc(u.switchLang)}</a>
 </header>`;
 }
+/* 分享预览图（1200×630，og.png / og-zh.png 在站点根目录） */
+function ogImage(lang) {
+  const img = SITE + (lang === 'zh' ? '/og-zh.png' : '/og.png');
+  return '<meta property="og:image" content="' + img + '">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n' +
+    '<meta property="og:site_name" content="SFX Brew">\n<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="' + img + '">';
+}
 function headTags(lang, { title, description, urlPath, altPath }) {
   const alt = (l, p) => '<link rel="alternate" hreflang="' + HREFLANG[l] + '" href="' + SITE + p + '">';
   const paths = { [lang]: urlPath, [other(lang)]: altPath };
@@ -105,7 +111,7 @@ ${alt('zh', paths.zh)}
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${SITE + urlPath}">
 <meta property="og:locale" content="${lang === 'zh' ? 'zh_CN' : 'en_US'}">
-<meta name="twitter:card" content="summary">`;
+${ogImage(lang)}`;
 }
 /* 音效库左侧导航（详情页、音效包页）：全部 / 音效包 / 各大类（当前大类展开列出音效） */
 function libSide(lang, current) {
@@ -453,7 +459,7 @@ ${alt('zh', paths.zh)}
 <meta property="og:title" content="${esc(st.title)}">
 <meta property="og:description" content="${esc(st.metaDesc)}">
 <meta property="og:url" content="${SITE + urlPath}">
-<meta name="twitter:card" content="summary">
+${ogImage(lang)}
 <link rel="stylesheet" href="/style.css">
 <link rel="stylesheet" href="/studio/studio.css">
 </head>
