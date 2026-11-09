@@ -307,6 +307,10 @@ a.lab-tab:hover { border-color: var(--line-2); color: var(--ink); }
 .ts-offline { padding: 10px 12px; border-radius: var(--radius); background: var(--fill); color: var(--danger); margin: 0 0 12px; }
 .ts-cf { margin-top: 8px; }
 .ts-key { margin: 8px 0 0; font-size: 13px; }
+.ts-buy { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 0; font-size: 13px; color: var(--ink-2); }
+.ts-claimed { margin: 12px 0 0; padding: 12px 14px; border: 1px solid var(--accent); border-radius: var(--radius); background: var(--paper); font-size: 14px; }
+.ts-claimed p { margin: 0 0 6px; }
+.ts-claimed code { font-family: var(--mono); font-size: 15px; padding: 4px 8px; border-radius: 6px; background: var(--fill); user-select: all; word-break: break-all; }
 .ts-key summary { cursor: pointer; color: var(--ink-2); }
 .ts-key-form { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 .ts-key-form input { flex: 1 1 220px; min-width: 0; padding: 6px 10px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 13px; }

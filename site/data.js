@@ -969,9 +969,12 @@ const TEXTSFX = {
     errors: { per_minute: 'Too many requests. Wait a minute and try again.', per_day: 'You have used today\'s free generations. Come back tomorrow.', daily_global: 'Today\'s beta quota for everyone is used up. Come back tomorrow.',
       busy: 'Busy right now, please try again in a moment.', captcha: 'Verification failed. Reload the page and try again.', empty: 'Type a description first.', origin: 'Request blocked.', server: 'Generation failed. Try describing it differently.', network: 'Could not reach the generator. It may be offline.' },
     license: 'Results are free to use in your games. Recordings are CC0 from Freesound.',
-    keyH: 'Have a credit key?', keyPh: 'Paste your license key', keyUse: 'Use key', keyClear: 'Remove',
-    keyNote: 'Each generation or refinement uses 1 credit. With a key there is no daily limit. The key is kept only in this browser.', keyBuy: 'Buy credits',
-    creditsLeft: '{n} credits left on your key', keyErrors: { license_invalid: 'This key is not valid (or was refunded).', no_credits: 'Your key has no credits left.', license_unavailable: 'Could not check the key right now. Try again in a minute.' }
+    keyH: 'Have a credit key?', keyPh: 'SFXB-XXXXX-XXXXX-XXXXX-XXXXX', keyUse: 'Use key', keyClear: 'Remove',
+    keyNote: 'Each generation or refinement uses 1 credit. With a key there is no daily limit and no captcha. The key is kept in this browser; paste it to use your credits on another device.',
+    buyH: 'Need more?', buy: '{n} credits · {price}', buying: 'Opening checkout…',
+    paidH: 'Payment received. Your credit key:', paidNote: 'It is saved in this browser. Copy it somewhere safe to use it on another device.', copy: 'Copy', copied: 'Copied',
+    creditsLeft: '{n} credits left on your key',
+    keyErrors: { license_invalid: 'This key is not valid (or the payment was refunded).', no_credits: 'Your key has no credits left.', not_paid: 'The payment has not gone through yet. Reload this page in a minute.', payment_error: 'Payment service error. If you were charged, email contact@sfxbrew.com and we will send your key.' }
   },
   zh: {
     title: '文字生成音效（测试版）| SFX Brew 实验室',
@@ -988,9 +991,12 @@ const TEXTSFX = {
     errors: { per_minute: '请求太频繁，请过一分钟再试。', per_day: '你今天的免费次数用完了，明天再来吧。', daily_global: '今天全站的测试名额已经用完，明天再来吧。',
       busy: '现在有点忙，请稍等片刻再试。', captcha: '人机验证没通过，请刷新页面再试。', empty: '先写一句描述。', origin: '请求被拒绝。', server: '生成失败，换个说法试试。', network: '连不上生成服务，可能暂时离线。' },
     license: '结果可以免费用在你的游戏里。录音素材来自 Freesound，均为 CC0。',
-    keyH: '有点数兑换码？', keyPh: '粘贴你的兑换码（license key）', keyUse: '使用', keyClear: '移除',
-    keyNote: '每次生成或修改扣 1 点，用兑换码不受每日次数限制。兑换码只保存在这个浏览器里。', keyBuy: '购买点数',
-    creditsLeft: '兑换码还剩 {n} 点', keyErrors: { license_invalid: '兑换码无效（或已退款）。', no_credits: '兑换码的点数用完了。', license_unavailable: '暂时无法验证兑换码，请过一分钟再试。' }
+    keyH: '有点数兑换码？', keyPh: 'SFXB-XXXXX-XXXXX-XXXXX-XXXXX', keyUse: '使用', keyClear: '移除',
+    keyNote: '每次生成或修改扣 1 点，用兑换码不受每日次数限制，也不用人机验证。兑换码保存在这个浏览器里，换设备时粘贴进来即可。',
+    buyH: '不够用？', buy: '{n} 点 · {price}', buying: '正在打开付款页…',
+    paidH: '付款成功，你的兑换码：', paidNote: '已保存在这个浏览器里。请另外复制保存，换设备时要用。', copy: '复制', copied: '已复制',
+    creditsLeft: '兑换码还剩 {n} 点',
+    keyErrors: { license_invalid: '兑换码无效（或这笔付款已退款）。', no_credits: '兑换码的点数用完了。', not_paid: '付款还没完成，请过一分钟刷新本页。', payment_error: '付款服务出错。如果已经扣款，请发邮件到 contact@sfxbrew.com，我们会把兑换码发给你。' }
   }
 };
 

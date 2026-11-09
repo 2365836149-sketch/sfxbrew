@@ -70,10 +70,8 @@
     if (!status.paid) { licenseKey = ''; return; }          // 后端没开点数包：整块不显示
     const box = $('#ts-key'), inp = $('#ts-key-in'), clear = $('#ts-key-clear');
     box.hidden = false;
-    if (D.buy) { $('#ts-buy').href = D.buy; $('#ts-buy').hidden = false; }
     const sync = () => { inp.value = licenseKey; clear.hidden = !licenseKey; box.open = !!licenseKey; };
     sync();
-    if (licenseKey) checkKey(licenseKey).then(j => showCredits(j.left)).catch(err => { errorBox($('#ts-log'), err.message); });
     $('#ts-key-form').onsubmit = async e => {
       e.preventDefault();
       const k = inp.value.trim(); if (!k) return;
@@ -81,6 +79,44 @@
       catch (err) { errorBox($('#ts-log'), err.message); }
     };
     clear.onclick = () => { licenseKey = ''; store.set(''); sync(); showLeft(status.left_today); };
+
+    /* 购买按钮：每个档位一个，点了去 Stripe 付款页 */
+    const fmt = (amt, cur) => { try { return new Intl.NumberFormat(D.lang === 'zh' ? 'zh-CN' : 'en', { style: 'currency', currency: cur.toUpperCase() }).format(amt / 100); } catch (e) { return (amt / 100) + ' ' + cur.toUpperCase(); } };
+    const packs = (status.packs || []).filter(p => p.amount != null);
+    if (packs.length) {
+      $('#ts-buy').hidden = false;
+      packs.forEach(p => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'btn';
+        const label = T.buy.replace('{n}', p.credits).replace('{price}', fmt(p.amount, p.currency));
+        b.textContent = label;
+        b.onclick = async () => {
+          b.disabled = true; b.textContent = T.buying;
+          try {
+            const r = await fetch(API + '/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ price: p.id, lang: D.lang }) });
+            const j = await r.json().catch(() => ({}));
+            if (!r.ok || !j.url) throw new Error(keyMsg(j.kind || 'payment_error'));
+            location.href = j.url;
+          } catch (err) { errorBox($('#ts-log'), err.message); b.disabled = false; b.textContent = label; }
+        };
+        $('#ts-packs').append(b);
+      });
+    }
+
+    /* 从 Stripe 付款页回来：?paid=cs_... → 领兑换码 */
+    const sid = new URLSearchParams(location.search).get('paid');
+    if (sid) {
+      fetch(API + '/api/claim', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sid }) })
+        .then(async r => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(keyMsg(j.kind || 'payment_error')); return j; })
+        .then(j => {
+          licenseKey = j.key; store.set(j.key); sync(); showCredits(j.left);
+          $('#ts-claimed-key').textContent = j.key; $('#ts-claimed').hidden = false;
+          $('#ts-copy').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(j.key).then(() => { $('#ts-copy').textContent = T.copied; }); };
+        })
+        .catch(err => errorBox($('#ts-log'), err.message));
+      // 兑换码只在付款后的这一页显示；地址里保留订单号，刷新也能再领到同一个码
+    } else if (licenseKey) {
+      checkKey(licenseKey).then(j => showCredits(j.left)).catch(err => { errorBox($('#ts-log'), err.message); });
+    }
   }
 
   function setBusy(b, btn, label) {

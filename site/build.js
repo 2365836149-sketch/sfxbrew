@@ -35,8 +35,6 @@ const privacyUrl = lang => PREFIX[lang] + 'privacy/';
    TURNSTILE_SITEKEY：Cloudflare Turnstile 的站点密钥（公开的）。留空 = 用 Cloudflare 的测试密钥（总是通过，只适合本地）。 */
 const API_BASE = 'https://api.sfxbrew.com';
 const TURNSTILE_SITEKEY = '0x4AAAAAAF51qx0EEEg_ckOM';
-/* 点数包购买链接（Lemon Squeezy 结账页）。留空 = 不显示“购买”链接；后端没开点数包时整块都不显示 */
-const CREDITS_BUY_URL = '';
 const textSfxUrl = lang => PREFIX[lang] + 'lab/sfx/';
 const SITE = 'https://sfxbrew.com';
 const VARIANTS = 12;
@@ -561,7 +559,7 @@ ${analyticsTag()}
 function textSfxPage(lang) {
   const t = TEXTSFX[lang], u = UI[lang], st = STUDIO[lang];
   const urlPath = textSfxUrl(lang), altPath = textSfxUrl(other(lang));
-  const data = { lang, api: API_BASE, sitekey: TURNSTILE_SITEKEY, buy: CREDITS_BUY_URL, i18n: t };
+  const data = { lang, api: API_BASE, sitekey: TURNSTILE_SITEKEY, i18n: t };
   const html = `<!doctype html>
 <html lang="${HTML_LANG[lang]}">
 <head>
@@ -580,9 +578,11 @@ ${labNav(lang, 'sfx')}
   <div class="ts-ex"><span>${esc(t.examplesH)}</span>${t.examples.map(x => '<button type="button" class="ts-chip">' + esc(x) + '</button>').join('')}</div>
   <p class="ts-note">${esc(t.notice)} <a href="${privacyUrl(lang)}">${esc(t.privacy)}</a></p>
   <p id="ts-left" class="ts-left"></p>
+  <div id="ts-claimed" class="ts-claimed" hidden><p><b>${esc(t.paidH)}</b> ${esc(t.paidNote)}</p><p><code id="ts-claimed-key"></code> <button type="button" id="ts-copy" class="btn">${esc(t.copy)}</button></p></div>
+  <div id="ts-buy" class="ts-buy" hidden><span>${esc(t.buyH)}</span><span id="ts-packs"></span></div>
   <details id="ts-key" class="ts-key" hidden><summary>${esc(t.keyH)}</summary>
     <form id="ts-key-form" class="ts-key-form"><input id="ts-key-in" type="text" maxlength="100" placeholder="${esc(t.keyPh)}" autocomplete="off" spellcheck="false" aria-label="${esc(t.keyH)}"><button class="btn">${esc(t.keyUse)}</button><button type="button" id="ts-key-clear" class="btn" hidden>${esc(t.keyClear)}</button></form>
-    <p class="ts-note">${esc(t.keyNote)} <a id="ts-buy" href="#" target="_blank" rel="noopener" hidden>${esc(t.keyBuy)}</a></p>
+    <p class="ts-note">${esc(t.keyNote)}</p>
   </details>
   <div id="ts-cf" class="ts-cf"></div>
   <div id="ts-log"></div>
@@ -617,7 +617,7 @@ const PRIVACY = {
     body: [
       ['Short version', 'SFX Brew has no accounts and sets no tracking cookies. Sounds and music are generated in your own browser; nothing you make is uploaded to us. The one exception is the Text to sound effect beta in the Lab, described below.'],
       ['Text to sound effect (beta)', 'When you use Lab → Text to sound effect, the description you type (and any change you ask for) is sent to our server, which runs on a machine we operate in Germany and is reached through Cloudflare. To interpret it, the text is passed to DeepSeek, an AI service operated in China; please do not type personal information. The server uses your IP address only in memory to enforce rate limits and forgets it within a day. We keep the text you typed and the result scores, without your IP address, for 30 days to improve the tool, then delete them. The generated audio files are deleted after 2 hours.'],
-      ['Credits for Text to sound effect', 'If you buy credits, the payment is handled by Lemon Squeezy, which acts as the seller (merchant of record) and processes your name, email and payment details under its own privacy policy; we never see your card details. You receive a license key. When you use it, the key is checked with Lemon Squeezy, and our server stores only a one-way hash of the key with the number of credits used. The key itself is kept in your browser\'s local storage until you remove it.'],
+      ['Credits for Text to sound effect', 'If you buy credits, checkout and payment run on Stripe. Stripe acts as the seller (merchant of record) through Stripe Managed Payments and processes your name, email, address and payment details under its own privacy policy; we never see your card details. After payment our server asks Stripe whether the order is paid and gives you a credit key. We store only a one-way hash of the key, the number of credits used and the Stripe order ID (to handle refunds). The key itself is kept in your browser\'s local storage until you remove it.'],
       ['Bot protection', 'The Text to sound effect page uses Cloudflare Turnstile to block automated abuse. Turnstile checks your browser when you press Generate and does not set advertising or tracking cookies. See the Cloudflare Turnstile privacy addendum.'],
       ['Stored in your browser', 'A few preferences are saved in your browser\'s local storage so the site remembers them: your language, which sound categories you have open, and your Lab project. They never leave your device, and clearing your browser data removes them.'],
       ['Visitor statistics', 'We use Cloudflare Web Analytics to count page views. It does not use cookies or fingerprinting and does not track you across sites; we only see totals such as how many people visited a page and from which country.'],
@@ -630,7 +630,7 @@ const PRIVACY = {
     body: [
       ['简单说', 'SFX Brew 没有账号系统，也不设置任何追踪 cookie。音效和配乐都在你自己的浏览器里生成，你做的东西不会上传给我们。唯一的例外是实验室里的「文字生成音效」测试版，见下文。'],
       ['文字生成音效（测试版）', '使用「实验室 → 文字生成音效」时，你输入的描述（以及修改要求）会发送到我们的服务器。服务器是我们在德国自己运营的一台机器，经 Cloudflare 访问。为了理解描述，这段文字会转交给 DeepSeek（位于中国的 AI 服务），请不要输入个人信息。服务器只在内存里用你的 IP 地址做频率限制，一天之内就会忘掉。我们会保存你输入的文字和结果评分（不含 IP 地址）30 天用于改进工具，然后删除。生成的音频文件 2 小时后删除。'],
-      ['文字生成音效的点数', '如果你购买点数，付款由 Lemon Squeezy 处理，它作为卖方（Merchant of Record）按它自己的隐私政策处理你的姓名、邮箱和支付信息，我们看不到你的银行卡信息。你会收到一个兑换码（license key）。使用时，我们的服务器会向 Lemon Squeezy 核验这个兑换码，只保存兑换码的单向哈希和已用点数。兑换码本身保存在你浏览器的本地存储里，直到你移除它。'],
+      ['文字生成音效的点数', '如果你购买点数，结账和付款在 Stripe 上完成。Stripe 通过 Stripe Managed Payments 作为卖方（Merchant of Record），按它自己的隐私政策处理你的姓名、邮箱、地址和支付信息，我们看不到你的银行卡信息。付款后，我们的服务器向 Stripe 确认订单已付款，然后给你一个兑换码。我们只保存兑换码的单向哈希、已用点数和 Stripe 订单号（用于处理退款）。兑换码本身保存在你浏览器的本地存储里，直到你移除它。'],
       ['防机器人', '「文字生成音效」页面使用 Cloudflare Turnstile 拦截自动化滥用。它在你点「生成」时检查浏览器环境，不设置广告或追踪 cookie，详见 Cloudflare Turnstile 隐私附录。'],
       ['存在你浏览器里的东西', '为了记住你的设置，网站会在浏览器本地存储里保存几项内容：界面语言、编辑器里展开了哪些分类、实验室的工程。这些不会离开你的设备，清除浏览器数据就会删掉。'],
       ['访问统计', '我们用 Cloudflare Web Analytics 统计页面访问量。它不用 cookie、不做指纹识别，也不跨网站追踪你；我们只能看到总数，比如某个页面有多少人访问、来自哪些国家。'],
