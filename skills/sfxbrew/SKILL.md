@@ -14,7 +14,7 @@ docs_url: https://sfxbrew.com/llms.txt
 
 # SFX Brew: sound effects for games
 
-SFX Brew is a free, open-source sound effect engine (https://sfxbrew.com, MIT code). It synthesizes sounds locally from 29 presets; a few presets (war drum, lightning, gong, erhu) play short CC0 recordings. Generated sounds are free for commercial use with no attribution required.
+SFX Brew is a free, open-source sound effect engine (https://sfxbrew.com, MIT code). It synthesizes sounds locally from 45 presets; a few presets (war drum, lightning, gong, erhu) play short CC0 recordings. Generated sounds are free for commercial use with no attribution required.
 
 ## Before you start: setup and network use
 
