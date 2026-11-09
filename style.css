@@ -306,6 +306,10 @@ a.lab-tab:hover { border-color: var(--line-2); color: var(--ink); }
 .ts-left { font-size: 13px; color: var(--accent); margin: 6px 0 0; min-height: 1em; }
 .ts-offline { padding: 10px 12px; border-radius: var(--radius); background: var(--fill); color: var(--danger); margin: 0 0 12px; }
 .ts-cf { margin-top: 8px; }
+.ts-key { margin: 8px 0 0; font-size: 13px; }
+.ts-key summary { cursor: pointer; color: var(--ink-2); }
+.ts-key-form { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.ts-key-form input { flex: 1 1 220px; min-width: 0; padding: 6px 10px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 13px; }
 .ts-err { color: var(--danger); margin: 16px 0 0; }
 .ts-turn { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
 .ts-ask { font-weight: 600; margin: 0; }

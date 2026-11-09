@@ -13,6 +13,12 @@
   const audio = new Audio();
   let current = null, busy = false, captchaOn = true;
 
+  /* ---------- 点数兑换码（Lemon Squeezy license key），只存在本浏览器 ---------- */
+  const store = { get: () => { try { return localStorage.getItem('sfxbrew.key') || ''; } catch (e) { return ''; } },
+                  set: v => { try { v ? localStorage.setItem('sfxbrew.key', v) : localStorage.removeItem('sfxbrew.key'); } catch (e) {} } };
+  let licenseKey = store.get();
+  const keyMsg = kind => (T.keyErrors && T.keyErrors[kind]) || T.errors[kind] || T.errors.server;
+
   /* ---------- Turnstile：每次请求拿一个新令牌 ---------- */
   let widget = null, pending = null;
   function token() {
@@ -38,19 +44,44 @@
   async function post(path, body) {
     let r;
     try {
-      body.turnstile = await token();
+      if (licenseKey) body.license_key = licenseKey; else body.turnstile = await token();
       r = await fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     } catch (e) {
       throw new Error(e.message === T.errors.captcha ? e.message : T.errors.network);
     }
     let j = {};
     try { j = await r.json(); } catch (e) {}
-    if (!r.ok) throw new Error(T.errors[j.kind] || T.errors.server);
+    if (!r.ok) throw new Error(keyMsg(j.kind));
     if (j.left_today != null) showLeft(j.left_today);
+    if (j.credits_left != null) showCredits(j.credits_left);
     return j;
   }
 
-  function showLeft(n) { $('#ts-left').textContent = T.left.replace('{n}', Math.max(0, n)); }
+  function showLeft(n) { if (!licenseKey) $('#ts-left').textContent = T.left.replace('{n}', Math.max(0, n)); }
+  function showCredits(n) { $('#ts-left').textContent = T.creditsLeft.replace('{n}', Math.max(0, n)); }
+
+  async function checkKey(k) {
+    const r = await fetch(API + '/api/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ license_key: k }) });
+    let j = {}; try { j = await r.json(); } catch (e) {}
+    if (!r.ok) throw new Error(keyMsg(j.kind));
+    return j;
+  }
+  function setupKey(status) {
+    if (!status.paid) { licenseKey = ''; return; }          // 后端没开点数包：整块不显示
+    const box = $('#ts-key'), inp = $('#ts-key-in'), clear = $('#ts-key-clear');
+    box.hidden = false;
+    if (D.buy) { $('#ts-buy').href = D.buy; $('#ts-buy').hidden = false; }
+    const sync = () => { inp.value = licenseKey; clear.hidden = !licenseKey; box.open = !!licenseKey; };
+    sync();
+    if (licenseKey) checkKey(licenseKey).then(j => showCredits(j.left)).catch(err => { errorBox($('#ts-log'), err.message); });
+    $('#ts-key-form').onsubmit = async e => {
+      e.preventDefault();
+      const k = inp.value.trim(); if (!k) return;
+      try { const j = await checkKey(k); licenseKey = k; store.set(k); sync(); showCredits(j.left); }
+      catch (err) { errorBox($('#ts-log'), err.message); }
+    };
+    clear.onclick = () => { licenseKey = ''; store.set(''); sync(); showLeft(status.left_today); };
+  }
 
   function setBusy(b, btn, label) {
     busy = b;
@@ -138,6 +169,7 @@
   fetch(API + '/api/status').then(r => r.json()).then(j => {
     captchaOn = j.captcha !== false;
     showLeft(j.left_today);
+    setupKey(j);
     if (j.global_left <= 0) $('#ts-left').textContent = T.errors.daily_global;
   }).catch(() => {
     $('#ts-offline').hidden = false;
