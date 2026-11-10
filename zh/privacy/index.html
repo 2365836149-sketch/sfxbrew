@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>隐私政策 | SFX Brew</title>
-<meta name="description" content="SFX Brew 存什么、收集什么：没有账号，没有追踪 cookie，声音都在你的浏览器里生成。">
+<meta name="description" content="SFX Brew 存什么、收集什么：没有追踪 cookie，声音都在你的浏览器里生成，购买点数时可选邮箱登录。">
 <link rel="canonical" href="https://sfxbrew.com/zh/privacy/">
 <link rel="alternate" hreflang="en" href="https://sfxbrew.com/privacy/">
 <link rel="alternate" hreflang="zh-Hans" href="https://sfxbrew.com/zh/privacy/">
@@ -12,7 +12,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:title" content="隐私政策 | SFX Brew">
-<meta property="og:description" content="SFX Brew 存什么、收集什么：没有账号，没有追踪 cookie，声音都在你的浏览器里生成。">
+<meta property="og:description" content="SFX Brew 存什么、收集什么：没有追踪 cookie，声音都在你的浏览器里生成，购买点数时可选邮箱登录。">
 <meta property="og:url" content="https://sfxbrew.com/zh/privacy/">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://sfxbrew.com/og-zh.png">
@@ -21,7 +21,7 @@
 <meta property="og:site_name" content="SFX Brew">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://sfxbrew.com/og-zh.png">
-<link rel="stylesheet" href="/style.css?v=c034f2e1">
+<link rel="stylesheet" href="/style.css?v=66ef296b">
 
 
 </head>
@@ -36,7 +36,7 @@
 <div class="lib-shell">
 <div class="lib-side-wrap"><button class="lib-side-toggle" aria-expanded="false" onclick="var o=this.parentNode.classList.toggle('side-open');this.setAttribute('aria-expanded',o)">分类：全部音效 <span>▾</span></button><nav class="lib-side" aria-label="音效库"><div class="sheet-h"><b>音效库</b><button type="button" class="btn primary sheet-x">完成</button></div><div class="side-g"><div class="side-l"><a href="/zh/sounds/" class="on" aria-current="page">全部音效</a></div></div><div class="side-g"><p class="sec-h">音效包</p><div class="side-l"><a href="/zh/packs/xianxia-game-sound-pack/">修仙 / 武侠游戏音效包</a><a href="/zh/packs/game-ui-sound-pack/">游戏界面音效包</a></div></div><div class="side-g"><p class="sec-h">大类</p><div class="side-l"><a href="/zh/sounds/c/combat/">战斗 <i>11</i></a><a href="/zh/sounds/c/magic/">法术仙侠 <i>9</i></a><a href="/zh/sounds/c/eastern-instruments/">东方乐器 <i>9</i></a><a href="/zh/sounds/c/ui/">界面 <i>9</i></a><a href="/zh/sounds/c/items-rewards/">道具奖励 <i>9</i></a><a href="/zh/sounds/c/character/">角色动作 <i>5</i></a><a href="/zh/sounds/c/ambience/">环境氛围 <i>7</i></a><a href="/zh/sounds/c/creatures/">生物 <i>1</i></a></div></div></nav></div>
 <main class="lib">
-<article class="prose"><h1>隐私政策</h1><p class="muted">最后更新: 2026-11-10</p><h2>简单说</h2><p>SFX Brew 没有账号系统，也不设置任何追踪 cookie。音效和配乐都在你自己的浏览器里生成，你做的东西不会上传给我们。唯一的例外是实验室里的「文字生成音效」测试版，见下文。</p><h2>文字生成音效（测试版）</h2><p>使用「实验室 → 文字生成音效」时，你输入的描述（以及修改要求）会发送到我们的服务器。服务器是我们在德国自己运营的一台机器，经 Cloudflare 访问。为了理解描述，这段文字会转交给 DeepSeek（位于中国的 AI 服务），请不要输入个人信息。服务器只在内存里用你的 IP 地址做频率限制，一天之内就会忘掉。为了改进工具、训练我们自己的音效模型，我们会在不记录 IP 地址的情况下保存最多 2 年：你输入的文字、AI 的理解、为你生成的声音参数（不是音频本身），以及你在页面上对它们的操作（播放、下载、选中继续修改、点赞或点踩）。这些记录只用一个随机编号串起来，它在你打开页面时生成、关掉页面就作废，所以不同次的访问无法关联起来。如果你用了兑换码，我们只记“这次是付费请求”，不记是哪个兑换码。生成的音频文件 2 小时后删除。</p><h2>文字生成音效的点数</h2><p>如果你购买点数，结账和付款在 Stripe 上完成。Stripe 通过 Stripe Managed Payments 作为卖方（Merchant of Record），按它自己的隐私政策处理你的姓名、邮箱、地址和支付信息，我们看不到你的银行卡信息。付款后，我们的服务器向 Stripe 确认订单已付款，然后给你一个兑换码。我们只保存兑换码的单向哈希、已用点数和 Stripe 订单号（用于处理退款）。兑换码本身保存在你浏览器的本地存储里，直到你移除它。</p><h2>防机器人</h2><p>「文字生成音效」页面使用 Cloudflare Turnstile 拦截自动化滥用。它在你点「生成」时检查浏览器环境，不设置广告或追踪 cookie，详见 Cloudflare Turnstile 隐私附录。</p><h2>存在你浏览器里的东西</h2><p>为了记住你的设置，网站会在浏览器本地存储里保存几项内容：界面语言、编辑器里展开了哪些分类、实验室的工程。这些不会离开你的设备，清除浏览器数据就会删掉。</p><h2>访问统计</h2><p>我们用 Cloudflare Web Analytics 统计页面访问量。它不用 cookie、不做指纹识别，也不跨网站追踪你；我们只能看到总数，比如某个页面有多少人访问、来自哪些国家。</p><h2>托管</h2><p>网站托管在 GitHub Pages。和所有网站服务器一样，你打开页面时 GitHub 会收到你的 IP 地址，并可能出于安全原因记录在日志里，详见 GitHub 隐私声明。</p><h2>录音和字体</h2><p>少数音效会播放本站提供的简短 CC0 录音。网站不加载第三方字体；唯一的第三方嵌入是「文字生成音效」页面的 Cloudflare Turnstile。</p><h2>广告</h2><p>网站目前没有广告。如果以后加广告，会先更新本页，并在使用任何广告 cookie 之前征得你的同意。</p><h2>联系</h2><p>对本政策或你的数据有疑问，可以发邮件到 contact@sfxbrew.com，或者在 GitHub 上提 issue（github.com/2365836149-sketch/sfxbrew）。</p></article>
+<article class="prose"><h1>隐私政策</h1><p class="muted">最后更新: 2026-11-10</p><h2>简单说</h2><p>SFX Brew 不设置任何追踪 cookie。音效和配乐都在你自己的浏览器里生成，你做的东西不会上传给我们。例外是实验室里的「文字生成音效」测试版，以及购买点数时可选的邮箱登录，见下文。</p><h2>文字生成音效（测试版）</h2><p>使用「实验室 → 文字生成音效」时，你输入的描述（以及修改要求）会发送到我们的服务器。服务器是我们在德国自己运营的一台机器，经 Cloudflare 访问。为了理解描述，这段文字会转交给 DeepSeek（位于中国的 AI 服务），请不要输入个人信息。服务器只在内存里用你的 IP 地址做频率限制，一天之内就会忘掉。为了改进工具、训练我们自己的音效模型，我们会在不记录 IP 地址的情况下保存最多 2 年：你输入的文字、AI 的理解、为你生成的声音参数（不是音频本身），以及你在页面上对它们的操作（播放、下载、选中继续修改、点赞或点踩）。这些记录只用一个随机编号串起来，它在你打开页面时生成、关掉页面就作废，所以不同次的访问无法关联起来。如果你已登录，我们只记“这次是付费请求”，不记是谁。生成的音频文件 2 小时后删除。</p><h2>登录和点数</h2><p>购买点数需要用邮箱登录：我们通过邮件服务商 Resend 给你发一个 6 位验证码，输入后会在你浏览器的本地存储里保存一个登录令牌，直到你退出登录。我们的服务器保存你的邮箱、点数余额、购买对应的 Stripe 订单号（用于处理退款）以及登录令牌的单向哈希。结账和付款在 Stripe 上完成，Stripe 通过 Stripe Managed Payments 作为卖方（Merchant of Record），按它自己的隐私政策处理你的姓名、邮箱、地址和支付信息，我们看不到你的银行卡信息。你的邮箱只用于登录和处理购买相关的问题，不会用来发营销邮件。要删除账户，请用该邮箱发邮件到 contact@sfxbrew.com。</p><h2>防机器人</h2><p>「文字生成音效」页面使用 Cloudflare Turnstile 拦截自动化滥用。它在你点「生成」时检查浏览器环境，不设置广告或追踪 cookie，详见 Cloudflare Turnstile 隐私附录。</p><h2>存在你浏览器里的东西</h2><p>为了记住你的设置，网站会在浏览器本地存储里保存几项内容：界面语言、编辑器里展开了哪些分类、实验室的工程。这些不会离开你的设备，清除浏览器数据就会删掉。</p><h2>访问统计</h2><p>我们用 Cloudflare Web Analytics 统计页面访问量。它不用 cookie、不做指纹识别，也不跨网站追踪你；我们只能看到总数，比如某个页面有多少人访问、来自哪些国家。</p><h2>托管</h2><p>网站托管在 GitHub Pages。和所有网站服务器一样，你打开页面时 GitHub 会收到你的 IP 地址，并可能出于安全原因记录在日志里，详见 GitHub 隐私声明。</p><h2>录音和字体</h2><p>少数音效会播放本站提供的简短 CC0 录音。网站不加载第三方字体；唯一的第三方嵌入是「文字生成音效」页面的 Cloudflare Turnstile。</p><h2>广告</h2><p>网站目前没有广告。如果以后加广告，会先更新本页，并在使用任何广告 cookie 之前征得你的同意。</p><h2>联系</h2><p>对本政策或你的数据有疑问，可以发邮件到 contact@sfxbrew.com，或者在 GitHub 上提 issue（github.com/2365836149-sketch/sfxbrew）。</p></article>
 
 <footer class="foot">
   <p>本站所有声音都在你的浏览器里实时生成（合成或少量 CC0 录音素材），可免费商用，不需要署名。</p>

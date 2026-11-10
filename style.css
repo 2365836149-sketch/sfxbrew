@@ -386,10 +386,20 @@ a.lab-tab:hover { border-color: var(--line-2); color: var(--ink); }
 .ts-chip:hover { border-color: var(--accent); }
 .ts-chip:disabled, .ts-form button:disabled { opacity: 0.5; cursor: wait; }
 .ts-note { font-size: 12px; color: var(--ink-2); margin: 12px 0 0; }
-.ts-left { font-size: 13px; color: var(--accent); margin: 6px 0 0; min-height: 1em; }
+.ts-acct { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 10px 0 0; font-size: 13px; min-height: 1.4em; }
+.ts-left { color: var(--accent); }
+.ts-who { color: var(--ink-2); overflow-wrap: anywhere; }
+.ts-link { font: inherit; padding: 0; border: 0; background: none; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.ts-link:hover { color: var(--ink); }
+.ts-login { margin: 10px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); max-width: 420px; }
+.ts-login-row { display: flex; gap: 6px; margin: 0 0 8px; }
+.ts-login-row input { flex: 1 1 auto; min-width: 0; padding: 8px 10px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--bg); color: var(--ink); font: inherit; font-size: 15px; }
+.ts-login-row input#ts-code { letter-spacing: .2em; font-family: var(--mono); }
+.ts-login .ts-note { margin: 0 0 6px; }
+.ts-login .ts-link { font-size: 13px; color: var(--ink-2); }
+.ts-paid { margin: 10px 0 0; padding: 8px 12px; border-radius: var(--radius); background: var(--fill); color: var(--accent); font-size: 14px; }
 .ts-offline { padding: 10px 12px; border-radius: var(--radius); background: var(--fill); color: var(--danger); margin: 0 0 12px; }
 .ts-cf { margin-top: 8px; }
-.ts-key { margin: 8px 0 0; font-size: 13px; }
 .ts-rate { display: inline-flex; gap: 2px; }
 .ts-rate button { border: 1px solid transparent; background: none; border-radius: 6px; padding: 2px 5px; font-size: 15px; line-height: 1; cursor: pointer; opacity: .55; filter: grayscale(1); }
 .ts-rate button:hover { opacity: 1; filter: none; border-color: var(--line-2); }
@@ -397,12 +407,7 @@ a.lab-tab:hover { border-color: var(--line-2); color: var(--ink); }
 .ts-rate.done button:not(.on) { opacity: .2; }
 .ts-rate button.on { opacity: 1; filter: none; border-color: var(--accent); }
 .ts-buy { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 0; font-size: 13px; color: var(--ink-2); }
-.ts-claimed { margin: 12px 0 0; padding: 12px 14px; border: 1px solid var(--accent); border-radius: var(--radius); background: var(--paper); font-size: 14px; }
-.ts-claimed p { margin: 0 0 6px; }
-.ts-claimed code { font-family: var(--mono); font-size: 15px; padding: 4px 8px; border-radius: 6px; background: var(--fill); user-select: all; word-break: break-all; }
-.ts-key summary { cursor: pointer; color: var(--ink-2); }
-.ts-key-form { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-.ts-key-form input { flex: 1 1 220px; min-width: 0; padding: 6px 10px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 13px; }
+.ts-buy .ts-note { flex-basis: 100%; margin: 2px 0 0; }
 .ts-err { color: var(--danger); margin: 16px 0 0; }
 .ts-turn { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
 .ts-ask { font-weight: 600; margin: 0; }

@@ -591,13 +591,16 @@ ${siteBar(lang, 'ai', altPath)}
   <form id="ts-form" class="ts-form"><input id="ts-q" type="text" maxlength="300" placeholder="${esc(t.ph)}" autocomplete="off" aria-label="${esc(t.h)}"><button id="ts-go" class="btn primary big">${esc(t.go)}</button></form>
   <div class="ts-ex"><span>${esc(t.examplesH)}</span>${t.examples.map(x => '<button type="button" class="ts-chip">' + esc(x) + '</button>').join('')}</div>
   <p class="ts-note">${esc(t.notice)} <a href="${privacyUrl(lang)}">${esc(t.privacy)}</a></p>
-  <p id="ts-left" class="ts-left"></p>
-  <div id="ts-claimed" class="ts-claimed" hidden><p><b>${esc(t.paidH)}</b> ${esc(t.paidNote)}</p><p><code id="ts-claimed-key"></code> <button type="button" id="ts-copy" class="btn">${esc(t.copy)}</button></p></div>
-  <div id="ts-buy" class="ts-buy" hidden><span>${esc(t.buyH)}</span><span id="ts-packs"></span></div>
-  <details id="ts-key" class="ts-key" hidden><summary>${esc(t.keyH)}</summary>
-    <form id="ts-key-form" class="ts-key-form"><input id="ts-key-in" type="text" maxlength="100" placeholder="${esc(t.keyPh)}" autocomplete="off" spellcheck="false" aria-label="${esc(t.keyH)}"><button class="btn">${esc(t.keyUse)}</button><button type="button" id="ts-key-clear" class="btn" hidden>${esc(t.keyClear)}</button></form>
-    <p class="ts-note">${esc(t.keyNote)}</p>
-  </details>
+  <div class="ts-acct"><span id="ts-left" class="ts-left"></span><span id="ts-who" class="ts-who" hidden></span>
+    <button type="button" id="ts-login-open" class="ts-link" hidden>${esc(t.loginBuy)}</button><button type="button" id="ts-logout" class="ts-link" hidden>${esc(t.logout)}</button></div>
+  <p id="ts-paid" class="ts-paid" hidden></p>
+  <form id="ts-login" class="ts-login" hidden>
+    <div class="ts-login-row"><input id="ts-email" type="email" maxlength="254" placeholder="${esc(t.emailPh)}" autocomplete="email" aria-label="${esc(t.emailPh)}" required><button id="ts-send" class="btn">${esc(t.sendCode)}</button></div>
+    <div id="ts-code-row" class="ts-login-row" hidden><input id="ts-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="${esc(t.codePh)}" autocomplete="one-time-code" aria-label="${esc(t.codePh)}"><button type="button" id="ts-verify" class="btn primary">${esc(t.verify)}</button></div>
+    <p id="ts-login-msg" class="ts-note"></p>
+    <button type="button" id="ts-login-cancel" class="ts-link">${esc(t.cancel)}</button>
+  </form>
+  <div id="ts-buy" class="ts-buy" hidden><span>${esc(t.buyH)}</span><span id="ts-packs"></span><p class="ts-note">${esc(t.acctNote)}</p></div>
   <div id="ts-cf" class="ts-cf"></div>
   <div id="ts-log"></div>
   <p class="ts-note">${esc(t.license)}</p>
@@ -627,11 +630,11 @@ function musicRedirect(lang) {
 
 /* ---------------- 隐私政策 ---------------- */
 const PRIVACY = {
-  en: { h: 'Privacy', title: 'Privacy Policy | SFX Brew', desc: 'What SFX Brew stores and collects: no accounts, no tracking cookies, sounds made in your browser.', updated: 'Last updated',
+  en: { h: 'Privacy', title: 'Privacy Policy | SFX Brew', desc: 'What SFX Brew stores and collects: no tracking cookies, sounds made in your browser, an optional email sign-in for buying credits.', updated: 'Last updated',
     body: [
-      ['Short version', 'SFX Brew has no accounts and sets no tracking cookies. Sounds and music are generated in your own browser; nothing you make is uploaded to us. The one exception is the Text to sound effect beta in the Lab, described below.'],
-      ['Text to sound effect (beta)', 'When you use Lab → Text to sound effect, the description you type (and any change you ask for) is sent to our server, which runs on a machine we operate in Germany and is reached through Cloudflare. To interpret it, the text is passed to DeepSeek, an AI service operated in China; please do not type personal information. The server uses your IP address only in memory to enforce rate limits and forgets it within a day. To improve the tool and to train our own sound models, we keep, without your IP address and for up to 2 years: the text you typed, how the AI interpreted it, the settings of the sounds we generated for you (not the audio itself) and what you did with them on the page (playing, downloading, picking one to refine, thumbs up or down). These records are linked only by a random number created when you open the page and discarded when you close it, so separate visits cannot be connected. If you use a credit key, we only note that the request was paid, not which key. The generated audio files are deleted after 2 hours.'],
-      ['Credits for Text to sound effect', 'If you buy credits, checkout and payment run on Stripe. Stripe acts as the seller (merchant of record) through Stripe Managed Payments and processes your name, email, address and payment details under its own privacy policy; we never see your card details. After payment our server asks Stripe whether the order is paid and gives you a credit key. We store only a one-way hash of the key, the number of credits used and the Stripe order ID (to handle refunds). The key itself is kept in your browser\'s local storage until you remove it.'],
+      ['Short version', 'SFX Brew sets no tracking cookies. Sounds and music are generated in your own browser; nothing you make is uploaded to us. The exceptions are the Text to sound effect beta in the Lab and the optional email sign-in for buying credits, both described below.'],
+      ['Text to sound effect (beta)', 'When you use Lab → Text to sound effect, the description you type (and any change you ask for) is sent to our server, which runs on a machine we operate in Germany and is reached through Cloudflare. To interpret it, the text is passed to DeepSeek, an AI service operated in China; please do not type personal information. The server uses your IP address only in memory to enforce rate limits and forgets it within a day. To improve the tool and to train our own sound models, we keep, without your IP address and for up to 2 years: the text you typed, how the AI interpreted it, the settings of the sounds we generated for you (not the audio itself) and what you did with them on the page (playing, downloading, picking one to refine, thumbs up or down). These records are linked only by a random number created when you open the page and discarded when you close it, so separate visits cannot be connected. If you are signed in, we only note that the request was paid, not who made it. The generated audio files are deleted after 2 hours.'],
+      ['Sign-in and credits', 'To buy credits you sign in with your email address: we email you a 6-digit code (sent through Resend, our email provider) and, once you enter it, keep a sign-in token in your browser\'s local storage until you sign out. On our server we store your email address, your credit balance, the Stripe order IDs of your purchases (to handle refunds) and a one-way hash of the sign-in token. Checkout and payment run on Stripe, which acts as the seller (merchant of record) through Stripe Managed Payments and processes your name, email, address and payment details under its own privacy policy; we never see your card details. We use your email address only for signing in and questions about your purchases, never for marketing. To delete your account, email contact@sfxbrew.com from that address.'],
       ['Bot protection', 'The Text to sound effect page uses Cloudflare Turnstile to block automated abuse. Turnstile checks your browser when you press Generate and does not set advertising or tracking cookies. See the Cloudflare Turnstile privacy addendum.'],
       ['Stored in your browser', 'A few preferences are saved in your browser\'s local storage so the site remembers them: your language, which sound categories you have open, and your Lab project. They never leave your device, and clearing your browser data removes them.'],
       ['Visitor statistics', 'We use Cloudflare Web Analytics to count page views. It does not use cookies or fingerprinting and does not track you across sites; we only see totals such as how many people visited a page and from which country.'],
@@ -640,11 +643,11 @@ const PRIVACY = {
       ['Advertising', 'There are no ads on the site right now. If we add them, this page will be updated first and you will be asked for consent before any advertising cookies are used.'],
       ['Contact', 'Questions about this policy or your data: email contact@sfxbrew.com, or open an issue on GitHub (github.com/2365836149-sketch/sfxbrew).']
     ] },
-  zh: { h: '隐私政策', title: '隐私政策 | SFX Brew', desc: 'SFX Brew 存什么、收集什么：没有账号，没有追踪 cookie，声音都在你的浏览器里生成。', updated: '最后更新',
+  zh: { h: '隐私政策', title: '隐私政策 | SFX Brew', desc: 'SFX Brew 存什么、收集什么：没有追踪 cookie，声音都在你的浏览器里生成，购买点数时可选邮箱登录。', updated: '最后更新',
     body: [
-      ['简单说', 'SFX Brew 没有账号系统，也不设置任何追踪 cookie。音效和配乐都在你自己的浏览器里生成，你做的东西不会上传给我们。唯一的例外是实验室里的「文字生成音效」测试版，见下文。'],
-      ['文字生成音效（测试版）', '使用「实验室 → 文字生成音效」时，你输入的描述（以及修改要求）会发送到我们的服务器。服务器是我们在德国自己运营的一台机器，经 Cloudflare 访问。为了理解描述，这段文字会转交给 DeepSeek（位于中国的 AI 服务），请不要输入个人信息。服务器只在内存里用你的 IP 地址做频率限制，一天之内就会忘掉。为了改进工具、训练我们自己的音效模型，我们会在不记录 IP 地址的情况下保存最多 2 年：你输入的文字、AI 的理解、为你生成的声音参数（不是音频本身），以及你在页面上对它们的操作（播放、下载、选中继续修改、点赞或点踩）。这些记录只用一个随机编号串起来，它在你打开页面时生成、关掉页面就作废，所以不同次的访问无法关联起来。如果你用了兑换码，我们只记“这次是付费请求”，不记是哪个兑换码。生成的音频文件 2 小时后删除。'],
-      ['文字生成音效的点数', '如果你购买点数，结账和付款在 Stripe 上完成。Stripe 通过 Stripe Managed Payments 作为卖方（Merchant of Record），按它自己的隐私政策处理你的姓名、邮箱、地址和支付信息，我们看不到你的银行卡信息。付款后，我们的服务器向 Stripe 确认订单已付款，然后给你一个兑换码。我们只保存兑换码的单向哈希、已用点数和 Stripe 订单号（用于处理退款）。兑换码本身保存在你浏览器的本地存储里，直到你移除它。'],
+      ['简单说', 'SFX Brew 不设置任何追踪 cookie。音效和配乐都在你自己的浏览器里生成，你做的东西不会上传给我们。例外是实验室里的「文字生成音效」测试版，以及购买点数时可选的邮箱登录，见下文。'],
+      ['文字生成音效（测试版）', '使用「实验室 → 文字生成音效」时，你输入的描述（以及修改要求）会发送到我们的服务器。服务器是我们在德国自己运营的一台机器，经 Cloudflare 访问。为了理解描述，这段文字会转交给 DeepSeek（位于中国的 AI 服务），请不要输入个人信息。服务器只在内存里用你的 IP 地址做频率限制，一天之内就会忘掉。为了改进工具、训练我们自己的音效模型，我们会在不记录 IP 地址的情况下保存最多 2 年：你输入的文字、AI 的理解、为你生成的声音参数（不是音频本身），以及你在页面上对它们的操作（播放、下载、选中继续修改、点赞或点踩）。这些记录只用一个随机编号串起来，它在你打开页面时生成、关掉页面就作废，所以不同次的访问无法关联起来。如果你已登录，我们只记“这次是付费请求”，不记是谁。生成的音频文件 2 小时后删除。'],
+      ['登录和点数', '购买点数需要用邮箱登录：我们通过邮件服务商 Resend 给你发一个 6 位验证码，输入后会在你浏览器的本地存储里保存一个登录令牌，直到你退出登录。我们的服务器保存你的邮箱、点数余额、购买对应的 Stripe 订单号（用于处理退款）以及登录令牌的单向哈希。结账和付款在 Stripe 上完成，Stripe 通过 Stripe Managed Payments 作为卖方（Merchant of Record），按它自己的隐私政策处理你的姓名、邮箱、地址和支付信息，我们看不到你的银行卡信息。你的邮箱只用于登录和处理购买相关的问题，不会用来发营销邮件。要删除账户，请用该邮箱发邮件到 contact@sfxbrew.com。'],
       ['防机器人', '「文字生成音效」页面使用 Cloudflare Turnstile 拦截自动化滥用。它在你点「生成」时检查浏览器环境，不设置广告或追踪 cookie，详见 Cloudflare Turnstile 隐私附录。'],
       ['存在你浏览器里的东西', '为了记住你的设置，网站会在浏览器本地存储里保存几项内容：界面语言、编辑器里展开了哪些分类、实验室的工程。这些不会离开你的设备，清除浏览器数据就会删掉。'],
       ['访问统计', '我们用 Cloudflare Web Analytics 统计页面访问量。它不用 cookie、不做指纹识别，也不跨网站追踪你；我们只能看到总数，比如某个页面有多少人访问、来自哪些国家。'],

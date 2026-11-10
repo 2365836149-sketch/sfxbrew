@@ -6,7 +6,7 @@
   const D = JSON.parse(document.getElementById('ts-data').textContent);
   const T = D.i18n;
   const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
-  const API = local ? 'http://localhost:8792' : D.api;
+  const API = local ? (new URLSearchParams(location.search).get('api') || 'http://localhost:8792') : D.api;   // 本机调试可用 ?api= 指向别的后端
   const SITEKEY = (!local && D.sitekey) || '1x00000000000000000000AA';   // Cloudflare 官方测试密钥：总是通过
   const $ = s => document.querySelector(s);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -22,10 +22,11 @@
   }
   let current = null, busy = false, captchaOn = true;
 
-  /* ---------- 点数兑换码（Lemon Squeezy license key），只存在本浏览器 ---------- */
+  /* ---------- 登录凭证：邮箱登录得到的会话令牌 st_...（旧的 SFXB- 兑换码也还能用），只存在本浏览器 ---------- */
   const store = { get: () => { try { return localStorage.getItem('sfxbrew.key') || ''; } catch (e) { return ''; } },
                   set: v => { try { v ? localStorage.setItem('sfxbrew.key', v) : localStorage.removeItem('sfxbrew.key'); } catch (e) {} } };
   let licenseKey = store.get();
+  const signedIn = () => licenseKey.startsWith('st_');
   const keyMsg = kind => (T.keyErrors && T.keyErrors[kind]) || T.errors[kind] || T.errors.server;
 
   /* ---------- Turnstile：每次请求拿一个新令牌 ---------- */
@@ -70,63 +71,114 @@
   function showLeft(n) { if (!licenseKey) $('#ts-left').textContent = T.left.replace('{n}', Math.max(0, n)); }
   function showCredits(n) { $('#ts-left').textContent = T.creditsLeft.replace('{n}', Math.max(0, n)); }
 
-  async function checkKey(k) {
-    const r = await fetch(API + '/api/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ license_key: k }) });
+  async function api(path, body) {
+    let r;
+    try { r = await fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); }
+    catch (e) { throw new Error(T.errors.network); }
     let j = {}; try { j = await r.json(); } catch (e) {}
-    if (!r.ok) throw new Error(keyMsg(j.kind));
+    if (!r.ok) { const err = new Error(keyMsg(j.kind)); err.kind = j.kind; throw err; }
     return j;
   }
-  function setupKey(status) {
-    if (!status.paid) { licenseKey = ''; return; }          // 后端没开点数包：整块不显示
-    const box = $('#ts-key'), inp = $('#ts-key-in'), clear = $('#ts-key-clear');
-    box.hidden = false;
-    const sync = () => { inp.value = licenseKey; clear.hidden = !licenseKey; box.open = !!licenseKey; };
-    sync();
-    $('#ts-key-form').onsubmit = async e => {
-      e.preventDefault();
-      const k = inp.value.trim(); if (!k) return;
-      try { const j = await checkKey(k); licenseKey = k; store.set(k); sync(); showCredits(j.left); }
-      catch (err) { errorBox($('#ts-log'), err.message); }
-    };
-    clear.onclick = () => { licenseKey = ''; store.set(''); sync(); showLeft(status.left_today); };
 
-    /* 购买按钮：每个档位一个，点了去 Stripe 付款页 */
+  /* ---------- 账户：登录状态、点数余额、购买 ---------- */
+  let status = {}, pendingPack = null;
+  function renderAccount(info) {
+    const inn = !!licenseKey;
+    $('#ts-who').hidden = !(inn && info && info.email);
+    if (inn && info && info.email) $('#ts-who').textContent = info.email;
+    $('#ts-logout').hidden = !inn;
+    $('#ts-login-open').hidden = inn || !status.paid;
+    if (inn && info) showCredits(info.left); else if (!inn) showLeft(status.left_today);
+  }
+  function signOut() {
+    if (licenseKey) api('/api/logout', { license_key: licenseKey }).catch(() => {});
+    licenseKey = ''; store.set(''); renderAccount(null);
+  }
+  async function refreshAccount() {
+    if (!licenseKey) { renderAccount(null); return null; }
+    try { const j = await api('/api/credits', { license_key: licenseKey }); renderAccount(j); return j; }
+    catch (err) { if (err.kind === 'license_invalid') { licenseKey = ''; store.set(''); renderAccount(null); } else errorBox($('#ts-log'), err.message); return null; }
+  }
+
+  /* 登录：邮箱 → 验证码 → 令牌。发验证码要过人机验证（防止被拿来轰炸别人的邮箱） */
+  const form = $('#ts-login'), msg = $('#ts-login-msg');
+  function openLogin(pack) {
+    pendingPack = pack || null;
+    form.hidden = false; $('#ts-login-open').hidden = true; msg.textContent = '';
+    $('#ts-email').focus();
+  }
+  function closeLogin() { form.hidden = true; $('#ts-code-row').hidden = true; pendingPack = null; renderAccount(null); }
+  $('#ts-login-open').onclick = () => openLogin(null);
+  $('#ts-login-cancel').onclick = closeLogin;
+  $('#ts-logout').onclick = signOut;
+  form.onsubmit = async e => {
+    e.preventDefault();
+    const email = $('#ts-email').value.trim(), b = $('#ts-send');
+    if (!email) return;
+    b.disabled = true; b.textContent = T.sending; msg.textContent = '';
+    try {
+      await api('/api/login', { email, lang: D.lang, turnstile: await token() });
+      msg.textContent = T.codeSent.replace('{email}', email);
+      $('#ts-code-row').hidden = false; $('#ts-code').value = ''; $('#ts-code').focus();
+    } catch (err) { msg.textContent = err.message; }
+    b.disabled = false; b.textContent = T.sendCode;
+  };
+  async function verify() {
+    const code = $('#ts-code').value.replace(/\D/g, ''), b = $('#ts-verify');
+    if (code.length !== 6) return;
+    b.disabled = true;
+    try {
+      const j = await api('/api/verify', { email: $('#ts-email').value.trim(), code });
+      licenseKey = j.token; store.set(j.token);
+      const pack = pendingPack;
+      form.hidden = true; $('#ts-code-row').hidden = true; pendingPack = null;
+      renderAccount(j);
+      if (pack) checkout(pack);
+    } catch (err) { msg.textContent = err.message; }
+    b.disabled = false;
+  }
+  $('#ts-verify').onclick = verify;
+  $('#ts-code').oninput = e => { if (e.target.value.replace(/\D/g, '').length === 6) verify(); };
+  $('#ts-code').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); verify(); } };
+
+  async function checkout(p, btn, label) {
+    if (!signedIn()) { openLogin(p); return; }               // 必须先登录：点数进这个邮箱的账户
+    if (btn) { btn.disabled = true; btn.textContent = T.buying; }
+    try { const j = await api('/api/checkout', { price: p.id, lang: D.lang, license_key: licenseKey }); location.href = j.url; }
+    catch (err) {
+      if (err.kind === 'license_invalid' || err.kind === 'login_required') { licenseKey = ''; store.set(''); openLogin(p); }
+      else errorBox($('#ts-log'), err.message);
+      if (btn) { btn.disabled = false; btn.textContent = label; }
+    }
+  }
+
+  function setupAccount(st) {
+    status = st;
+    if (!st.paid) { licenseKey = ''; return; }               // 后端没开点数包：整块不显示
     const fmt = (amt, cur) => { try { return new Intl.NumberFormat(D.lang === 'zh' ? 'zh-CN' : 'en', { style: 'currency', currency: cur.toUpperCase() }).format(amt / 100); } catch (e) { return (amt / 100) + ' ' + cur.toUpperCase(); } };
-    const packs = (status.packs || []).filter(p => p.amount != null);
+    const packs = (st.packs || []).filter(p => p.amount != null);
     if (packs.length) {
       $('#ts-buy').hidden = false;
       packs.forEach(p => {
         const b = document.createElement('button'); b.type = 'button'; b.className = 'btn';
         const label = T.buy.replace('{n}', p.credits).replace('{price}', fmt(p.amount, p.currency));
         b.textContent = label;
-        b.onclick = async () => {
-          b.disabled = true; b.textContent = T.buying;
-          try {
-            const r = await fetch(API + '/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ price: p.id, lang: D.lang }) });
-            const j = await r.json().catch(() => ({}));
-            if (!r.ok || !j.url) throw new Error(keyMsg(j.kind || 'payment_error'));
-            location.href = j.url;
-          } catch (err) { errorBox($('#ts-log'), err.message); b.disabled = false; b.textContent = label; }
-        };
+        b.onclick = () => checkout(p, b, label);
         $('#ts-packs').append(b);
       });
     }
-
-    /* 从 Stripe 付款页回来：?paid=cs_... → 领兑换码 */
+    /* 从 Stripe 付款页回来：?paid=cs_... → 入账到当前登录的账户，然后把订单号从地址里去掉 */
     const sid = new URLSearchParams(location.search).get('paid');
-    if (sid) {
-      fetch(API + '/api/claim', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sid }) })
-        .then(async r => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(keyMsg(j.kind || 'payment_error')); return j; })
+    if (sid && signedIn()) {
+      api('/api/claim', { session_id: sid, license_key: licenseKey })
         .then(j => {
-          licenseKey = j.key; store.set(j.key); sync(); showCredits(j.left);
-          $('#ts-claimed-key').textContent = j.key; $('#ts-claimed').hidden = false;
-          $('#ts-copy').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(j.key).then(() => { $('#ts-copy').textContent = T.copied; }); };
+          renderAccount(j);
+          const n = j.added || 0;
+          if (n) { const p = $('#ts-paid'); p.textContent = T.paidOk.replace('{n}', n); p.hidden = false; }
+          const u = new URL(location.href); u.searchParams.delete('paid'); history.replaceState(null, '', u.pathname + u.search + u.hash);
         })
         .catch(err => errorBox($('#ts-log'), err.message));
-      // 兑换码只在付款后的这一页显示；地址里保留订单号，刷新也能再领到同一个码
-    } else if (licenseKey) {
-      checkKey(licenseKey).then(j => showCredits(j.left)).catch(err => { errorBox($('#ts-log'), err.message); });
-    }
+    } else refreshAccount();
   }
 
   function setBusy(b, btn, label) {
@@ -232,7 +284,7 @@
   fetch(API + '/api/status').then(r => r.json()).then(j => {
     captchaOn = j.captcha !== false;
     showLeft(j.left_today);
-    setupKey(j);
+    setupAccount(j);
     if (fromHome && j.global_left > 0) $('#ts-form').requestSubmit();   // 从首页带来的描述：后端在线就直接生成一次
     if (j.global_left <= 0) $('#ts-left').textContent = T.errors.daily_global;
   }).catch(() => {
