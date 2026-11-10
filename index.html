@@ -21,13 +21,14 @@ if (/^#[A-Za-z]+(\.|$)/.test(location.hash) && ['#agents', '#faq'].indexOf(locat
 <meta property="og:site_name" content="SFX Brew">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://sfxbrew.com/og.png">
-<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/style.css?v=9835599a">
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebApplication", "name": "SFX Brew", "url": "https://sfxbrew.com/", "applicationCategory": "MultimediaApplication", "operatingSystem": "Any (web browser), Node.js 18+", "description": "Free game sound effect generator, sound library and music lab. Eastern (wuxia/xianxia) and general game sounds as WAV or JavaScript, plus an MCP server for AI coding agents.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "isAccessibleForFree": true, "sameAs": ["https://github.com/2365836149-sketch/sfxbrew", "https://www.npmjs.com/package/sfxbrew", "https://2365836149-sketch.itch.io/xianxia-wuxia-sound-pack", "https://www.agensi.io/skills/sfx-brew-game-sound-effects"]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Where can I find free xianxia, wuxia or Chinese-style game sound effects?", "acceptedAnswer": {"@type": "Answer", "text": "SFX Brew has a free Xianxia & Wuxia Game Sound Pack with 44 sounds: guqin, pipa, erhu, bamboo flute, temple bells, gongs, wooden fish, war drums, sword qi, talismans, alchemy, thunder tribulations and breakthroughs, plus matching UI sounds. Listen and download at sfxbrew.com/packs/xianxia-game-sound-pack/ or on itch.io."}}, {"@type": "Question", "name": "Are the sounds free for commercial use?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Every sound and song you make or download on SFX Brew is free for commercial and non-commercial projects, with no attribution required."}}, {"@type": "Question", "name": "How can an AI coding agent add sound effects to my game?", "acceptedAnswer": {"@type": "Answer", "text": "Install the free SFX Brew MCP server: claude mcp add sfxbrew -- npx -y sfxbrew mcp (works in Claude Code, Cursor and other MCP clients). The agent can then list presets, write WAV files into your project and generate a JavaScript snippet that plays them. It runs locally, needs no API key and is listed in the official MCP Registry as com.sfxbrew/sfxbrew."}}, {"@type": "Question", "name": "What formats can I download?", "acceptedAnswer": {"@type": "Answer", "text": "WAV (44.1 kHz, 16-bit), a ZIP of a whole set, or a dependency-free JavaScript snippet that plays the same sound in a web game without any audio files."}}, {"@type": "Question", "name": "Do I need an account or an API key?", "acceptedAnswer": {"@type": "Answer", "text": "No. Everything runs in your browser or locally with npx. There is no sign-up and nothing is uploaded."}}, {"@type": "Question", "name": "How is SFX Brew different from jsfxr or ChipTone?", "acceptedAnswer": {"@type": "Answer", "text": "jsfxr and ChipTone are great for retro 8-bit blips. SFX Brew also covers Eastern instruments and realistic sounds (footsteps, sword clashes, campfire, monsters) built on CC0 recordings, has a ready-made library with fixed variations, a music lab, and an MCP server so AI agents can use it directly."}}]}]}</script>
 </head>
 <body>
 <header class="bar">
   <a class="bar-brand" href="/"><img src="/favicon.svg" alt=""><span>SFX Brew</span></a>
   <nav class="bar-tabs">
+    <a href="/lab/sfx/" data-href-zh="/zh/lab/sfx/" data-ai><span class="i18n" data-lang="en">AI SFX</span><span class="i18n" data-lang="zh" hidden>AI 生成</span></a>
     <a href="/editor/" data-href-zh="/editor/?lang=zh"><span class="i18n" data-lang="en">SFX Editor</span><span class="i18n" data-lang="zh" hidden>音效编辑器</span></a>
     <a href="/sounds/" data-href-zh="/zh/sounds/"><span class="i18n" data-lang="en">Sound Library</span><span class="i18n" data-lang="zh" hidden>音效库</span></a>
     <a href="/lab/" data-href-zh="/zh/lab/"><span class="i18n" data-lang="en">Lab</span><span class="i18n" data-lang="zh" hidden>实验室</span></a>
@@ -44,9 +45,13 @@ if (/^#[A-Za-z]+(\.|$)/.test(location.hash) && ['#agents', '#faq'].indexOf(locat
       <h1 class="i18n" data-lang="zh" hidden>在浏览器里做游戏音效和配乐</h1>
       <p class="intro-sub i18n" data-lang="en">Sound effects and music for games, generated on your device. Eastern instruments (guqin, pipa, erhu, bells, war drums) and classic game sounds. Free for commercial use, no sign-up.</p>
       <p class="intro-sub i18n" data-lang="zh" hidden>游戏音效和配乐，在你的设备上实时生成。古琴、琵琶、二胡、钟磬、战鼓等东方音色，加上常用的通用游戏音效。免费商用，不用注册。</p>
+      <form id="ai-form" class="ai-form" action="/lab/sfx/">
+        <label for="ai-q" class="ai-label"><span class="i18n" data-lang="en">Describe a sound and AI makes it</span><span class="i18n" data-lang="zh" hidden>用一句话描述，AI 帮你做出来</span></label>
+        <div class="ai-row"><input id="ai-q" name="q" type="text" maxlength="300" autocomplete="off" placeholder="a heavy wooden door creaking open"><button class="btn primary big"><span class="i18n" data-lang="en">Generate</span><span class="i18n" data-lang="zh" hidden>生成</span></button></div>
+      </form>
       <div class="intro-cta">
-        <a class="btn primary big" href="/editor/" data-href-zh="/editor/?lang=zh"><span class="i18n" data-lang="en">Open the SFX editor</span><span class="i18n" data-lang="zh" hidden>打开音效编辑器</span></a>
-        <a class="btn big" href="/lab/" data-href-zh="/zh/lab/"><span class="i18n" data-lang="en">Open the music lab</span><span class="i18n" data-lang="zh" hidden>打开实验室</span></a>
+        <a class="btn big" href="/editor/" data-href-zh="/editor/?lang=zh"><span class="i18n" data-lang="en">Open the SFX editor</span><span class="i18n" data-lang="zh" hidden>打开音效编辑器</span></a>
+        <a class="btn big" href="/sounds/" data-href-zh="/zh/sounds/"><span class="i18n" data-lang="en">Browse the sound library</span><span class="i18n" data-lang="zh" hidden>浏览音效库</span></a>
       </div>
     </div>
     <div class="demo">
@@ -56,6 +61,12 @@ if (/^#[A-Za-z]+(\.|$)/.test(location.hash) && ['#agents', '#faq'].indexOf(locat
   </div>
 
   <div class="tools">
+    <a class="tool tool-ai" href="/lab/sfx/" data-href-zh="/zh/lab/sfx/">
+      <b class="i18n" data-lang="en">AI SFX</b><b class="i18n" data-lang="zh" hidden>AI 生成音效</b>
+      <span class="i18n" data-lang="en">Type what you need. AI combines real CC0 recordings, our synthesizer and a generative model, listens to the results and keeps the three closest. Refine it in plain words.</span>
+      <span class="i18n" data-lang="zh" hidden>写下你要的声音。AI 组合真实的 CC0 录音、我们的合成器和生成模型，自己试听后留下最像的三个，还能用一句话继续改。</span>
+      <em class="i18n" data-lang="en">Generate →</em><em class="i18n" data-lang="zh" hidden>去生成 →</em>
+    </a>
     <a class="tool" href="/editor/" data-href-zh="/editor/?lang=zh">
       <b class="i18n" data-lang="en">SFX Editor</b><b class="i18n" data-lang="zh" hidden>音效编辑器</b>
       <span class="i18n" data-lang="en">45 presets. Mutate, make it heavier, farther or more magical, fine-tune every layer, then export WAV, seamless ambience loops, a Godot / Unity / web engine pack or JavaScript.</span>
@@ -103,9 +114,9 @@ if (/^#[A-Za-z]+(\.|$)/.test(location.hash) && ['#agents', '#faq'].indexOf(locat
   <p class="license i18n" data-lang="zh" hidden>在这里生成的所有音效和曲子都归你：可以免费商用，不需要署名。<a href="/zh/privacy/">隐私政策</a> · <a href="/samples/CREDITS.md">录音素材来源</a> · <a href="https://2365836149-sketch.itch.io/xianxia-wuxia-sound-pack">itch.io</a> · <a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
 </main>
 
-<script src="/engine.js"></script>
-<script src="/presets.js"></script>
-<script src="/shared.js"></script>
+<script src="/engine.js?v=e414867f"></script>
+<script src="/presets.js?v=2ec934c5"></script>
+<script src="/shared.js?v=a017bb35"></script>
 <script>
 /* 介绍页：语言切换 + 一排可以点的示例声音 */
 (function () {
@@ -128,6 +139,8 @@ if (/^#[A-Za-z]+(\.|$)/.test(location.hash) && ['#agents', '#faq'].indexOf(locat
       el.setAttribute('href', lang === 'zh' ? el.dataset.hrefZh : el.dataset.hrefEn);
     });
     document.getElementById('lang').textContent = lang === 'zh' ? 'English' : '中文';
+    document.getElementById('ai-q').placeholder = lang === 'zh' ? '比如：推开一扇沉重的旧木门' : 'e.g. a heavy wooden door creaking open';
+    document.getElementById('ai-form').action = lang === 'zh' ? '/zh/lab/sfx/' : '/lab/sfx/';
     chips.innerHTML = '';
     Object.keys(NAMES).forEach(id => {
       const b = document.createElement('button');

@@ -221,11 +221,19 @@
   };
   document.querySelectorAll('.ts-chip').forEach(c => { c.onclick = () => { $('#ts-q').value = c.textContent; $('#ts-form').requestSubmit(); }; });
 
+  /* 从首页带过来的描述（?q=）：先填进输入框，再从地址里去掉（刷新不会重复生成） */
+  const fromHome = (new URLSearchParams(location.search).get('q') || '').trim().slice(0, 300);
+  if (fromHome) {
+    $('#ts-q').value = fromHome;
+    const u = new URL(location.href); u.searchParams.delete('q'); history.replaceState(null, '', u.pathname + u.search + u.hash);
+  }
+
   /* 后端在不在线 */
   fetch(API + '/api/status').then(r => r.json()).then(j => {
     captchaOn = j.captcha !== false;
     showLeft(j.left_today);
     setupKey(j);
+    if (fromHome && j.global_left > 0) $('#ts-form').requestSubmit();   // 从首页带来的描述：后端在线就直接生成一次
     if (j.global_left <= 0) $('#ts-left').textContent = T.errors.daily_global;
   }).catch(() => {
     $('#ts-offline').hidden = false;

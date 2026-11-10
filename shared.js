@@ -94,15 +94,23 @@
     if (!w || !h) return;
     cv.width = w * dpr; cv.height = h * dpr;
     const g = cv.getContext('2d');
+    cv.classList.add('drawn');            // 去掉加载占位（style.css 的 .card-wave:not(.drawn)）
     g.scale(dpr, dpr);
     g.clearRect(0, 0, w, h);
     g.fillStyle = color || getComputedStyle(document.documentElement).getPropertyValue('--wave').trim();
-    const mid = h / 2, per = Math.max(1, n / w);
+    /* 只画听得见的部分：比峰值低 40 dB 以下的长尾音不算长度（否则 1.5 秒的声音会挤在左边一小块）；高度按峰值拉满 */
+    let peak = 0;
+    for (let i = 0; i < n; i++) { const v = Math.abs(d[i]); if (v > peak) peak = v; }
+    if (!peak) { g.fillRect(0, h / 2, w, 1); return; }
+    let end = n - 1;
+    while (end > 0 && Math.abs(d[end]) < peak * 0.01) end--;
+    n = Math.min(n, Math.max(Math.round(n * 0.08), end + Math.round(n * 0.03) + 1));
+    const mid = h / 2, per = Math.max(1, n / w), k = 0.95 / peak;
     for (let x = 0; x < w; x++) {
       let lo = 0, hi = 0;
       const a = Math.floor(x * per), b = Math.min(n, Math.floor((x + 1) * per));
       for (let i = a; i < b; i++) { const v = d[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
-      const y1 = mid - hi * mid * 0.95, y2 = mid - lo * mid * 0.95;
+      const y1 = mid - hi * k * mid, y2 = mid - lo * k * mid;
       g.fillRect(x, y1, 1, Math.max(1, y2 - y1));
     }
   }

@@ -13,6 +13,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const lib = require('../node/lib.js');
 const { SOUNDS, PACKS, UI, MUSIC, STUDIO, CAT_COPY, TEXTSFX } = require('./data.js');
 const CAT = require('../catalog.js');
@@ -78,8 +79,8 @@ const packUrl = (lang, slug) => PREFIX[lang] + 'packs/' + slug + '/';
 /* ---------------- 全站顶栏（音效库和实验室都用这一份） ---------------- */
 function siteBar(lang, active, altPath) {
   const u = UI[lang];
-  const tabs = [[editorUrl(lang), u.navEditor, 'editor'], [PREFIX[lang] + 'sounds/', u.navLibrary, 'library'], [PREFIX[lang] + 'lab/', u.navLab, 'lab']]
-    .map(([href, label, key]) => '<a href="' + href + '"' + (key === active ? ' class="on" aria-current="page"' : '') + '>' + esc(label) + '</a>').join('');
+  const tabs = [[textSfxUrl(lang), u.navAI, 'ai'], [editorUrl(lang), u.navEditor, 'editor'], [PREFIX[lang] + 'sounds/', u.navLibrary, 'library'], [PREFIX[lang] + 'lab/', u.navLab, 'lab']]
+    .map(([href, label, key]) => '<a href="' + href + '"' + (key === 'ai' ? ' data-ai' : '') + (key === active ? ' class="on" aria-current="page"' : '') + '>' + esc(label) + '</a>').join('');
   return `<header class="bar">
   <a class="bar-brand" href="${introUrl(lang)}"><img src="/favicon.svg" alt=""><span>SFX Brew</span></a>
   <nav class="bar-tabs">${tabs}</nav>
@@ -267,7 +268,7 @@ function soundPage(lang, id) {
   <div class="lib-actions">
     <button class="btn primary" data-act="zip">${esc(u.zipAll(VARIANTS))}</button>
     <button class="btn" data-act="code">${esc(u.codeAll(VARIANTS))}</button>
-    <a class="btn seal" href="${editorUrl(lang, '#' + id)}">${esc(u.editor)}</a>
+    <a class="btn" href="${editorUrl(lang, '#' + id)}">${esc(u.editor)}</a>
   </div>
 </div>
 <p class="lead">${esc(firstSentence(t.intro, lang))}</p>
@@ -568,8 +569,7 @@ ${headTags(lang, { title: t.title, description: t.metaDesc, urlPath, altPath })}
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
 <body>
-${siteBar(lang, 'lab', altPath)}
-${labNav(lang, 'sfx')}
+${siteBar(lang, 'ai', altPath)}
 <main class="ts">
   <h1>${esc(t.h)} <span class="ts-beta">${esc(t.beta)}</span></h1>
   <p class="ts-sub">${esc(t.sub)}</p>
@@ -648,11 +648,21 @@ function privacyPage(lang) {
     body, side: 'index', noAds: true, scripts: ' ' }) };
 }
 
-/* 首页和编辑器是手写的：把统计代码写进 <!--analytics--> 标记之间 */
+/* 本站的 JS / CSS 链接加上按内容算的版本号（?v=前 8 位哈希）：文件改了链接就变，用户不会拿到缓存的旧文件 */
+const assetHash = {};
+function stampAssets(html) {
+  return html.replace(/(src|href)="(\/[\w./-]+\.(?:js|css))(?:\?v=[0-9a-f]+)?"/g, (m, attr, p) => {
+    const fp = path.join(ROOT, p);
+    if (!(p in assetHash)) assetHash[p] = fs.existsSync(fp) ? crypto.createHash('md5').update(fs.readFileSync(fp)).digest('hex').slice(0, 8) : '';
+    return assetHash[p] ? `${attr}="${p}?v=${assetHash[p]}"` : m;
+  });
+}
+
+/* 首页和编辑器是手写的：把统计代码写进 <!--analytics--> 标记之间，并给 JS / CSS 加版本号 */
 for (const f of ['index.html', 'editor/index.html']) {
   const fp = path.join(ROOT, f), h = fs.readFileSync(fp, 'utf8');
   if (!h.includes('<!--analytics-->')) throw new Error(f + ' 缺少 <!--analytics--><!--/analytics--> 标记');
-  fs.writeFileSync(fp, h.replace(/<!--analytics-->[\s\S]*?<!--\/analytics-->/, '<!--analytics-->' + analyticsTag() + '<!--/analytics-->'));
+  fs.writeFileSync(fp, stampAssets(h.replace(/<!--analytics-->[\s\S]*?<!--\/analytics-->/, '<!--analytics-->' + analyticsTag() + '<!--/analytics-->')));
 }
 
 /* ---------------- 写文件 ---------------- */
@@ -663,7 +673,7 @@ LANGS.forEach(lang => {
   out.push(searchPage(lang, null), ...usedCats().map(c => searchPage(lang, c)), labPage(lang), textSfxPage(lang), musicRedirect(lang), privacyPage(lang), ...Object.keys(SOUNDS).map(id => soundPage(lang, id)), ...Object.keys(PACKS).map(slug => packPage(lang, slug)));
 });
 for (const dir of ['sounds', 'packs', 'zh', 'music', 'lab', 'privacy']) fs.rmSync(path.join(ROOT, dir), { recursive: true, force: true });
-out.forEach(o => { lib.writeFile(path.join(ROOT, o.file), o.html); });
+out.forEach(o => { lib.writeFile(path.join(ROOT, o.file), stampAssets(o.html)); });
 
 const urls = ['/', '/editor/', ...LANGS.flatMap(l => [PREFIX[l] + 'sounds/', ...usedCats().map(c => catUrl(l, c)), PREFIX[l] + 'lab/', textSfxUrl(l), privacyUrl(l), ...Object.keys(SOUNDS).map(id => soundUrl(l, id)), ...Object.keys(PACKS).map(k => packUrl(l, k))]), '/llms.txt'];
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +

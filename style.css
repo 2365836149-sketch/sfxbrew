@@ -52,7 +52,10 @@ input[type=range] { accent-color: var(--accent); }
 .bar-brand { display: flex; align-items: center; gap: 7px; color: var(--ink); text-decoration: none !important; flex: none; }
 .bar-brand img { width: 24px; height: 24px; display: block; }
 .bar-brand span { font-family: var(--serif); font-weight: 700; font-size: 16px; letter-spacing: 0.02em; }
-.bar-tabs { display: flex; gap: 2px; background: var(--fill); padding: 2px; border-radius: 7px; }
+.bar-tabs { display: flex; gap: 2px; background: var(--fill); padding: 2px; border-radius: 7px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.bar-tabs::-webkit-scrollbar { display: none; }
+/* 「AI 生成」入口：前面一个小圆点，标出它是主打功能 */
+.bar-tabs a[data-ai]::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: var(--accent); vertical-align: 1px; }
 .bar-tabs a { padding: 4px 12px; border-radius: 5px; color: var(--ink-2); text-decoration: none !important; white-space: nowrap; font-size: 13px; }
 .bar-tabs a:hover { color: var(--ink); }
 .bar-tabs a.on { background: var(--paper); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(60, 40, 10, 0.15); }
@@ -147,7 +150,16 @@ textarea { width: 100%; height: 320px; margin: 10px 0; font: 12px/1.5 var(--mono
 .demo-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .demo-chips button { padding: 4px 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); cursor: pointer; font-size: 12.5px; }
 .demo-chips button.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px; }
+.tools { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 28px; }
+.tool.tool-ai { border-color: var(--accent); box-shadow: inset 0 3px 0 var(--accent); }
+/* 首页的「一句话生成」输入框 */
+.intro-head > * { min-width: 0; }
+.ai-form { margin: 0 0 14px; max-width: 560px; }
+.ai-label { display: block; font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.ai-row { display: flex; gap: 8px; }
+.ai-row input { flex: 1; min-width: 0; height: 40px; padding: 0 12px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--paper); color: var(--ink); font-size: 15px; }
+.ai-row input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.ai-row .btn.big { height: 40px; padding: 0 20px; }
 .tool { display: flex; flex-direction: column; gap: 6px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px; color: var(--ink); text-decoration: none !important; }
 .tool:hover { border-color: var(--accent); }
 .tool b { font-family: var(--serif); font-size: 17px; }
@@ -196,6 +208,12 @@ a.card-name:hover { text-decoration: underline; }
 .card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
 .card:hover { border-color: var(--line-2); }
 .card-wave { width: 100%; height: 40px; display: block; cursor: pointer; }
+/* 还没渲染出来时：一条淡淡的波形占位，轻微闪动，而不是一片空白 */
+.card-wave:not(.drawn) { border-radius: 4px; background:
+  repeating-linear-gradient(90deg, var(--line) 0 2px, transparent 2px 6px) center / 100% 40% no-repeat,
+  linear-gradient(var(--line), var(--line)) center / 100% 1px no-repeat; mask-image: linear-gradient(90deg, #000 0%, #000 35%, rgba(0,0,0,.35) 100%); animation: wave-wait 1.2s ease-in-out infinite alternate; }
+@keyframes wave-wait { from { opacity: .45; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .card-wave:not(.drawn) { animation: none; } }
 .card-row { display: flex; align-items: center; gap: 8px; }
 .card-name { font-weight: 600; font-size: 13px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-dur { color: var(--ink-2); font-size: 11.5px; font-variant-numeric: tabular-nums; }
@@ -236,6 +254,7 @@ a.card-name:hover { text-decoration: underline; }
 
 /* ---------------- 窄屏 ---------------- */
 @media (max-width: 1100px) {
+  .tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ed { grid-template-columns: 190px minmax(0, 1fr) 300px; }
   .tweak-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }

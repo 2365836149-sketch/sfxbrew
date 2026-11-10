@@ -743,7 +743,7 @@ const CAT_COPY = {
 /* 页面固定文字 */
 const UI = {
   en: {
-    navEditor: 'SFX Editor', navLibrary: 'Sound Library', navLab: 'Lab', navMusic: 'Music', navPacks: 'Packs', navAgents: 'For AI agents', switchLang: '中文',
+    navEditor: 'SFX Editor', navLibrary: 'Sound Library', navLab: 'Lab', navAI: 'AI SFX', navMusic: 'Music', navPacks: 'Packs', navAgents: 'For AI agents', switchLang: '中文',
     nVariants: n => n + ' variations', libCount: (k, n) => k + ' categories × ' + n + ' variations', moreInfo: name => 'About these ' + name.toLowerCase() + ' sounds, uses and license', aboutLib: 'About this library',
     library: 'Sound Library', packs: 'Packs', category: 'Category', filters: 'Filters', categoriesH: 'Categories', searchPh: 'Search: sword, coin, rain, 剑…', sortDefault: 'Sort: category', sortName: 'Sort: name', sortDur: 'Sort: length', clearAll: 'Clear filters', showing: (n, m) => n + ' of ' + m + ' sounds', nSounds: n => n + ' free sounds', libMetaTail: 'Free for commercial use: play in the browser, download WAV or copy JavaScript.', noResults: 'No sound matches. Try another word or clear the filters.', reroll: 'New variation', details: 'Details', allIn: name => 'All ' + name.toLowerCase(), groupInstr: 'Eastern instruments', groupXianxia: 'Xianxia & magic', groupEast: 'Eastern & Xianxia', groupGeneral: 'General Game Sounds',
     zipAll: n => 'Download all ' + n + ' as ZIP', zipPack: n => 'Download all ' + n + ' sounds as ZIP', itchPack: 'Also on itch.io',
@@ -766,7 +766,7 @@ const UI = {
     js: { rendering: (i, n) => 'Rendering ' + i + ' / ' + n + '…', downloaded: 'Downloaded ✓', copied: 'Copied — paste it into your game ✓', copyFailed: 'Copy failed' }
   },
   zh: {
-    navEditor: '音效编辑器', navLibrary: '音效库', navLab: '实验室', navMusic: '配乐', navPacks: '音效包', navAgents: '给 AI 用', switchLang: 'English',
+    navEditor: '音效编辑器', navLibrary: '音效库', navLab: '实验室', navAI: 'AI 生成', navMusic: '配乐', navPacks: '音效包', navAgents: '给 AI 用', switchLang: 'English',
     nVariants: n => n + ' 个变体', libCount: (k, n) => k + ' 类 × 每类 ' + n + ' 个变体', moreInfo: name => '关于' + name + '音效：适用场景、技巧和授权', aboutLib: '关于这个音效库',
     library: '音效库', packs: '音效包', category: '分类', filters: '筛选', categoriesH: '大类', searchPh: '搜索：剑、金币、雨、slash…', sortDefault: '排序：按大类', sortName: '排序：按名称', sortDur: '排序：按长短', clearAll: '清除筛选', showing: (n, m) => '显示 ' + n + ' / ' + m + ' 个音效', nSounds: n => n + ' 个免费音效', libMetaTail: '免费商用，可在线试听、下载 WAV 或复制 JavaScript。', noResults: '没有匹配的音效。换个词，或者清除筛选。', reroll: '换一个', details: '详情', allIn: name => '全部' + name, groupInstr: '东方乐器', groupXianxia: '仙侠', groupEast: '东方 / 修仙', groupGeneral: '通用游戏音效',
     zipAll: n => '下载全部 ' + n + ' 个（ZIP）', zipPack: n => '下载全部 ' + n + ' 个音效（ZIP）', itchPack: '在 itch.io 下载',
