@@ -24,7 +24,7 @@
       prop2h: 'Made in your browser', prop2: 'Every sound is generated on your device. Each click brews a new variation.',
       prop3h: 'Built for AI coding agents', prop3: 'Claude Code, Cursor and others can generate and wire in sounds via MCP.',
       tw: { heavier: 'Heavier', lighter: 'Lighter', farther: 'Farther', closer: 'Closer', brighter: 'Brighter', darker: 'Darker', longer: 'Longer', shorter: 'Shorter', punchier: 'Punchier', softer: 'Softer', magical: 'More magical', retro: 'More retro' },
-      navEditor: 'SFX Editor', navLibrary: 'Sound Library', navLab: 'Lab', navAI: 'AI SFX', navAgents: 'For AI agents', docTitle: 'Sound Effect Editor — Free Game SFX Generator | SFX Brew',
+      navEditor: 'SFX Editor', navLibrary: 'Sound Library', navLab: 'Lab', navAI: 'AI SFX', pickSound: 'Sound', navAgents: 'For AI agents', docTitle: 'Sound Effect Editor — Free Game SFX Generator | SFX Brew',
       heroTitle: 'Game sound effects, made on the spot.',
       heroTry: 'Hear one', heroOpen: 'Open the editor',
       editorTitle: 'Make it yours.', editorSub: 'Pick a sound, press Mutate until it fits, nudge it heavier or farther, then download.',
@@ -67,7 +67,7 @@
       prop2h: '在浏览器里生成', prop2: '声音在你的设备上实时生成，每点一次都是新的变体。',
       prop3h: '为 AI 写代码而做', prop3: 'Claude Code、Cursor 等可以通过 MCP 直接生成并接入音效。',
       tw: { heavier: '更重', lighter: '更轻', farther: '更远', closer: '更近', brighter: '更亮', darker: '更暗', longer: '更长', shorter: '更短', punchier: '更有力', softer: '更柔和', magical: '更魔幻', retro: '更复古' },
-      navEditor: '音效编辑器', navLibrary: '音效库', navLab: '实验室', navAI: 'AI 生成', navAgents: '给 AI 用', docTitle: '音效编辑器：免费游戏音效生成 | SFX Brew',
+      navEditor: '音效编辑器', navLibrary: '音效库', navLab: '实验室', navAI: 'AI 生成', pickSound: '声音', navAgents: '给 AI 用', docTitle: '音效编辑器：免费游戏音效生成 | SFX Brew',
       heroTitle: '游戏音效，现做现用。',
       heroTry: '试听一下', heroOpen: '打开编辑器',
       editorTitle: '调成你想要的样子。', editorSub: '选一个声音，点"变体"直到顺耳，再调得更重、更远，然后下载。',
@@ -173,12 +173,20 @@
         b.className = 'preset' + (p.id === presetId ? ' on' : '');
         b.dataset.id = p.id;
         b.textContent = T[lang].p[p.id];
-        b.onclick = () => { presetId = p.id; fresh(); };
+        b.onclick = () => { presetId = p.id; fresh(); togglePresets(false); };
         g.querySelector('.grid').appendChild(b);
       });
       box.appendChild(g);
     });
     filterPresets();
+    $('#preset-cur').textContent = T[lang].p[presetId] || '';
+  }
+  /* 手机上预设列表默认收起，只留一行「声音：当前预设 ▾」；选好一个自动收起 */
+  function togglePresets(open) {
+    const box = document.querySelector('.ed-presets');
+    open = open === undefined ? !box.classList.contains('open') : open;
+    box.classList.toggle('open', open);
+    $('#preset-toggle').setAttribute('aria-expanded', open);
   }
   /* 搜索：中英文名 + 目录关键词 + 大类名 + 标签名 */
   const hayOf = id => {
@@ -528,6 +536,7 @@
   $('#btn-undo').onclick = undo;
   $('#preset-search').addEventListener('input', filterPresets);
   $('#preset-cat').addEventListener('change', filterPresets);
+  $('#preset-toggle').addEventListener('click', () => togglePresets());
   $('#preset-search').addEventListener('keydown', e => {
     if (e.key === 'Enter') { const b = [...document.querySelectorAll('.preset')].find(x => !x.hidden); if (b) b.click(); }
     if (e.key === 'Escape') { e.target.value = ''; filterPresets(); }

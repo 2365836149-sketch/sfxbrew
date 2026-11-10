@@ -7,7 +7,7 @@
 <meta name="description" content="Make royalty-free game sound effects in your browser: pick a preset, mutate it, make it heavier or farther, fine-tune layers, then export WAV, seamless loops, a game-engine pack (Godot, Unity, web) or drop-in JavaScript. Free for commercial use.">
 <link rel="canonical" href="https://sfxbrew.com/editor/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/style.css?v=9835599a">
+<link rel="stylesheet" href="/style.css?v=c034f2e1">
 </head>
 <body>
 <header class="bar">
@@ -25,10 +25,13 @@
 
 <main class="ed" id="editor">
   <aside class="ed-presets">
+    <button id="preset-toggle" class="preset-toggle" type="button" aria-expanded="false" aria-controls="preset-body"><span data-t="pickSound"></span><b id="preset-cur"></b><i aria-hidden="true">▾</i></button>
+    <div id="preset-body" class="preset-body">
     <input id="preset-search" class="search" type="search" autocomplete="off">
     <select id="preset-cat" class="search pcat"></select>
     <p id="search-empty" class="muted small" hidden data-t="noMatch"></p>
     <div id="preset-groups"></div>
+    </div>
   </aside>
 
   <section class="ed-stage">
@@ -85,9 +88,9 @@
 <script src="/engine.js?v=e414867f"></script>
 <script src="/presets.js?v=2ec934c5"></script>
 <script src="/catalog.js?v=40cbf494"></script>
-<script src="/shared.js?v=a017bb35"></script>
+<script src="/shared.js?v=cc7dbb55"></script>
 <script src="/export.js?v=4e11a72b"></script>
-<script src="/app.js?v=b8e2cf8d"></script>
+<script src="/app.js?v=f61aaf65"></script>
 <!--analytics--><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "a45dcf7d53464930b4757d7687c6b9b1"}'></script><!--/analytics-->
 </body>
 </html>

@@ -46,6 +46,16 @@ const HTML_LANG = { en: 'en', zh: 'zh-CN' };
 const HREFLANG = { en: 'en', zh: 'zh-Hans' };
 const other = lang => (lang === 'en' ? 'zh' : 'en');
 
+/* 卡片上的小图标（线条图标，颜色跟文字走） */
+const svg = d => '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+const ICON = {
+  dl: svg('<path d="M8 2.5v7.5M4.8 7.2 8 10.4l3.2-3.2M3 13h10"/>'),
+  reroll: svg('<path d="M13 3.5v3h-3"/><path d="M12.7 6.5A5 5 0 1 0 13 9.6"/>'),
+  edit: svg('<path d="M2.5 4.5h4M9.5 4.5h4M2.5 11.5h7M12.5 11.5h1"/><circle cx="8" cy="4.5" r="1.5"/><circle cx="11" cy="11.5" r="1.5"/>'),
+  more: svg('<path d="M6 3.5 10.5 8 6 12.5"/>'),
+};
+/* 卡片底部的操作按钮：窄卡片只显示图标（title 当提示），宽卡片（手机上的整行卡片）同时显示文字 */
+const act = (tag, cls, icon, label, attrs) => `<${tag} class="act ${cls}"${attrs || ''} title="${esc(label)}" aria-label="${esc(label)}">${ICON[icon]}<span>${esc(label)}</span></${tag}>`;
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const jsonForHtml = o => JSON.stringify(o).replace(/</g, '\\u003c');
 const pad = n => String(n).padStart(2, '0');
@@ -114,6 +124,8 @@ ${alt('zh', paths.zh)}
 <meta property="og:locale" content="${lang === 'zh' ? 'zh_CN' : 'en_US'}">
 ${ogImage(lang)}`;
 }
+/* 手机上左栏变成从底部滑出的抽屉：顶上一行标题 + 「完成」按钮（桌面端隐藏） */
+const sheetHead = (title, done) => '<div class="sheet-h"><b>' + esc(title) + '</b><button type="button" class="btn primary sheet-x">' + esc(done) + '</button></div>';
 /* 音效库左侧导航（详情页、音效包页）：全部 / 音效包 / 各大类（当前大类展开列出音效） */
 function libSide(lang, current) {
   const u = UI[lang];
@@ -126,7 +138,7 @@ function libSide(lang, current) {
     (c === curCat ? '<div class="side-sub">' + idsIn(c).map(id => link(soundUrl(lang, id), SOUNDS[id][lang].name, 'sound:' + id)).join('') + '</div>' : '')).join(''));
   const curName = current === 'index' ? u.allCats : current.startsWith('pack:') ? PACKS[current.slice(5)][lang].name : current.startsWith('cat:') ? catName(lang, current.slice(4)) : SOUNDS[current.slice(6)][lang].name;
   return '<button class="lib-side-toggle" aria-expanded="false" onclick="var o=this.parentNode.classList.toggle(\'side-open\');this.setAttribute(\'aria-expanded\',o)">' + esc(u.category) + '：' + esc(curName) + ' <span>▾</span></button>' +
-    '<nav class="lib-side" aria-label="' + esc(u.library) + '">' + h + '</nav>';
+    '<nav class="lib-side" aria-label="' + esc(u.library) + '">' + sheetHead(u.library, u.done) + h + '</nav>';
 }
 
 /* ---------------- 音效库页面外壳 ---------------- */
@@ -174,7 +186,7 @@ function cards(lang, items) {
     <span class="card-name">${esc(it.label)}</span>
     <span class="card-dur"></span>
   </div>
-  <div class="card-links"><button class="wav">WAV</button><a href="${it.edit}">${esc(u.edit)}</a>${it.category ? '<a href="' + it.category + '">' + esc(u.more) + '</a>' : ''}</div>
+  <div class="card-acts"><button class="act act-main wav" title="${esc(u.dlWav)}" aria-label="${esc(u.dlWav + ' ' + it.label)}">${ICON.dl}<b>WAV</b></button>${act('a', 'edit', 'edit', u.edit, ' href="' + it.edit + '"')}${it.category ? act('a', 'more', 'more', u.more, ' href="' + it.category + '"') : ''}</div>
 </article>`).join('\n') + '</div>';
 }
 
@@ -362,9 +374,8 @@ function searchPage(lang, cat) {
     const shown = tags.filter(x => /^(style|material|mood):/.test(x)).slice(0, 3).map(x => tagName(lang, x));
     return `<article class="card sc" data-i="${i}" data-cats="${cats.join(' ')}" data-tags="${tags.join(' ')}" data-hay="${esc(hay)}" data-dur="${ENGINE.duration(p).toFixed(2)}" data-name="${esc(t.name)}">
   <canvas class="card-wave" aria-hidden="true"></canvas>
-  <div class="card-row"><button class="play" aria-label="${esc(u.play + ' ' + t.name)}">▶</button><a class="card-name" href="${soundUrl(lang, id)}">${esc(t.name)}</a><span class="card-dur"></span></div>
-  <div class="card-tags">${esc([catName(lang, cats[0]), ...shown].join(' · '))}</div>
-  <div class="card-links"><button class="reroll">${esc(u.reroll)}</button><button class="wav">WAV</button><a class="edit" href="${editorUrl(lang, '#' + id)}">${esc(u.edit)}</a><a href="${soundUrl(lang, id)}">${esc(u.details)}</a></div>
+  <div class="card-row"><button class="play" aria-label="${esc(u.play + ' ' + t.name)}">▶</button><div class="card-id"><a class="card-name" href="${soundUrl(lang, id)}">${esc(t.name)}</a><div class="card-tags">${esc([catName(lang, cats[0]), ...shown].join(' · '))}</div></div><span class="card-dur"></span></div>
+  <div class="card-acts"><button class="act act-main wav" title="${esc(u.dlWav)}" aria-label="${esc(u.dlWav + ' ' + t.name)}">${ICON.dl}<b>WAV</b></button>${act('button', 'reroll', 'reroll', u.reroll)}${act('a', 'edit', 'edit', u.edit, ' href="' + editorUrl(lang, '#' + id) + '"')}${act('a', 'more', 'more', u.details, ' href="' + soundUrl(lang, id) + '"')}</div>
 </article>`;
   }).join('\n');
 
@@ -380,8 +391,9 @@ function searchPage(lang, cat) {
     if (!vals.length) return '';
     return `<div class="side-g facet"><p class="sec-h">${esc(dim[lang])}</p><div class="side-l">${vals.map(x => `<label class="fchk"><input type="checkbox" value="${x.t}"> <span>${esc(x.label)}</span> <i>${x.n}</i></label>`).join('')}</div></div>`;
   }).join('');
-  const sideHtml = `<button class="lib-side-toggle" aria-expanded="false" onclick="var o=this.parentNode.classList.toggle('side-open');this.setAttribute('aria-expanded',o)">${esc(u.filters)} <span>▾</span></button>
+  const sideHtml = `<button class="lib-side-toggle" aria-expanded="false" onclick="var o=this.parentNode.classList.toggle('side-open');this.setAttribute('aria-expanded',o)"><b>${esc(u.filters)}</b><i id="fcount" hidden></i> <span>▾</span></button>
 <nav class="lib-side" aria-label="${esc(u.filters)}">
+${sheetHead(u.filters, u.done)}
 <div class="side-g"><div class="side-l"><a href="${PREFIX[lang]}sounds/" data-cat=""${cat ? '' : ' class="on"'}>${esc(u.allCats)} <i>${Object.keys(SOUNDS).length}</i></a></div></div>
 <div class="side-g"><p class="sec-h">${esc(u.categoriesH)}</p><div class="side-l cat-links">${catLinks}</div></div>
 ${facets}
@@ -408,7 +420,7 @@ ${cat ? '' : `<details class="more-info"><summary>${esc(u.aboutLib)}</summary><p
       title: cat ? cc.title + ' — ' + u.nSounds(ids.length) + ' | SFX Brew' : u.libMetaTitle,
       description: cat ? cc.intro + ' ' + u.libMetaTail : u.libMetaDesc,
       urlPath, altPath, sideHtml, body,
-      data: { mode: cat ? 'cat' : 'all', i18n2: { showing: u.showing('{n}', '{m}') }, sounds: data },
+      data: { mode: cat ? 'cat' : 'all', i18n2: { showing: u.showing('{n}', '{m}'), showN: u.showN('{n}') }, sounds: data },
       scripts: '<script src="/presets.js"></script>\n<script src="/search.js"></script>'
     })
   };

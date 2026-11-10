@@ -153,5 +153,14 @@
     return channels.map(c => c.slice(0, end));
   }
 
+  /* 手机上的筛选抽屉（音效库左栏）：点「完成」、点抽屉外的暗色区域、按 Esc 都能关上 */
+  document.addEventListener('DOMContentLoaded', () => {
+    const wrap = document.querySelector('.lib-side-wrap');
+    if (!wrap) return;
+    const close = () => { wrap.classList.remove('side-open'); const b = wrap.querySelector('.lib-side-toggle'); if (b) b.setAttribute('aria-expanded', 'false'); };
+    wrap.addEventListener('click', e => { if (e.target === wrap || e.target.closest('.sheet-x')) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  });
+
   window.SFXB = { wavMulti, trimChannels, trimLength, wavBytes, download, downloadBlob, zip, round, jsCode, drawWave, hashFor, copyText };
 })();

@@ -56,6 +56,10 @@
     $('#scount').textContent = (T.showing || '{n} / {m}').replace('{n}', n).replace('{m}', cards.length);
     $('#sempty').hidden = n > 0;
     $('#sclear').hidden = !(state.q || state.cat || state.tags.size);
+    /* 手机筛选抽屉：按钮上标出已选几个条件，抽屉里的按钮写「查看 N 个音效」 */
+    const nf = state.tags.size + (state.cat ? 1 : 0), fc = $('#fcount'), sx = $('.sheet-x');
+    if (fc) { fc.textContent = nf; fc.hidden = !nf; }
+    if (sx && T.showN) sx.textContent = T.showN.replace('{n}', n);
     $('#sq').value = state.q;
     $('#ssort').value = state.sort;
     document.querySelectorAll('.fchk input').forEach(i => { i.checked = state.tags.has(i.value); });
