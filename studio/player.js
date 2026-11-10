@@ -15,20 +15,41 @@
     let segs = [], cursor = 0, metronome = false, onEnd = null;
     const LOOK = 0.25;
 
+    /* 厅堂混响的脉冲响应（和 music.js 的总线同一个做法）：20ms 预延迟、一簇早期反射、左右不相关的尾巴，高频比低频衰减得快 */
+    function rnd(seed) { let s = seed; return () => { s = (s * 16807) % 2147483647; return s / 2147483647; }; }
     function makeIR(c) {
-      const len = Math.floor(c.sampleRate * 2.6), ir = c.createBuffer(2, len, c.sampleRate);
-      let s = 11;
-      const r = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
-      for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (r() * 2 - 1) * Math.pow(1 - i / len, 2.6); }
+      const sr = c.sampleRate, len = Math.floor(sr * 2.8), ir = c.createBuffer(2, len, sr), pre = Math.floor(sr * 0.02);
+      for (let ch = 0; ch < 2; ch++) {
+        const d = ir.getChannelData(ch), r = rnd(11 + ch * 97);
+        let y = 0;
+        for (let e = 0; e < 10; e++) {
+          const at = pre + Math.floor(sr * (0.004 + r() * 0.07)), amp = (0.5 - e * 0.035) * (r() < 0.5 ? -1 : 1);
+          if (at < len) d[at] += amp;
+        }
+        for (let i = pre; i < len; i++) {
+          const u = (i - pre) / (len - pre), a = 0.85 - 0.75 * Math.pow(u, 0.6);
+          y += a * ((r() * 2 - 1) - y);
+          d[i] += y * 0.55 * Math.pow(1 - u, 2.2) * Math.min(1, (i - pre) / (sr * 0.03));
+        }
+      }
       return ir;
     }
-    /* 搭一套混音连线：每轨 gain → panner → master，另外 gain → send → reverb → master */
+    /* 搭一套混音连线：每轨 gain → panner → master，另外 gain → send → 混响 → master。
+       混响回来的声音去掉 220Hz 以下（不糊）和 7kHz 以上（不刺）。
+       主总线：35Hz 低切 → 300Hz 轻微挖一点（所有乐器都堆在这里）→ 轻度「胶水」压缩 → 限幅，免得爆音。 */
     function buildRig(c, p, dest) {
-      const master = c.createGain(), comp = c.createDynamicsCompressor(), verb = c.createConvolver(), verbOut = c.createGain();
-      comp.threshold.value = -8; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.25;
+      const master = c.createGain(), verb = c.createConvolver(), verbOut = c.createGain(), wl = c.createBiquadFilter(), wh = c.createBiquadFilter();
+      const lc = c.createBiquadFilter(), dip = c.createBiquadFilter(), glue = c.createDynamicsCompressor(), lim = c.createDynamicsCompressor(), out = c.createGain();
       verb.buffer = makeIR(c); verbOut.gain.value = 0.9;
-      verb.connect(verbOut); verbOut.connect(master);
-      master.connect(comp); comp.connect(dest || c.destination);
+      wl.type = 'highpass'; wl.frequency.value = 220; wh.type = 'lowpass'; wh.frequency.value = 7000;
+      verb.connect(wl); wl.connect(wh); wh.connect(verbOut); verbOut.connect(master);
+      lc.type = 'highpass'; lc.frequency.value = 35; lc.Q.value = 0.7;
+      dip.type = 'peaking'; dip.frequency.value = 300; dip.Q.value = 0.9; dip.gain.value = -2;
+      glue.threshold.value = -16; glue.ratio.value = 2.5; glue.knee.value = 8; glue.attack.value = 0.02; glue.release.value = 0.25;
+      lim.threshold.value = -2; lim.ratio.value = 20; lim.knee.value = 0; lim.attack.value = 0.002; lim.release.value = 0.1;
+      /* 压缩和限幅会自动补大约 4dB，这里收回来 */
+      out.gain.value = 0.8;
+      master.connect(lc); lc.connect(dip); dip.connect(glue); glue.connect(lim); lim.connect(out); out.connect(dest || c.destination);
       const tracks = {};
       p.tracks.forEach(t => {
         const g = c.createGain(), pan = c.createStereoPanner ? c.createStereoPanner() : null, send = c.createGain();
@@ -67,7 +88,10 @@
     const spb = () => 60 / project.tempo;
     function patchFor(note) {
       const inst = insts.get(note.inst);
-      return inst.make({ p: note.p, dur: note.d * spb(), v: note.v });
+      const pt = inst.make({ p: note.p, dur: note.d * spb(), v: note.v });
+      /* 乐器自带的声像只在 music.js 的自动配乐里用；这里声像归音轨管（弦乐组例外：三个声部各坐各的位置） */
+      if (pt && !inst.keepPan) delete pt.pan;
+      return pt;
     }
     function samplesOf(p) {
       const names = [];

@@ -802,7 +802,14 @@ const MUSIC = {
       calm: ['Calm landscape', 'Guqin and bamboo flute over a soft drone. Meditation, cultivation, villages, idle progress.'],
       battle: ['Battle', 'Dagu war drums, pipa tremolo and a low pulse, with a gong every eight bars. Combat, bosses, sieges.'],
       mystery: ['Mysterious cave', 'Dark drone, distant bells, wind chimes and guqin harmonics. Exploration, caves, secret realms.'],
-      sad: ['Sorrow', 'Erhu melody over gentle guqin chords. Farewells, defeat, emotional story beats.']
+      sad: ['Sorrow', 'Erhu melody over gentle guqin chords. Farewells, defeat, emotional story beats.'],
+      journey: ['On the road', 'Bamboo flute over broken guqin chords and a string bed, erhu in the second half. Travel, overworld, open country.'],
+      capital: ['Old capital', 'A free-time erhu opening, then a slow ballad with guqin, cellos and a distant wood block. Cities, story scenes.'],
+      palace: ['Forbidden palace', 'Slow guqin over low cellos that pulse like a heartbeat, building to a peak in the middle. Intrigue, stealth, dread.'],
+      temple: ['Mountain temple', 'Flute in free time, open pentatonic harmony, almost no pulse. Ruins, shrines, quiet endings.'],
+      skirmish: ['Skirmish', 'Dark five-note scale over Phrygian harmony: grinding low strings, falling erhu, sparse heavy drums. Regular fights.'],
+      boss: ['Boss fight', 'Slower and heavier, a whole tone lower, erhu over sawing cellos. Elite enemies, mid-bosses.'],
+      final: ['Final battle', 'The fastest of the three, erhu and low pipa stacked at the climax. Last stand, final boss.']
     },
     play: 'Play', stop: 'Stop', nowPlaying: 'Now composing: {mood} · variation {seed}', idle: 'Pick a mood and press Play. Each variation composes differently.',
     tempo: 'Tempo', volume: 'Volume', reseed: 'New variation',
@@ -844,7 +851,14 @@ const MUSIC = {
       calm: ['宁静山水', '古琴和竹笛，底下一层柔和的长音。打坐修炼、村庄、放置挂机。'],
       battle: ['战斗', '大鼓擂动、琵琶轮指、低音推进，每八小节一声锣。战斗、Boss、攻城。'],
       mystery: ['神秘洞府', '幽暗的低音、远处的钟声、风铃和古琴泛音。探索、洞府、秘境。'],
-      sad: ['悲伤抒情', '二胡旋律配柔和的古琴和弦。离别、失败、感人剧情。']
+      sad: ['悲伤抒情', '二胡旋律配柔和的古琴和弦。离别、失败、感人剧情。'],
+      journey: ['行旅', '竹笛领奏，古琴分解和弦，弦乐铺底，后半段换二胡。赶路、大地图、野外。'],
+      capital: ['京城叙事', '二胡散板开头，接一段慢叙事，古琴、大提琴和远处的木鱼。城镇、剧情。'],
+      palace: ['深宫', '古琴慢弹，底下大提琴像心跳一样低低地跳，中段推到最高。阴谋、潜行、压抑。'],
+      temple: ['山中古寺', '竹笛散板起、散板收，五声和声，几乎没有节拍。遗迹、寺庙、安静的结尾。'],
+      skirmish: ['遭遇战', '都节调旋律配弗里几亚和声：低弦来回锯，二胡往下坠，大鼓疏而沉。普通战斗。'],
+      boss: ['头目战', '更慢更沉，低一个全音，二胡压在锯动的大提琴上。精英怪、小头目。'],
+      final: ['决战', '三档里最急的一档，二胡和低音琵琶在高潮叠在一起。最终战。']
     },
     play: '播放', stop: '停止', nowPlaying: '正在作曲：{mood} · 变奏 {seed}', idle: '选一种情绪点播放。每个变奏的作曲都不一样。',
     tempo: '速度', volume: '音量', reseed: '换一个变奏',
@@ -883,7 +897,7 @@ const MUSIC = {
 const STUDIO = {
   en: {
     title: 'SFX Brew Lab — Free Online Music Studio for Game Soundtracks',
-    metaDesc: 'A free music studio in your browser for game soundtracks: multitrack timeline, piano roll, drum grid and mixer with guqin, pipa, bamboo flute, erhu, bells and war drums. Generate a full arrangement from a mood, edit every note, export WAV, loops and stems. Free for commercial use.',
+    metaDesc: 'A free music studio in your browser for game soundtracks: multitrack timeline, piano roll, drum grid and mixer with guqin, pipa, bamboo flute, erhu, bells, war drums and a string section (violins, violas, cellos). Generate a full arrangement from a mood, edit every note, export WAV, loops and stems. Free for commercial use.',
     untitled: 'Untitled song', expStudio: 'Music studio', expText: 'Text to music (coming soon)', expSfx: 'Text to sound effect (beta)', expTextShort: 'Text to music', soon: 'soon', newProject: 'New', exportBtn: 'Export',
     play: 'Play', stop: 'Stop', toStart: 'Go to start', loop: 'Cycle (C)', metronome: 'Metronome (K)', undo: 'Undo (⌘Z)', redo: 'Redo (⇧⌘Z)',
     tempo: 'Tempo', key: 'Key', mode: 'Mode', scaleLock: 'Pentatonic lock', scaleLockTip: 'Only show notes of the pentatonic scale in the piano roll',
@@ -897,12 +911,12 @@ const STUDIO = {
     mobile: 'Editing works best on a computer. On a phone you can generate, listen and export.',
     aboutH: 'A music studio for game soundtracks', aboutP: [
       'SFX Brew Studio is a small music workstation that runs in your browser. Every song is made of tracks, every track of regions, every region of notes you can edit in the piano roll or drum grid. Nothing is uploaded: sound is synthesised on your computer.',
-      'Generate a piece from a mood (calm landscape, battle, mysterious cave, sorrow) and the composer writes a theme, harmony, sections, bass and percussion as separate tracks. Change the instruments, move regions, redraw the melody, mute and solo, set the cycle range and export a seamless loop or stems for your game engine.',
-      'Everything you make is free for commercial use, no attribution required. The few recordings used (drums, gong, erhu) are CC0.'
+      'Generate a piece from a mood (calm landscape, battle, mysterious cave, sorrow, plus road, capital, palace, temple and three tiers of combat) and the composer writes a theme, harmony, sections, a string bed, bass and percussion as separate tracks. Melodies stay pentatonic while the chords underneath are triads of the full seven-note scale, with a darker Phrygian colour for combat. Each instrument starts in its usual seat in the stereo field, and the master bus adds a hall reverb, gentle compression and a limiter. Change the instruments, move regions, redraw the melody, mute and solo, set the cycle range and export a seamless loop or stems for your game engine.',
+      'Everything you make is free for commercial use, no attribution required. The few recordings used (drums, gong, erhu, string section) are CC0.'
     ],
     i18n: {
       play: 'Play', stop: 'Stop', saved: 'Saved in this browser', saveFailed: 'Could not save (storage full or blocked)', restored: 'Restored your last song',
-      sections: { intro: 'Intro', outro: 'Outro', A: 'A', B: 'B' },
+      sections: { intro: 'Intro', outro: 'Outro', A: 'A', B: 'B', A2: 'A′', C: 'Climax', brk: 'Break', free: 'Free time' },
       trackName: 'Track name', mute: 'Mute', solo: 'Solo', volume: 'Volume', pan: 'Pan', reverb: 'Reverb', instrument: 'Instrument',
       project: 'Song', songBars: 'Length (bars)', inspEmpty: 'Select a track or region to edit it. Double-click an empty spot on a track to add a region.',
       shortcuts: 'Shortcuts',
@@ -910,14 +924,14 @@ const STUDIO = {
       trackInfo: 'Regions: {regions} · notes: {notes}', dupTrack: 'Duplicate track', delTrack: 'Delete track',
       region: 'Region', regionStart: 'Starts at bar', regionLen: 'Length (bars)', regionInfo: 'Notes: {notes}', dupRegion: 'Duplicate', loopRegion: 'Cycle it', delRegion: 'Delete',
       center: 'Center', left: 'L', right: 'R',
-      modes: { gong: 'Gong (bright)', shang: 'Shang', jue: 'Jue', zhi: 'Zhi', yu: 'Yu (sad)' },
+      modes: { gong: 'Gong (bright)', shang: 'Shang', jue: 'Jue', zhi: 'Zhi', yu: 'Yu (sad)', miyako: 'Miyako-bushi (dark)' },
       rendering: 'Rendering…', renderingStem: 'Rendering track {i} of {n}…', exported: 'Downloaded', exportFailed: 'Nothing to export yet', opened: 'Opened {name}', openFailed: 'That file is not an SFX Brew project',
       rollEmpty: 'Select a region to edit its notes (double-click an empty spot on a track to make one)', regionAt: 'bar {bar}, {len} bars', velocity: 'Velocity'
     }
   },
   zh: {
     title: 'SFX Brew 实验室：免费在线编曲工作室（游戏配乐 / 民乐音色）',
-    metaDesc: '在浏览器里免费做游戏配乐的编曲工作室：多轨时间线、钢琴卷帘、鼓网格、混音，音色有古琴、琵琶、竹笛、二胡、钟磬和战鼓。按情绪一键生成完整编曲，每个音都能改，导出 WAV、无缝循环和分轨，免费商用。',
+    metaDesc: '在浏览器里免费做游戏配乐的编曲工作室：多轨时间线、钢琴卷帘、鼓网格、混音，音色有古琴、琵琶、竹笛、二胡、钟磬、战鼓和西洋弦乐组（小提琴、中提琴、大提琴）。按情绪一键生成完整编曲，每个音都能改，导出 WAV、无缝循环和分轨，免费商用。',
     untitled: '未命名', expStudio: '编曲工作室', expText: '文字作曲（即将推出）', expSfx: '文字生成音效（测试版）', expTextShort: '文字作曲', soon: '即将推出', newProject: '新建', exportBtn: '导出',
     play: '播放', stop: '停止', toStart: '回到开头', loop: '循环（C）', metronome: '节拍器（K）', undo: '撤销（⌘Z）', redo: '重做（⇧⌘Z）',
     tempo: '速度', key: '主音', mode: '调式', scaleLock: '五声锁定', scaleLockTip: '钢琴卷帘里只显示五声音阶内的音',
@@ -931,12 +945,12 @@ const STUDIO = {
     mobile: '精细编辑建议用电脑。手机上可以生成、试听和导出。',
     aboutH: '给游戏配乐用的编曲工作室', aboutP: [
       'SFX Brew 工作室是一个在浏览器里运行的小型编曲软件。一首曲子由多条音轨组成，每条轨上有若干片段，每个片段里的音符都能在钢琴卷帘或鼓网格里修改。不上传任何东西，声音都在你的电脑上实时合成。',
-      '按情绪（宁静山水、战斗、神秘洞府、悲伤抒情）生成一首，作曲引擎会写出主题、和声、段落、低音和打击乐，各占一条轨。可以换乐器、挪片段、重画旋律、静音独奏、设定循环区间，再导出无缝循环或分轨，放进游戏引擎里。',
-      '在这里做的所有内容都可以免费商用，不需要署名。用到的少量录音（鼓、锣、二胡）都是 CC0。'
+      '按情绪生成一首（宁静山水、战斗、神秘洞府、悲伤抒情，以及行旅、京城、深宫、古寺和三档战斗），作曲引擎会写出主题、和声、段落、弦乐铺底、低音和打击乐，各占一条轨。旋律是五声的，底下的和声用七声音阶的三和弦，战斗曲用更阴的弗里几亚色彩。每件乐器默认坐在乐队里惯常的位置上，总线上有厅堂混响、轻度压缩和限幅。可以换乐器、挪片段、重画旋律、静音独奏、设定循环区间，再导出无缝循环或分轨，放进游戏引擎里。',
+      '在这里做的所有内容都可以免费商用，不需要署名。用到的少量录音（鼓、锣、二胡、弦乐组）都是 CC0。'
     ],
     i18n: {
       play: '播放', stop: '停止', saved: '已自动保存在本浏览器', saveFailed: '保存失败（存储空间满了或被禁用）', restored: '已恢复上次的曲子',
-      sections: { intro: '引子', outro: '尾声', A: 'A 段', B: 'B 段' },
+      sections: { intro: '引子', outro: '尾声', A: 'A 段', B: 'B 段', A2: 'A 变奏', C: '高潮', brk: '间歇', free: '散板' },
       trackName: '音轨名', mute: '静音', solo: '独奏', volume: '音量', pan: '声像', reverb: '混响', instrument: '乐器',
       project: '曲子', songBars: '长度（小节）', inspEmpty: '选中一条音轨或一个片段来修改。在音轨的空白处双击可以新建片段。',
       shortcuts: '快捷键',
@@ -944,7 +958,7 @@ const STUDIO = {
       trackInfo: '{regions} 个片段，{notes} 个音符', dupTrack: '复制音轨', delTrack: '删除音轨',
       region: '片段', regionStart: '起始小节', regionLen: '长度（小节）', regionInfo: '{notes} 个音符', dupRegion: '复制', loopRegion: '循环它', delRegion: '删除',
       center: '居中', left: '左', right: '右',
-      modes: { gong: '宫调（明亮）', shang: '商调', jue: '角调', zhi: '徵调', yu: '羽调（哀婉）' },
+      modes: { gong: '宫调（明亮）', shang: '商调', jue: '角调', zhi: '徵调', yu: '羽调（哀婉）', miyako: '都节调（阴暗）' },
       rendering: '渲染中…', renderingStem: '正在渲染第 {i} / {n} 轨…', exported: '已下载', exportFailed: '还没有可以导出的音符', opened: '已打开 {name}', openFailed: '这不是 SFX Brew 的项目文件',
       rollEmpty: '选中一个片段来编辑音符（在音轨空白处双击可以新建片段）', regionAt: '第 {bar} 小节起，{len} 小节', velocity: '力度'
     }

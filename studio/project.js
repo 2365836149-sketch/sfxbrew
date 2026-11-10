@@ -10,14 +10,18 @@
 (function (root) {
   'use strict';
 
-  const MODES = { gong: [0, 2, 4, 7, 9], shang: [0, 2, 5, 7, 10], jue: [0, 3, 5, 8, 10], zhi: [0, 2, 5, 7, 9], yu: [0, 3, 5, 7, 10] };
+  const MODES = { gong: [0, 2, 4, 7, 9], shang: [0, 2, 5, 7, 10], jue: [0, 3, 5, 8, 10], zhi: [0, 2, 5, 7, 9], yu: [0, 3, 5, 7, 10],
+    /* 都节调（1 ♭2 4 5 ♭6）：带两个半音的五声，阴暗、紧张，战斗曲用 */
+    miyako: [0, 1, 5, 7, 8] };
+  /* 和声：penta = 五声音阶上叠四度的开放和弦（老项目）；diatonic = 七声音阶三和弦（旋律仍是五声）；dark = 弗里几亚色彩（i 和 ♭II 来回） */
+  const HARMONIES = ['penta', 'diatonic', 'dark'];
   const STORE_KEY = 'sfxbrew-studio-project';
   let seq = 0;
   const uid = p => p + Date.now().toString(36) + (seq++).toString(36);
 
   function newProject() {
     return {
-      v: 1, title: '', tempo: 90, root: 50, mode: 'gong', scaleLock: true, bars: 16,
+      v: 1, title: '', tempo: 90, root: 50, mode: 'gong', harmony: 'penta', scaleLock: true, bars: 16,
       loop: { on: false, start: 0, end: 16 },
       sections: [], chords: [], tracks: []
     };
@@ -59,6 +63,7 @@
     p.tempo = Math.max(30, Math.min(240, +p.tempo || 90));
     p.root = Math.max(36, Math.min(72, Math.round(+p.root || 50)));
     if (!MODES[p.mode]) p.mode = 'gong';
+    if (!HARMONIES.includes(p.harmony)) p.harmony = 'penta';
     p.bars = Math.max(1, Math.min(512, Math.round(+p.bars || 16)));
     p.loop = Object.assign({ on: false, start: 0, end: 16 }, p.loop || {});
     p.sections = Array.isArray(p.sections) ? p.sections : [];
@@ -95,7 +100,7 @@
     try { const s = root.localStorage && root.localStorage.getItem(STORE_KEY); return s ? sanitize(JSON.parse(s)) : null; } catch (e) { return null; }
   }
 
-  const api = { MODES, uid, newProject, newTrack, newRegion, scaleOf, inScale, isTonic, snapToScale, findTrack, findRegion, lengthBeats, sanitize, makeHistory, save, load };
+  const api = { MODES, HARMONIES, uid, newProject, newTrack, newRegion, scaleOf, inScale, isTonic, snapToScale, findTrack, findRegion, lengthBeats, sanitize, makeHistory, save, load };
   root.Studio = root.Studio || {};
   root.Studio.project = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

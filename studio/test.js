@@ -42,7 +42,20 @@ const stats = ch => { let pk = 0, nan = 0, ss = 0; for (const v of ch) { if (isN
   assert.strictEqual(P.snapToScale({ root: 50, mode: 'gong' }, 51), 50, 'snap to scale');
 
   /* 4. 四种情绪都能生成并渲染（只渲染前 16 小节，节省时间） */
-  for (const mood of music.moods) {
+  /* 3b. 和声：七声三和弦的性质、五声叠置和弦、都节调 */
+  assert.deepStrictEqual(S.chordMidi({ root: 45, mode: 'yu', harmony: 'diatonic' }, 0), [45, 48, 52], 'i in A yu = A C E');
+  assert.strictEqual(S.chordQuality({ root: 45, mode: 'yu', harmony: 'diatonic' }, 0), 'm', 'i is minor');
+  assert.strictEqual(S.chordQuality({ root: 45, mode: 'yu', harmony: 'diatonic' }, 5), '', 'VI is major');
+  assert.deepStrictEqual(S.chordMidi({ root: 45, mode: 'miyako', harmony: 'dark' }, 1), [46, 50, 53], 'bII in A = Bb D F');
+  assert.strictEqual(S.chordQuality({ root: 50, mode: 'gong', harmony: 'penta' }, 0), '', 'pentatonic chords have no quality');
+  assert.ok(P.inScale({ root: 45, mode: 'miyako' }, 46), 'miyako has the flat second');
+  const sk = S.fromMood(music, 'skirmish', 3, 'zh');
+  assert.strictEqual(sk.harmony, 'dark'); assert.strictEqual(sk.mode, 'miyako');
+  assert.ok(['strings', 'cello', 'spic'].every(i => sk.tracks.some(t => t.instrument === i)), 'skirmish has string bed, cello bass and spiccato');
+  assert.strictEqual(P.sanitize({ tracks: [] }).harmony, 'penta', 'old projects default to pentatonic harmony');
+
+  /* 4. 四种情绪 + 七套编曲都能生成并渲染 */
+  for (const mood of [...music.moods, ...Object.keys(S.STYLES)]) {
     const p = S.fromMood(music, mood, 5, 'en');
     const t0 = Date.now();
     const r = await player.render(p, { from: 0, to: 64, sampleRate: 22050, tail: 2 });

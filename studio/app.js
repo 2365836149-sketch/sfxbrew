@@ -22,7 +22,7 @@
   const noteName = m => NOTE[((m % 12) + 12) % 12] + (Math.floor(m / 12) - 1);
   const pcName = m => NOTE[((m % 12) + 12) % 12];
   const instName = id => { const i = insts.get(id); return LANG === 'zh' ? i.zh : i.en; };
-  const COLORS = { guqin: '#b5833a', pipa: '#b5523f', flute: '#3f7f9a', erhu: '#9a4a6a', bass: '#5f5a9a', pad: '#3d8a6e', drone: '#5d6b80', bell: '#b08d2e', chime: '#4f9aa5', drums: '#8a6440' };
+  const COLORS = { guqin: '#b5833a', pipa: '#b5523f', flute: '#3f7f9a', erhu: '#9a4a6a', bass: '#5f5a9a', violin: '#a8553a', viola: '#96633a', cello: '#7a4a2e', spic: '#8f5a4a', strings: '#a06a4e', pad: '#3d8a6e', drone: '#5d6b80', bell: '#b08d2e', chime: '#4f9aa5', drums: '#8a6440' };
   const color = id => COLORS[id] || '#8a8a8e';
   const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
   const FONT = getComputedStyle(document.body).fontFamily;
@@ -145,7 +145,11 @@
     const end = P.lengthBeats(project), cs = project.chords.slice().sort((a, b) => a.beat - b.beat);
     return cs.map((c, i) => ({ beat: c.beat, end: i + 1 < cs.length ? cs[i + 1].beat : end, degree: c.degree }));
   }
-  function chordLabel(deg) { return pcName(Smart.degMidi(project, deg)); }
+  /* 和弦标签：根音名 + 性质（m 小三、° 减三）；五声叠置和弦只写根音 */
+  function chordLabel(deg) {
+    const q = Smart.chordQuality(project, deg);
+    return pcName(Smart.chordMidi(project, deg)[0]) + (q === 'dim' ? '°' : q);
+  }
 
   function tlDraw() {
     const W = tlScroll.clientWidth, H = tlScroll.clientHeight;
@@ -377,6 +381,8 @@
   $$('button', addMenu).forEach(b => b.addEventListener('click', () => {
     closePops();
     const t = P.newTrack(b.dataset.inst, ''), r = P.newRegion(Math.floor(cursor / 4) * 4, 16, []);
+    const mx = insts.mixOf(b.dataset.inst);          /* 新音轨先放在这件乐器惯常的位置上 */
+    t.pan = mx.pan; t.reverb = mx.reverb;
     t.regions.push(r);
     if (b.dataset.inst === 'drums') t.drummer = null;
     edit(() => { project.tracks.push(t); });

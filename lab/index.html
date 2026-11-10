@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SFX Brew Lab — Free Online Music Studio for Game Soundtracks | SFX Brew</title>
-<meta name="description" content="A free music studio in your browser for game soundtracks: multitrack timeline, piano roll, drum grid and mixer with guqin, pipa, bamboo flute, erhu, bells and war drums. Generate a full arrangement from a mood, edit every note, export WAV, loops and stems. Free for commercial use.">
+<meta name="description" content="A free music studio in your browser for game soundtracks: multitrack timeline, piano roll, drum grid and mixer with guqin, pipa, bamboo flute, erhu, bells, war drums and a string section (violins, violas, cellos). Generate a full arrangement from a mood, edit every note, export WAV, loops and stems. Free for commercial use.">
 <link rel="canonical" href="https://sfxbrew.com/lab/">
 <link rel="alternate" hreflang="en" href="https://sfxbrew.com/lab/">
 <link rel="alternate" hreflang="zh-Hans" href="https://sfxbrew.com/zh/lab/">
@@ -12,7 +12,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:title" content="SFX Brew Lab — Free Online Music Studio for Game Soundtracks">
-<meta property="og:description" content="A free music studio in your browser for game soundtracks: multitrack timeline, piano roll, drum grid and mixer with guqin, pipa, bamboo flute, erhu, bells and war drums. Generate a full arrangement from a mood, edit every note, export WAV, loops and stems. Free for commercial use.">
+<meta property="og:description" content="A free music studio in your browser for game soundtracks: multitrack timeline, piano roll, drum grid and mixer with guqin, pipa, bamboo flute, erhu, bells, war drums and a string section (violins, violas, cellos). Generate a full arrangement from a mood, edit every note, export WAV, loops and stems. Free for commercial use.">
 <meta property="og:url" content="https://sfxbrew.com/lab/">
 <meta property="og:image" content="https://sfxbrew.com/og.png">
 <meta property="og:image:width" content="1200">
@@ -21,7 +21,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://sfxbrew.com/og.png">
 <link rel="stylesheet" href="/style.css?v=c034f2e1">
-<link rel="stylesheet" href="/studio/studio.css?v=724330aa">
+<link rel="stylesheet" href="/studio/studio.css?v=0eaaf400">
 </head>
 <body class="st-page">
 <header class="bar">
@@ -90,7 +90,7 @@
     <h2 id="st-start-h">Start a new song</h2>
     <p>Pick a mood to get a full arrangement you can edit, or start from an empty track.</p>
     <h3>Generate from a mood</h3>
-    <div class="st-moods"><button class="st-mood" data-mood="calm"><b>Calm landscape</b><span>Guqin and bamboo flute over a soft drone. Meditation, cultivation, villages, idle progress.</span></button><button class="st-mood" data-mood="battle"><b>Battle</b><span>Dagu war drums, pipa tremolo and a low pulse, with a gong every eight bars. Combat, bosses, sieges.</span></button><button class="st-mood" data-mood="mystery"><b>Mysterious cave</b><span>Dark drone, distant bells, wind chimes and guqin harmonics. Exploration, caves, secret realms.</span></button><button class="st-mood" data-mood="sad"><b>Sorrow</b><span>Erhu melody over gentle guqin chords. Farewells, defeat, emotional story beats.</span></button></div>
+    <div class="st-moods"><button class="st-mood" data-mood="calm"><b>Calm landscape</b><span>Guqin and bamboo flute over a soft drone. Meditation, cultivation, villages, idle progress.</span></button><button class="st-mood" data-mood="battle"><b>Battle</b><span>Dagu war drums, pipa tremolo and a low pulse, with a gong every eight bars. Combat, bosses, sieges.</span></button><button class="st-mood" data-mood="mystery"><b>Mysterious cave</b><span>Dark drone, distant bells, wind chimes and guqin harmonics. Exploration, caves, secret realms.</span></button><button class="st-mood" data-mood="sad"><b>Sorrow</b><span>Erhu melody over gentle guqin chords. Farewells, defeat, emotional story beats.</span></button><button class="st-mood" data-mood="journey"><b>On the road</b><span>Bamboo flute over broken guqin chords and a string bed, erhu in the second half. Travel, overworld, open country.</span></button><button class="st-mood" data-mood="capital"><b>Old capital</b><span>A free-time erhu opening, then a slow ballad with guqin, cellos and a distant wood block. Cities, story scenes.</span></button><button class="st-mood" data-mood="palace"><b>Forbidden palace</b><span>Slow guqin over low cellos that pulse like a heartbeat, building to a peak in the middle. Intrigue, stealth, dread.</span></button><button class="st-mood" data-mood="temple"><b>Mountain temple</b><span>Flute in free time, open pentatonic harmony, almost no pulse. Ruins, shrines, quiet endings.</span></button><button class="st-mood" data-mood="skirmish"><b>Skirmish</b><span>Dark five-note scale over Phrygian harmony: grinding low strings, falling erhu, sparse heavy drums. Regular fights.</span></button><button class="st-mood" data-mood="boss"><b>Boss fight</b><span>Slower and heavier, a whole tone lower, erhu over sawing cellos. Elite enemies, mid-bosses.</span></button><button class="st-mood" data-mood="final"><b>Final battle</b><span>The fastest of the three, erhu and low pipa stacked at the climax. Last stand, final boss.</span></button></div>
     <div class="st-start-row">
       <button id="st-blank" class="st-mood"><b>Empty project</b><span>One guqin track, nothing in it.</span></button>
       <button id="st-start-open" class="st-tb">Open project file</button>
@@ -102,20 +102,20 @@
 <section class="st-about">
   <h1>A music studio for game soundtracks</h1>
   <p>SFX Brew Studio is a small music workstation that runs in your browser. Every song is made of tracks, every track of regions, every region of notes you can edit in the piano roll or drum grid. Nothing is uploaded: sound is synthesised on your computer.</p>
-  <p>Generate a piece from a mood (calm landscape, battle, mysterious cave, sorrow) and the composer writes a theme, harmony, sections, bass and percussion as separate tracks. Change the instruments, move regions, redraw the melody, mute and solo, set the cycle range and export a seamless loop or stems for your game engine.</p>
-  <p>Everything you make is free for commercial use, no attribution required. The few recordings used (drums, gong, erhu) are CC0.</p>
+  <p>Generate a piece from a mood (calm landscape, battle, mysterious cave, sorrow, plus road, capital, palace, temple and three tiers of combat) and the composer writes a theme, harmony, sections, a string bed, bass and percussion as separate tracks. Melodies stay pentatonic while the chords underneath are triads of the full seven-note scale, with a darker Phrygian colour for combat. Each instrument starts in its usual seat in the stereo field, and the master bus adds a hall reverb, gentle compression and a limiter. Change the instruments, move regions, redraw the melody, mute and solo, set the cycle range and export a seamless loop or stems for your game engine.</p>
+  <p>Everything you make is free for commercial use, no attribution required. The few recordings used (drums, gong, erhu, string section) are CC0.</p>
   <p class="foot-meta"><a href="/sounds/">Sound Library</a><a href="/privacy/">Privacy</a><a href="/samples/CREDITS.md">Recording credits</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
 </section>
-<script type="application/json" id="studio-data">{"lang":"en","i18n":{"play":"Play","stop":"Stop","saved":"Saved in this browser","saveFailed":"Could not save (storage full or blocked)","restored":"Restored your last song","sections":{"intro":"Intro","outro":"Outro","A":"A","B":"B"},"trackName":"Track name","mute":"Mute","solo":"Solo","volume":"Volume","pan":"Pan","reverb":"Reverb","instrument":"Instrument","project":"Song","songBars":"Length (bars)","inspEmpty":"Select a track or region to edit it. Double-click an empty spot on a track to add a region.","shortcuts":"Shortcuts","keys":[["Space","Play / stop"],["Return","Go to start"],["C","Cycle on / off"],["K","Metronome"],["E","Show / hide editor"],["⌘Z / ⇧⌘Z","Undo / redo"],["⌘D","Duplicate region"],["⌫","Delete selection"],["⌥-drag","Copy region"],["⌘-scroll","Zoom"]],"trackInfo":"Regions: {regions} · notes: {notes}","dupTrack":"Duplicate track","delTrack":"Delete track","region":"Region","regionStart":"Starts at bar","regionLen":"Length (bars)","regionInfo":"Notes: {notes}","dupRegion":"Duplicate","loopRegion":"Cycle it","delRegion":"Delete","center":"Center","left":"L","right":"R","modes":{"gong":"Gong (bright)","shang":"Shang","jue":"Jue","zhi":"Zhi","yu":"Yu (sad)"},"rendering":"Rendering…","renderingStem":"Rendering track {i} of {n}…","exported":"Downloaded","exportFailed":"Nothing to export yet","opened":"Opened {name}","openFailed":"That file is not an SFX Brew project","rollEmpty":"Select a region to edit its notes (double-click an empty spot on a track to make one)","regionAt":"bar {bar}, {len} bars","velocity":"Velocity"}}</script>
+<script type="application/json" id="studio-data">{"lang":"en","i18n":{"play":"Play","stop":"Stop","saved":"Saved in this browser","saveFailed":"Could not save (storage full or blocked)","restored":"Restored your last song","sections":{"intro":"Intro","outro":"Outro","A":"A","B":"B","A2":"A′","C":"Climax","brk":"Break","free":"Free time"},"trackName":"Track name","mute":"Mute","solo":"Solo","volume":"Volume","pan":"Pan","reverb":"Reverb","instrument":"Instrument","project":"Song","songBars":"Length (bars)","inspEmpty":"Select a track or region to edit it. Double-click an empty spot on a track to add a region.","shortcuts":"Shortcuts","keys":[["Space","Play / stop"],["Return","Go to start"],["C","Cycle on / off"],["K","Metronome"],["E","Show / hide editor"],["⌘Z / ⇧⌘Z","Undo / redo"],["⌘D","Duplicate region"],["⌫","Delete selection"],["⌥-drag","Copy region"],["⌘-scroll","Zoom"]],"trackInfo":"Regions: {regions} · notes: {notes}","dupTrack":"Duplicate track","delTrack":"Delete track","region":"Region","regionStart":"Starts at bar","regionLen":"Length (bars)","regionInfo":"Notes: {notes}","dupRegion":"Duplicate","loopRegion":"Cycle it","delRegion":"Delete","center":"Center","left":"L","right":"R","modes":{"gong":"Gong (bright)","shang":"Shang","jue":"Jue","zhi":"Zhi","yu":"Yu (sad)","miyako":"Miyako-bushi (dark)"},"rendering":"Rendering…","renderingStem":"Rendering track {i} of {n}…","exported":"Downloaded","exportFailed":"Nothing to export yet","opened":"Opened {name}","openFailed":"That file is not an SFX Brew project","rollEmpty":"Select a region to edit its notes (double-click an empty spot on a track to make one)","regionAt":"bar {bar}, {len} bars","velocity":"Velocity"}}</script>
 <script src="/engine.js?v=e414867f"></script>
 <script src="/shared.js?v=cc7dbb55"></script>
 <script src="/music.js?v=946e12b3"></script>
-<script src="/studio/project.js?v=499d4bda"></script>
-<script src="/studio/instruments.js?v=8cda34b6"></script>
-<script src="/studio/player.js?v=6b1a48d0"></script>
-<script src="/studio/smart.js?v=def9e355"></script>
+<script src="/studio/project.js?v=c8184a16"></script>
+<script src="/studio/instruments.js?v=880f230b"></script>
+<script src="/studio/player.js?v=1e595012"></script>
+<script src="/studio/smart.js?v=28f8c4ab"></script>
 <script src="/studio/roll.js?v=90188bbb"></script>
-<script src="/studio/app.js?v=039e0a28"></script>
+<script src="/studio/app.js?v=9a4cc09e"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "a45dcf7d53464930b4757d7687c6b9b1"}'></script>
 </body>
 </html>
