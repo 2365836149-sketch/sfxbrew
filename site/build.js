@@ -371,7 +371,9 @@ function searchPage(lang, cat) {
     const t = SOUNDS[id][lang], p = variant(id, 0), tags = tagsOf(id), cats = CAT.catsOf(id);
     data.push({ id, file: fileBase(id), patch: p });
     const hay = [SOUNDS[id].en.name, SOUNDS[id].zh.name, id, CAT.ENTRIES[id].kw, ...cats.map(c => catName('en', c) + ' ' + catName('zh', c)), ...tags.map(x => tagName('en', x) + ' ' + tagName('zh', x))].join(' ').toLowerCase();
-    const shown = tags.filter(x => /^(style|material|mood):/.test(x)).slice(0, 3).map(x => tagName(lang, x));
+    /* 卡片上的标签：最多 2 个，和大类名重复的不再显示（例如「东方乐器 · 东方」） */
+    const cn = catName(lang, cats[0]).toLowerCase();
+    const shown = tags.filter(x => /^(style|material|mood):/.test(x)).map(x => tagName(lang, x)).filter(n => !cn.includes(n.toLowerCase())).slice(0, 2);
     return `<article class="card sc" data-i="${i}" data-cats="${cats.join(' ')}" data-tags="${tags.join(' ')}" data-hay="${esc(hay)}" data-dur="${ENGINE.duration(p).toFixed(2)}" data-name="${esc(t.name)}">
   <canvas class="card-wave" aria-hidden="true"></canvas>
   <div class="card-row"><button class="play" aria-label="${esc(u.play + ' ' + t.name)}">▶</button><div class="card-id"><a class="card-name" href="${soundUrl(lang, id)}">${esc(t.name)}</a><div class="card-tags">${esc([catName(lang, cats[0]), ...shown].join(' · '))}</div></div><span class="card-dur"></span></div>
