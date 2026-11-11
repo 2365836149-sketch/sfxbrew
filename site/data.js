@@ -743,7 +743,7 @@ const CAT_COPY = {
 /* 页面固定文字 */
 const UI = {
   en: {
-    navEditor: 'SFX Editor', navLibrary: 'Sound Library', navLab: 'Lab', navAI: 'AI SFX', navMusic: 'Music', navPacks: 'Packs', navAgents: 'For AI agents', switchLang: '中文',
+    navEditor: 'Editor', navLibrary: 'Library', navLab: 'Music Lab', navAI: 'AI SFX', navMusic: 'Music', navPacks: 'Packs', navAgents: 'For AI agents', switchLang: '中文',
     nVariants: n => n + ' variations', libCount: (k, n) => k + ' categories × ' + n + ' variations', moreInfo: name => 'About these ' + name.toLowerCase() + ' sounds, uses and license', aboutLib: 'About this library',
     library: 'Sound Library', packs: 'Packs', category: 'Category', filters: 'Filters', categoriesH: 'Categories', searchPh: 'Search: sword, coin, rain, 剑…', sortDefault: 'Sort: category', sortName: 'Sort: name', sortDur: 'Sort: length', clearAll: 'Clear filters', showing: (n, m) => n + ' of ' + m + ' sounds', nSounds: n => n + ' free sounds', libMetaTail: 'Free for commercial use: play in the browser, download WAV or copy JavaScript.', noResults: 'No sound matches. Try another word or clear the filters.', reroll: 'New variation', details: 'Details', allIn: name => 'All ' + name.toLowerCase(), groupInstr: 'Eastern instruments', groupXianxia: 'Xianxia & magic', groupEast: 'Eastern & Xianxia', groupGeneral: 'General Game Sounds',
     zipAll: n => 'Download all ' + n + ' as ZIP', zipPack: n => 'Download all ' + n + ' sounds as ZIP', itchPack: 'Also on itch.io',
@@ -762,11 +762,13 @@ const UI = {
     soundMetaDesc: (first, n) => first + ' ' + n + ' free variations to play, download as WAV or copy as JavaScript. Free for commercial use.',
     packMetaTitle: (t, n) => t + ' — ' + n + ' Royalty-Free Sounds | SFX Brew',
     packMetaDesc: (first, n) => first + ' ' + n + ' sounds, free download as WAV or JavaScript.',
+    footShort: 'Sounds are yours to use, no attribution required.',
+    packKicker: 'Sound pack', openPack: 'Listen and download', allSoundsH: 'All sounds', libShort: (n, v) => n + ' sounds with ' + v + ' variations each. Download a WAV, a zip of variations, or open any sound in the editor.',
     footer: 'Every sound on this site is made in your browser, from synthesis or a few CC0 recordings, and free for commercial use, no attribution required.', credits: 'Recording credits',
     js: { rendering: (i, n) => 'Rendering ' + i + ' / ' + n + '…', downloaded: 'Downloaded ✓', copied: 'Copied — paste it into your game ✓', copyFailed: 'Copy failed' }
   },
   zh: {
-    navEditor: '音效编辑器', navLibrary: '音效库', navLab: '实验室', navAI: 'AI 生成', navMusic: '配乐', navPacks: '音效包', navAgents: '给 AI 用', switchLang: 'English',
+    navEditor: '音效编辑器', navLibrary: '音效库', navLab: '配乐实验室', navAI: 'AI 生成', navMusic: '配乐', navPacks: '音效包', navAgents: '给 AI 用', switchLang: 'English',
     nVariants: n => n + ' 个变体', libCount: (k, n) => k + ' 类 × 每类 ' + n + ' 个变体', moreInfo: name => '关于' + name + '音效：适用场景、技巧和授权', aboutLib: '关于这个音效库',
     library: '音效库', packs: '音效包', category: '分类', filters: '筛选', categoriesH: '大类', searchPh: '搜索：剑、金币、雨、slash…', sortDefault: '排序：按大类', sortName: '排序：按名称', sortDur: '排序：按长短', clearAll: '清除筛选', showing: (n, m) => '显示 ' + n + ' / ' + m + ' 个音效', nSounds: n => n + ' 个免费音效', libMetaTail: '免费商用，可在线试听、下载 WAV 或复制 JavaScript。', noResults: '没有匹配的音效。换个词，或者清除筛选。', reroll: '换一个', details: '详情', allIn: name => '全部' + name, groupInstr: '东方乐器', groupXianxia: '仙侠', groupEast: '东方 / 修仙', groupGeneral: '通用游戏音效',
     zipAll: n => '下载全部 ' + n + ' 个（ZIP）', zipPack: n => '下载全部 ' + n + ' 个音效（ZIP）', itchPack: '在 itch.io 下载',
@@ -785,6 +787,8 @@ const UI = {
     soundMetaDesc: (first, n) => first + n + ' 个免费变体，可试听、下载 WAV 或复制 JavaScript，免费商用。',
     packMetaTitle: (t, n) => t + '：' + n + ' 个免费可商用音效 | SFX Brew',
     packMetaDesc: (first, n) => first + '共 ' + n + ' 个音效，免费下载 WAV 或 JavaScript。',
+    footShort: '声音归你所有，可免费商用，不需要署名。',
+    packKicker: '音效包', openPack: '试听和下载', allSoundsH: '全部音效', libShort: (n, v) => n + ' 个音效，每个 ' + v + ' 个变体。可以下载单个 WAV、整组 zip，或者在编辑器里打开任意一个。',
     footer: '本站所有声音都在你的浏览器里实时生成（合成或少量 CC0 录音素材），可免费商用，不需要署名。', credits: '录音素材来源',
     js: { rendering: (i, n) => '渲染中 ' + i + ' / ' + n + '…', downloaded: '已下载 ✓', copied: '已复制，粘贴到游戏里就能用 ✓', copyFailed: '复制失败' }
   }
@@ -983,11 +987,12 @@ const TEXTSFX = {
     errors: { per_minute: 'Too many requests. Wait a minute and try again.', per_day: 'You have used today\'s free generations. Come back tomorrow.', daily_global: 'Today\'s beta quota for everyone is used up. Come back tomorrow.',
       busy: 'Busy right now, please try again in a moment.', captcha: 'Verification failed. Reload the page and try again.', empty: 'Type a description first.', origin: 'Request blocked.', server: 'Generation failed. Try describing it differently.', network: 'Could not reach the generator. It may be offline.' },
     license: 'Generated sounds are free for commercial use.',
+    acctH: 'Account and credits', loginH: 'Sign in with your email', signedAs: 'Signed in as', stripeNote: 'Secure checkout by Stripe. VAT included.', packCredits: '{n} credits', save: 'Save {p}%',
     loginBuy: 'Sign in to buy credits', emailPh: 'Email', sendCode: 'Send code', sending: 'Sending…', codeSent: 'We sent a code to {email}.', codePh: '6-digit code', verify: 'Sign in', logout: 'Sign out', cancel: 'Cancel',
     acctNote: '1 credit per generation or change. Credits never expire, and there is no daily limit while you are signed in.',
-    buyH: 'Buy credits', buy: '{n} credits · {price}', buying: 'Opening checkout…', paidOk: 'Payment received. {n} credits added.',
+    buyH: 'Top up', buy: '{n} credits · {price}', buying: 'Opening checkout…', paidOk: 'Payment received. {n} credits added.',
     up: 'Good match', down: 'Not what I wanted', ai: 'AI generated · Powered by Stability AI',
-    creditsLeft: '{n} credits',
+    creditsLeft: '{n} credits left', creditsShort: '{n} credits',
     keyErrors: { license_invalid: 'You were signed out. Please sign in again.', no_credits: 'You are out of credits.', not_paid: 'The payment has not gone through yet. Reload this page in a minute.',
       payment_error: 'Payment error. If you were charged, email contact@sfxbrew.com and we will sort it out.', login_required: 'Please sign in first.',
       code_invalid: 'That code is wrong or has expired.', email_invalid: 'That email address does not look right.', too_many: 'Too many attempts. Try again in a minute.', mail_error: 'Could not send the email. Please try again later.' }
@@ -1007,11 +1012,12 @@ const TEXTSFX = {
     errors: { per_minute: '请求太频繁，请过一分钟再试。', per_day: '你今天的免费次数用完了，明天再来吧。', daily_global: '今天全站的测试名额已经用完，明天再来吧。',
       busy: '现在有点忙，请稍等片刻再试。', captcha: '人机验证没通过，请刷新页面再试。', empty: '先写一句描述。', origin: '请求被拒绝。', server: '生成失败，换个说法试试。', network: '连不上生成服务，可能暂时离线。' },
     license: '生成的音效可以免费商用。',
+    acctH: '账户和点数', loginH: '用邮箱登录', signedAs: '已登录', stripeNote: '由 Stripe 安全结账，价格含税。', packCredits: '{n} 点', save: '省 {p}%',
     loginBuy: '登录购买点数', emailPh: '邮箱', sendCode: '发送验证码', sending: '发送中…', codeSent: '验证码已发到 {email}', codePh: '6 位验证码', verify: '登录', logout: '退出', cancel: '取消',
     acctNote: '生成或修改一次用 1 点，点数不过期；登录后不受每日免费次数限制。',
-    buyH: '购买点数', buy: '{n} 点 · {price}', buying: '正在打开付款页…', paidOk: '付款成功，{n} 点已到账。',
+    buyH: '充值点数', buy: '{n} 点 · {price}', buying: '正在打开付款页…', paidOk: '付款成功，{n} 点已到账。',
     up: '挺像的', down: '不是我要的', ai: 'AI 生成 · Powered by Stability AI',
-    creditsLeft: '剩余 {n} 点',
+    creditsLeft: '剩余 {n} 点', creditsShort: '{n} 点',
     keyErrors: { license_invalid: '登录已失效，请重新登录。', no_credits: '点数用完了。', not_paid: '付款还没完成，请过一分钟刷新本页。',
       payment_error: '付款出了问题。如果已经扣款，请发邮件到 contact@sfxbrew.com，我们会处理。', login_required: '请先登录。',
       code_invalid: '验证码不对或已过期。', email_invalid: '邮箱格式不对。', too_many: '操作太频繁，请过一会儿再试。', mail_error: '邮件发送失败，请稍后再试。' }

@@ -7,7 +7,7 @@
 <meta name="description" content="Make royalty-free game sound effects in your browser: pick a preset, mutate it, make it heavier or farther, fine-tune layers, then export WAV, seamless loops, a game-engine pack (Godot, Unity, web) or drop-in JavaScript. Free for commercial use.">
 <link rel="canonical" href="https://sfxbrew.com/editor/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/style.css?v=66ef296b">
+<link rel="stylesheet" href="/style.css?v=e11ec75a">
 </head>
 <body>
 <header class="bar">
@@ -35,43 +35,53 @@
   </aside>
 
   <section class="ed-stage">
-    <div class="title-row">
-      <h1 id="sound-name" class="sound-title"></h1>
-      <span id="dur" class="muted"></span>
+    <div class="ed-card">
+      <div class="title-row">
+        <h1 id="sound-name" class="sound-title"></h1>
+        <span id="dur" class="muted"></span>
+      </div>
+      <canvas id="wave"></canvas>
+      <div class="toolrow">
+        <button id="btn-play" class="btn primary big" data-t="play"></button>
+        <button id="btn-mutate" class="btn" data-t="mutate"></button>
+        <button id="btn-new" class="btn" data-t="fresh"></button>
+        <p class="keys-hint" data-t="keys"></p>
+      </div>
     </div>
-    <canvas id="wave"></canvas>
-    <div class="toolrow">
-      <button id="btn-play" class="btn primary" data-t="play"></button>
-      <button id="btn-mutate" class="btn" data-t="mutate"></button>
-      <button id="btn-new" class="btn" data-t="fresh"></button>
-      <span class="sep"></span>
-      <button id="btn-wav" class="btn" data-t="wav"></button>
-      <button id="btn-pack" class="btn" data-t="pack"></button>
-      <button id="btn-code" class="btn" data-t="code"></button>
-      <button id="btn-share" class="btn" data-t="share"></button>
-    </div>
-    <div id="loop-row" class="looprow" hidden>
-      <span class="looprow-h" data-t="loop"></span>
-      <div id="loop-seg" class="demo-chips seg"></div>
-      <span class="muted small" data-t="loopHint"></span>
-    </div>
-    <div class="box">
-      <div class="box-h"><span data-t="tweakLabel"></span><button id="btn-undo" class="link" data-t="undo" disabled></button></div>
+    <div class="ed-card">
+      <div class="box-h"><span class="ed-h" data-t="tweakLabel"></span><button id="btn-undo" class="btn" data-t="undo" disabled></button></div>
+      <p class="ed-sub" data-t="tweakHint"></p>
       <div id="tweak-buttons" class="tweak-grid"></div>
     </div>
-    <div id="history-wrap" class="box" hidden>
-      <div class="box-h"><span data-t="history"></span></div>
+    <div id="history-wrap" class="ed-card" hidden>
+      <div class="box-h"><span class="ed-h" data-t="history"></span></div>
       <div id="history"></div>
     </div>
-    <p class="keys-hint" data-t="keys"></p>
   </section>
 
   <aside class="ed-params">
-    <h3 data-t="layers"></h3>
-    <div id="layer-tabs" class="tabs"></div>
-    <div id="layer-fields" class="fields"></div>
-    <h3 data-t="effects"></h3>
-    <div id="fx-fields" class="fields"></div>
+    <div class="ed-card">
+      <p class="ed-h" data-t="exportH"></p>
+      <button id="btn-wav" class="btn primary big ed-full" data-t="wav"></button>
+      <div id="loop-row" class="looprow" hidden>
+        <span class="looprow-h" data-t="loop"></span>
+        <div id="loop-seg" class="demo-chips seg"></div>
+        <span class="muted small" data-t="loopHint"></span>
+      </div>
+      <div class="ed-exports">
+        <button id="btn-pack" class="btn" data-t="pack"></button>
+        <button id="btn-code" class="btn" data-t="code"></button>
+        <button id="btn-share" class="btn" data-t="share"></button>
+      </div>
+    </div>
+    <div class="ed-card">
+      <p class="ed-h" data-t="fineH"></p>
+      <h3 data-t="layers"></h3>
+      <div id="layer-tabs" class="tabs"></div>
+      <div id="layer-fields" class="fields"></div>
+      <h3 data-t="effects"></h3>
+      <div id="fx-fields" class="fields"></div>
+    </div>
   </aside>
 </main>
 
@@ -88,9 +98,9 @@
 <script src="/engine.js?v=e414867f"></script>
 <script src="/presets.js?v=2ec934c5"></script>
 <script src="/catalog.js?v=40cbf494"></script>
-<script src="/shared.js?v=cc7dbb55"></script>
+<script src="/shared.js?v=4b62293b"></script>
 <script src="/export.js?v=4e11a72b"></script>
-<script src="/app.js?v=f61aaf65"></script>
+<script src="/app.js?v=75bfe459"></script>
 <!--analytics--><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "a45dcf7d53464930b4757d7687c6b9b1"}'></script><!--/analytics-->
 </body>
 </html>

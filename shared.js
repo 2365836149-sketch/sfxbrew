@@ -105,13 +105,14 @@
     let end = n - 1;
     while (end > 0 && Math.abs(d[end]) < peak * 0.01) end--;
     n = Math.min(n, Math.max(Math.round(n * 0.08), end + Math.round(n * 0.03) + 1));
-    const mid = h / 2, per = Math.max(1, n / w), k = 0.95 / peak;
-    for (let x = 0; x < w; x++) {
-      let lo = 0, hi = 0;
-      const a = Math.floor(x * per), b = Math.min(n, Math.floor((x + 1) * per));
-      for (let i = a; i < b; i++) { const v = d[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
-      const y1 = mid - hi * k * mid, y2 = mid - lo * k * mid;
-      g.fillRect(x, y1, 1, Math.max(1, y2 - y1));
+    /* 画成一根根竖条（条宽约 3px、间隔 2px），每根取这一段的峰值，上下对称 */
+    const step = w > 300 ? 5 : 4, bars = Math.max(8, Math.floor(w / step)), bw = w / bars, per = n / bars, k = 0.96 / peak;
+    for (let j = 0; j < bars; j++) {
+      let m = 0;
+      const a = Math.floor(j * per), b = Math.min(n, Math.floor((j + 1) * per));
+      for (let i = a; i < b; i++) { const v = Math.abs(d[i]); if (v > m) m = v; }
+      const bh = Math.max(2, m * k * (h - 2));
+      g.fillRect(j * bw + bw * 0.2, (h - bh) / 2, Math.max(1, bw * 0.6), bh);
     }
   }
 

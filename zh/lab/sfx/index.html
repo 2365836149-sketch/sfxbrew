@@ -21,43 +21,49 @@
 <meta property="og:site_name" content="SFX Brew">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://sfxbrew.com/og-zh.png">
-<link rel="stylesheet" href="/style.css?v=66ef296b">
+<link rel="stylesheet" href="/style.css?v=e11ec75a">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 </head>
 <body>
 <header class="bar">
   <a class="bar-brand" href="/?lang=zh"><img src="/favicon.svg" alt=""><span>SFX Brew</span></a>
-  <nav class="bar-tabs"><a href="/zh/lab/sfx/" data-ai class="on" aria-current="page">AI 生成</a><a href="/editor/?lang=zh">音效编辑器</a><a href="/zh/sounds/">音效库</a><a href="/zh/lab/">实验室</a></nav>
+  <nav class="bar-tabs"><a href="/zh/lab/sfx/" data-ai class="on" aria-current="page">AI 生成</a><a href="/editor/?lang=zh">音效编辑器</a><a href="/zh/sounds/">音效库</a><a href="/zh/lab/">配乐实验室</a></nav>
   <span class="bar-spacer"></span>
   <a class="bar-link hide-sm" href="/?lang=zh#agents">给 AI 用</a>
   <a class="bar-link" href="/lab/sfx/" hreflang="en" lang="en">English</a>
 </header>
 <main class="ts">
-  <h1>文字生成音效 <span class="ts-beta">测试版</span></h1>
-  <p class="ts-sub">一句话描述，得到三个能直接放进游戏的音效。</p>
-  <p id="ts-offline" class="ts-offline" hidden>生成服务暂时离线（测试期间只跑在一台机器上），请稍后再来。</p>
-  <form id="ts-form" class="ts-form"><input id="ts-q" type="text" maxlength="300" placeholder="比如：推开一扇沉重的旧木门" autocomplete="off" aria-label="文字生成音效"><button id="ts-go" class="btn primary big">生成</button></form>
-  <div class="ts-ex"><span>试试</span><button type="button" class="ts-chip">推开一扇沉重的旧木门</button><button type="button" class="ts-chip">史莱姆跳跃落地</button><button type="button" class="ts-chip">科幻飞船的自动门打开</button><button type="button" class="ts-chip">在厚雪里走几步</button><button type="button" class="ts-chip">8-bit 风格的开宝箱</button><button type="button" class="ts-chip">拔剑出鞘</button><button type="button" class="ts-chip">雨夜里远处的寺庙钟声</button></div>
-  <p class="ts-note">测试版，偶尔会离线。 <a href="/zh/privacy/">隐私政策</a></p>
-  <div class="ts-acct"><span id="ts-left" class="ts-left"></span><span id="ts-who" class="ts-who" hidden></span>
-    <button type="button" id="ts-login-open" class="ts-link" hidden>登录购买点数</button><button type="button" id="ts-logout" class="ts-link" hidden>退出</button></div>
-  <p id="ts-paid" class="ts-paid" hidden></p>
-  <form id="ts-login" class="ts-login" hidden>
-    <div class="ts-login-row"><input id="ts-email" type="email" maxlength="254" placeholder="邮箱" autocomplete="email" aria-label="邮箱" required><button id="ts-send" class="btn">发送验证码</button></div>
-    <div id="ts-code-row" class="ts-login-row" hidden><input id="ts-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="6 位验证码" autocomplete="one-time-code" aria-label="6 位验证码"><button type="button" id="ts-verify" class="btn primary">登录</button></div>
-    <p id="ts-login-msg" class="ts-note"></p>
-    <button type="button" id="ts-login-cancel" class="ts-link">取消</button>
-  </form>
-  <div id="ts-buy" class="ts-buy" hidden><span>购买点数</span><span id="ts-packs"></span><p class="ts-note">生成或修改一次用 1 点，点数不过期；登录后不受每日免费次数限制。</p></div>
-  <div id="ts-cf" class="ts-cf"></div>
-  <div id="ts-log"></div>
-  <p class="ts-note">生成的音效可以免费商用。</p>
+  <div class="ts-main">
+    <div class="ts-head"><h1>文字生成音效</h1><span class="ts-beta">测试版</span></div>
+    <p class="ts-sub">一句话描述，得到三个能直接放进游戏的音效。</p>
+    <p id="ts-offline" class="ts-offline" hidden>生成服务暂时离线（测试期间只跑在一台机器上），请稍后再来。</p>
+    <form id="ts-form" class="ts-form"><input id="ts-q" type="text" maxlength="300" placeholder="比如：推开一扇沉重的旧木门" autocomplete="off" aria-label="文字生成音效"><button id="ts-go" class="btn primary big">生成</button></form>
+    <div class="ts-ex"><button type="button" class="ts-chip">推开一扇沉重的旧木门</button><button type="button" class="ts-chip">史莱姆跳跃落地</button><button type="button" class="ts-chip">科幻飞船的自动门打开</button><button type="button" class="ts-chip">在厚雪里走几步</button><button type="button" class="ts-chip">8-bit 风格的开宝箱</button><button type="button" class="ts-chip">拔剑出鞘</button><button type="button" class="ts-chip">雨夜里远处的寺庙钟声</button></div>
+    <div id="ts-cf" class="ts-cf"></div>
+    <div id="ts-log"></div>
+  </div>
+  <aside class="ts-side" aria-label="账户和点数">
+    <div class="ts-card ts-acct">
+      <p id="ts-who" class="ts-who" hidden></p>
+      <p id="ts-left" class="ts-left"></p>
+      <button type="button" id="ts-login-open" class="btn primary ts-wide" hidden>登录购买点数</button>
+      <button type="button" id="ts-logout" class="ts-link" hidden>退出</button>
+    </div>
+    <p id="ts-paid" class="ts-paid" hidden></p>
+    <form id="ts-login" class="ts-card ts-login" hidden>
+      <p class="ts-card-h">用邮箱登录</p>
+      <div class="ts-login-row"><input id="ts-email" type="email" maxlength="254" placeholder="邮箱" autocomplete="email" aria-label="邮箱" required><button id="ts-send" class="btn">发送验证码</button></div>
+      <div id="ts-code-row" class="ts-login-row" hidden><input id="ts-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="6 位验证码" autocomplete="one-time-code" aria-label="6 位验证码"><button type="button" id="ts-verify" class="btn primary">登录</button></div>
+      <p id="ts-login-msg" class="ts-note"></p>
+      <button type="button" id="ts-login-cancel" class="ts-link">取消</button>
+    </form>
+    <div id="ts-buy" class="ts-card ts-buy" hidden><p class="ts-card-h">充值点数</p><div id="ts-packs" class="ts-packs"></div><p class="ts-note">生成或修改一次用 1 点，点数不过期；登录后不受每日免费次数限制。 由 Stripe 安全结账，价格含税。</p></div>
+    <p class="ts-note">生成的音效可以免费商用。 测试版，偶尔会离线。 <a href="/zh/privacy/">隐私政策</a></p>
+  </aside>
 </main>
-<footer class="foot">
-  <p class="foot-meta"><a href="/zh/sounds/">音效库</a><a href="/zh/privacy/">隐私政策</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
-</footer>
-<script type="application/json" id="ts-data">{"lang":"zh","api":"https://api.sfxbrew.com","sitekey":"0x4AAAAAAF51qx0EEEg_ckOM","i18n":{"title":"文字生成音效（测试版）| SFX Brew 实验室","metaDesc":"用一句话描述游戏音效，得到三个能直接用的 WAV，再说一句就能接着改。每天都能免费试。","h":"文字生成音效","beta":"测试版","sub":"一句话描述，得到三个能直接放进游戏的音效。","ph":"比如：推开一扇沉重的旧木门","go":"生成","going":"生成中…","examplesH":"试试","examples":["推开一扇沉重的旧木门","史莱姆跳跃落地","科幻飞船的自动门打开","在厚雪里走几步","8-bit 风格的开宝箱","拔剑出鞘","雨夜里远处的寺庙钟声"],"refinePh":"说说怎么改：再闷一点 / 尾巴短点 / 更有金属感","refine":"修改","refining":"修改中…","pick":"选这个继续改","download":"WAV","play":"播放","match":"贴近度","recFrom":"录音素材","synth":"合成","you":"你","refineOf":"修改：","notice":"测试版，偶尔会离线。","privacy":"隐私政策","left":"今天还能免费生成 {n} 次","offline":"生成服务暂时离线（测试期间只跑在一台机器上），请稍后再来。","keptPrev":"这次改动反而离描述更远，第一个保留的是上一版。","mild":"原方案改得太猛，已自动换成温和一点的版本。","errors":{"per_minute":"请求太频繁，请过一分钟再试。","per_day":"你今天的免费次数用完了，明天再来吧。","daily_global":"今天全站的测试名额已经用完，明天再来吧。","busy":"现在有点忙，请稍等片刻再试。","captcha":"人机验证没通过，请刷新页面再试。","empty":"先写一句描述。","origin":"请求被拒绝。","server":"生成失败，换个说法试试。","network":"连不上生成服务，可能暂时离线。"},"license":"生成的音效可以免费商用。","loginBuy":"登录购买点数","emailPh":"邮箱","sendCode":"发送验证码","sending":"发送中…","codeSent":"验证码已发到 {email}","codePh":"6 位验证码","verify":"登录","logout":"退出","cancel":"取消","acctNote":"生成或修改一次用 1 点，点数不过期；登录后不受每日免费次数限制。","buyH":"购买点数","buy":"{n} 点 · {price}","buying":"正在打开付款页…","paidOk":"付款成功，{n} 点已到账。","up":"挺像的","down":"不是我要的","ai":"AI 生成 · Powered by Stability AI","creditsLeft":"剩余 {n} 点","keyErrors":{"license_invalid":"登录已失效，请重新登录。","no_credits":"点数用完了。","not_paid":"付款还没完成，请过一分钟刷新本页。","payment_error":"付款出了问题。如果已经扣款，请发邮件到 contact@sfxbrew.com，我们会处理。","login_required":"请先登录。","code_invalid":"验证码不对或已过期。","email_invalid":"邮箱格式不对。","too_many":"操作太频繁，请过一会儿再试。","mail_error":"邮件发送失败，请稍后再试。"}}}</script>
-<script src="/textsfx.js?v=41547358"></script>
+<footer class="site-foot"><div class="site-foot-in"><b>SFX Brew</b><span>声音归你所有，可免费商用，不需要署名。</span><span class="site-foot-links"><a href="/zh/sounds/">音效库</a><a href="/zh/privacy/">隐私政策</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></span></div></footer>
+<script type="application/json" id="ts-data">{"lang":"zh","api":"https://api.sfxbrew.com","sitekey":"0x4AAAAAAF51qx0EEEg_ckOM","i18n":{"title":"文字生成音效（测试版）| SFX Brew 实验室","metaDesc":"用一句话描述游戏音效，得到三个能直接用的 WAV，再说一句就能接着改。每天都能免费试。","h":"文字生成音效","beta":"测试版","sub":"一句话描述，得到三个能直接放进游戏的音效。","ph":"比如：推开一扇沉重的旧木门","go":"生成","going":"生成中…","examplesH":"试试","examples":["推开一扇沉重的旧木门","史莱姆跳跃落地","科幻飞船的自动门打开","在厚雪里走几步","8-bit 风格的开宝箱","拔剑出鞘","雨夜里远处的寺庙钟声"],"refinePh":"说说怎么改：再闷一点 / 尾巴短点 / 更有金属感","refine":"修改","refining":"修改中…","pick":"选这个继续改","download":"WAV","play":"播放","match":"贴近度","recFrom":"录音素材","synth":"合成","you":"你","refineOf":"修改：","notice":"测试版，偶尔会离线。","privacy":"隐私政策","left":"今天还能免费生成 {n} 次","offline":"生成服务暂时离线（测试期间只跑在一台机器上），请稍后再来。","keptPrev":"这次改动反而离描述更远，第一个保留的是上一版。","mild":"原方案改得太猛，已自动换成温和一点的版本。","errors":{"per_minute":"请求太频繁，请过一分钟再试。","per_day":"你今天的免费次数用完了，明天再来吧。","daily_global":"今天全站的测试名额已经用完，明天再来吧。","busy":"现在有点忙，请稍等片刻再试。","captcha":"人机验证没通过，请刷新页面再试。","empty":"先写一句描述。","origin":"请求被拒绝。","server":"生成失败，换个说法试试。","network":"连不上生成服务，可能暂时离线。"},"license":"生成的音效可以免费商用。","acctH":"账户和点数","loginH":"用邮箱登录","signedAs":"已登录","stripeNote":"由 Stripe 安全结账，价格含税。","packCredits":"{n} 点","save":"省 {p}%","loginBuy":"登录购买点数","emailPh":"邮箱","sendCode":"发送验证码","sending":"发送中…","codeSent":"验证码已发到 {email}","codePh":"6 位验证码","verify":"登录","logout":"退出","cancel":"取消","acctNote":"生成或修改一次用 1 点，点数不过期；登录后不受每日免费次数限制。","buyH":"充值点数","buy":"{n} 点 · {price}","buying":"正在打开付款页…","paidOk":"付款成功，{n} 点已到账。","up":"挺像的","down":"不是我要的","ai":"AI 生成 · Powered by Stability AI","creditsLeft":"剩余 {n} 点","creditsShort":"{n} 点","keyErrors":{"license_invalid":"登录已失效，请重新登录。","no_credits":"点数用完了。","not_paid":"付款还没完成，请过一分钟刷新本页。","payment_error":"付款出了问题。如果已经扣款，请发邮件到 contact@sfxbrew.com，我们会处理。","login_required":"请先登录。","code_invalid":"验证码不对或已过期。","email_invalid":"邮箱格式不对。","too_many":"操作太频繁，请过一会儿再试。","mail_error":"邮件发送失败，请稍后再试。"}}}</script>
+<script src="/textsfx.js?v=4a0e3d1c"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "a45dcf7d53464930b4757d7687c6b9b1"}'></script>
 </body>
 </html>

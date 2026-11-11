@@ -54,6 +54,8 @@ const ICON = {
   edit: svg('<path d="M2.5 4.5h4M9.5 4.5h4M2.5 11.5h7M12.5 11.5h1"/><circle cx="8" cy="4.5" r="1.5"/><circle cx="11" cy="11.5" r="1.5"/>'),
   more: svg('<path d="M6 3.5 10.5 8 6 12.5"/>'),
 };
+const PLAY_SVG = '<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
+const PACK_GLYPH = { 'xianxia-game-sound-pack': '仙', 'game-ui-sound-pack': '界' };
 /* 卡片底部的操作按钮：窄卡片只显示图标（title 当提示），宽卡片（手机上的整行卡片）同时显示文字 */
 const act = (tag, cls, icon, label, attrs) => `<${tag} class="act ${cls}"${attrs || ''} title="${esc(label)}" aria-label="${esc(label)}">${ICON[icon]}<span>${esc(label)}</span></${tag}>`;
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -180,12 +182,12 @@ function cards(lang, items) {
   const u = UI[lang];
   return '<div class="cards">' + items.map((it, i) =>
     `<article class="card" data-i="${i}">
-  <canvas class="card-wave" aria-hidden="true"></canvas>
   <div class="card-row">
-    <button class="play" aria-label="${esc(u.play + ' ' + it.label)}">▶</button>
+    <button class="play" aria-label="${esc(u.play + ' ' + it.label)}">${PLAY_SVG}</button>
     <span class="card-name">${esc(it.label)}</span>
     <span class="card-dur"></span>
   </div>
+  <canvas class="card-wave" aria-hidden="true"></canvas>
   <div class="card-acts"><button class="act act-main wav" title="${esc(u.dlWav)}" aria-label="${esc(u.dlWav + ' ' + it.label)}">${ICON.dl}<b>WAV</b></button>${act('a', 'edit', 'edit', u.edit, ' href="' + it.edit + '"')}${it.category ? act('a', 'more', 'more', u.more, ' href="' + it.category + '"') : ''}</div>
 </article>`).join('\n') + '</div>';
 }
@@ -375,8 +377,8 @@ function searchPage(lang, cat) {
     const cn = catName(lang, cats[0]).toLowerCase();
     const shown = tags.filter(x => /^(style|material|mood):/.test(x)).map(x => tagName(lang, x)).filter(n => !cn.includes(n.toLowerCase())).slice(0, 2);
     return `<article class="card sc" data-i="${i}" data-cats="${cats.join(' ')}" data-tags="${tags.join(' ')}" data-hay="${esc(hay)}" data-dur="${ENGINE.duration(p).toFixed(2)}" data-name="${esc(t.name)}">
+  <div class="card-row"><button class="play" aria-label="${esc(u.play + ' ' + t.name)}">${PLAY_SVG}</button><div class="card-id"><a class="card-name" href="${soundUrl(lang, id)}">${esc(t.name)}</a><div class="card-tags">${esc([catName(lang, cats[0]), ...shown].join(' · '))}</div></div><span class="card-dur"></span></div>
   <canvas class="card-wave" aria-hidden="true"></canvas>
-  <div class="card-row"><button class="play" aria-label="${esc(u.play + ' ' + t.name)}">▶</button><div class="card-id"><a class="card-name" href="${soundUrl(lang, id)}">${esc(t.name)}</a><div class="card-tags">${esc([catName(lang, cats[0]), ...shown].join(' · '))}</div></div><span class="card-dur"></span></div>
   <div class="card-acts"><button class="act act-main wav" title="${esc(u.dlWav)}" aria-label="${esc(u.dlWav + ' ' + t.name)}">${ICON.dl}<b>WAV</b></button>${act('button', 'reroll', 'reroll', u.reroll)}${act('a', 'edit', 'edit', u.edit, ' href="' + editorUrl(lang, '#' + id) + '"')}${act('a', 'more', 'more', u.details, ' href="' + soundUrl(lang, id) + '"')}</div>
 </article>`;
   }).join('\n');
@@ -411,7 +413,9 @@ ${cat ? `<nav class="crumbs"><a href="${PREFIX[lang]}sounds/">${esc(u.library)}<
   <span id="scount" class="count"></span>
   <button id="sclear" class="link" hidden>${esc(u.clearAll)}</button>
 </div>
-${cat ? `<p class="lead">${esc(cc.intro)}</p>` : ''}
+${cat ? `<p class="lead">${esc(cc.intro)}</p>` : `<p class="lead">${esc(u.libShort(Object.keys(SOUNDS).length, VARIANTS))}</p>
+<div class="pack-banners">${Object.keys(PACKS).map((k, i) => `<a class="pack-banner${i === 0 ? ' main' : ''}" href="${packUrl(lang, k)}"><span class="pack-glyph" aria-hidden="true">${PACK_GLYPH[k] || '音'}</span><span class="pack-txt"><small>${esc(u.packKicker)}</small><b>${esc(PACKS[k][lang].name)}</b><span>${esc(firstSentence(PACKS[k][lang].intro, lang))}</span></span><span class="pack-go">${esc(u.openPack)}</span></a>`).join('')}</div>
+<h2 class="lib-h2">${esc(u.allSoundsH)}</h2>`}
 <div id="sresults" class="cards">${cardsHtml}</div>
 <p id="sempty" class="muted" hidden>${esc(u.noResults)}</p>
 ${cat ? '' : `<details class="more-info"><summary>${esc(u.aboutLib)}</summary><p class="muted">${esc(u.libLead(Object.keys(SOUNDS).length, VARIANTS))}</p></details>`}`;
@@ -585,29 +589,35 @@ ${headTags(lang, { title: t.title, description: t.metaDesc, urlPath, altPath })}
 <body>
 ${siteBar(lang, 'ai', altPath)}
 <main class="ts">
-  <h1>${esc(t.h)} <span class="ts-beta">${esc(t.beta)}</span></h1>
-  <p class="ts-sub">${esc(t.sub)}</p>
-  <p id="ts-offline" class="ts-offline" hidden>${esc(t.offline)}</p>
-  <form id="ts-form" class="ts-form"><input id="ts-q" type="text" maxlength="300" placeholder="${esc(t.ph)}" autocomplete="off" aria-label="${esc(t.h)}"><button id="ts-go" class="btn primary big">${esc(t.go)}</button></form>
-  <div class="ts-ex"><span>${esc(t.examplesH)}</span>${t.examples.map(x => '<button type="button" class="ts-chip">' + esc(x) + '</button>').join('')}</div>
-  <p class="ts-note">${esc(t.notice)} <a href="${privacyUrl(lang)}">${esc(t.privacy)}</a></p>
-  <div class="ts-acct"><span id="ts-left" class="ts-left"></span><span id="ts-who" class="ts-who" hidden></span>
-    <button type="button" id="ts-login-open" class="ts-link" hidden>${esc(t.loginBuy)}</button><button type="button" id="ts-logout" class="ts-link" hidden>${esc(t.logout)}</button></div>
-  <p id="ts-paid" class="ts-paid" hidden></p>
-  <form id="ts-login" class="ts-login" hidden>
-    <div class="ts-login-row"><input id="ts-email" type="email" maxlength="254" placeholder="${esc(t.emailPh)}" autocomplete="email" aria-label="${esc(t.emailPh)}" required><button id="ts-send" class="btn">${esc(t.sendCode)}</button></div>
-    <div id="ts-code-row" class="ts-login-row" hidden><input id="ts-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="${esc(t.codePh)}" autocomplete="one-time-code" aria-label="${esc(t.codePh)}"><button type="button" id="ts-verify" class="btn primary">${esc(t.verify)}</button></div>
-    <p id="ts-login-msg" class="ts-note"></p>
-    <button type="button" id="ts-login-cancel" class="ts-link">${esc(t.cancel)}</button>
-  </form>
-  <div id="ts-buy" class="ts-buy" hidden><span>${esc(t.buyH)}</span><span id="ts-packs"></span><p class="ts-note">${esc(t.acctNote)}</p></div>
-  <div id="ts-cf" class="ts-cf"></div>
-  <div id="ts-log"></div>
-  <p class="ts-note">${esc(t.license)}</p>
+  <div class="ts-main">
+    <div class="ts-head"><h1>${esc(t.h)}</h1><span class="ts-beta">${esc(t.beta)}</span></div>
+    <p class="ts-sub">${esc(t.sub)}</p>
+    <p id="ts-offline" class="ts-offline" hidden>${esc(t.offline)}</p>
+    <form id="ts-form" class="ts-form"><input id="ts-q" type="text" maxlength="300" placeholder="${esc(t.ph)}" autocomplete="off" aria-label="${esc(t.h)}"><button id="ts-go" class="btn primary big">${esc(t.go)}</button></form>
+    <div class="ts-ex">${t.examples.map(x => '<button type="button" class="ts-chip">' + esc(x) + '</button>').join('')}</div>
+    <div id="ts-cf" class="ts-cf"></div>
+    <div id="ts-log"></div>
+  </div>
+  <aside class="ts-side" aria-label="${esc(t.acctH)}">
+    <div class="ts-card ts-acct">
+      <p id="ts-who" class="ts-who" hidden></p>
+      <p id="ts-left" class="ts-left"></p>
+      <button type="button" id="ts-login-open" class="btn primary ts-wide" hidden>${esc(t.loginBuy)}</button>
+      <button type="button" id="ts-logout" class="ts-link" hidden>${esc(t.logout)}</button>
+    </div>
+    <p id="ts-paid" class="ts-paid" hidden></p>
+    <form id="ts-login" class="ts-card ts-login" hidden>
+      <p class="ts-card-h">${esc(t.loginH)}</p>
+      <div class="ts-login-row"><input id="ts-email" type="email" maxlength="254" placeholder="${esc(t.emailPh)}" autocomplete="email" aria-label="${esc(t.emailPh)}" required><button id="ts-send" class="btn">${esc(t.sendCode)}</button></div>
+      <div id="ts-code-row" class="ts-login-row" hidden><input id="ts-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="${esc(t.codePh)}" autocomplete="one-time-code" aria-label="${esc(t.codePh)}"><button type="button" id="ts-verify" class="btn primary">${esc(t.verify)}</button></div>
+      <p id="ts-login-msg" class="ts-note"></p>
+      <button type="button" id="ts-login-cancel" class="ts-link">${esc(t.cancel)}</button>
+    </form>
+    <div id="ts-buy" class="ts-card ts-buy" hidden><p class="ts-card-h">${esc(t.buyH)}</p><div id="ts-packs" class="ts-packs"></div><p class="ts-note">${esc(t.acctNote)} ${esc(t.stripeNote)}</p></div>
+    <p class="ts-note">${esc(t.license)} ${esc(t.notice)} <a href="${privacyUrl(lang)}">${esc(t.privacy)}</a></p>
+  </aside>
 </main>
-<footer class="foot">
-  <p class="foot-meta"><a href="${PREFIX[lang]}sounds/">${esc(u.navLibrary)}</a><a href="${privacyUrl(lang)}">${esc(PRIVACY[lang].h)}</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></p>
-</footer>
+<footer class="site-foot"><div class="site-foot-in"><b>SFX Brew</b><span>${esc(u.footShort)}</span><span class="site-foot-links"><a href="${PREFIX[lang]}sounds/">${esc(u.navLibrary)}</a><a href="${privacyUrl(lang)}">${esc(PRIVACY[lang].h)}</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></span></div></footer>
 <script type="application/json" id="ts-data">${jsonForHtml(data)}</script>
 <script src="/textsfx.js"></script>
 ${analyticsTag()}
