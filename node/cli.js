@@ -17,6 +17,9 @@ Usage:
   sfxbrew render <patch.json> --out f.wav  render a custom patch
   sfxbrew pack <preset> [--out dir]      game-engine pack: WAV variations + Godot .tres,
                                          Unity script, web JS, README (add --loop for loops)
+  sfxbrew music list                     list music moods and stingers
+  sfxbrew music <mood> [options]         compose and render a seamless music loop (stereo WAV)
+  sfxbrew stinger <name> [--out f.wav]   render a short musical stinger (victory, guilt ...)
   sfxbrew mcp                            run the MCP server (stdio)
 
 Options:
@@ -36,6 +39,8 @@ Examples:
   npx sfxbrew rain --loop 30 --out assets/sfx/rain-loop.wav
   npx sfxbrew pack swordQi --count 8 --out assets/sfx
   npx sfxbrew pack campfire --loop 20 --out assets/sfx
+  npx sfxbrew music medieval --count 3 --out music/town.wav   # three different town pieces
+  npx sfxbrew stinger guiltChild --out music/guilt-child.wav
 `;
 
 function args(argv) {
@@ -62,6 +67,28 @@ async function main() {
       console.log(g === 'east' ? '\nEastern' : '\nGeneral');
       list.filter(p => p.group === g).forEach(p => console.log('  ' + p.id.padEnd(13) + (p.loopable ? '[loop] ' : '') + p.description));
     }
+    return;
+  }
+
+  if (cmd === 'music' || cmd === 'stinger') {
+    const name = o._[1];
+    if (!name || name === 'list') {
+      console.log('\nMusic moods (sfxbrew music <mood>)');
+      Object.entries(lib.MUSIC_META).forEach(([k, d]) => console.log('  ' + k.padEnd(14) + d));
+      console.log('\nStingers (sfxbrew stinger <name>)');
+      Object.entries(lib.STINGER_META).forEach(([k, d]) => console.log('  ' + k.padEnd(14) + d));
+      return;
+    }
+    const count = Math.max(1, Math.min(20, parseInt(o.count || '1', 10)));
+    const out = o.out || name + '.wav', base = o.seed != null ? parseInt(o.seed, 10) : null, results = [];
+    for (let i = 0; i < count; i++) {
+      const file = count === 1 ? out : out.replace(/(\.wav)?$/i, '-' + String(i + 1).padStart(2, '0') + '.wav');
+      const r = cmd === 'music' ? await lib.renderMusic(name, { seed: base == null ? null : base + i, volume: o.volume != null ? parseFloat(o.volume) : null })
+        : await lib.renderStinger(name);
+      results.push({ file: lib.writeFile(file, r.bytes), seconds: +r.seconds.toFixed(2), seed: r.seed });
+    }
+    if (o.json) { console.log(JSON.stringify(results, null, 2)); return; }
+    results.forEach(r => console.log(r.file + '  (' + r.seconds + ' s' + (r.seed != null ? ', seed ' + r.seed + ', seamless loop' : '') + ')'));
     return;
   }
 

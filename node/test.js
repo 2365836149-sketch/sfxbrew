@@ -16,7 +16,15 @@ const lib = require('./lib.js');
   const json = r => JSON.parse(r.content[0].text);
 
   const tools = (await client.listTools()).tools.map(t => t.name).sort();
-  assert.deepStrictEqual(tools, ['export_pack', 'generate_sfx', 'get_js_code', 'list_presets', 'render_patch']);
+  assert.deepStrictEqual(tools, ['export_pack', 'generate_music', 'generate_sfx', 'get_js_code', 'list_presets', 'render_patch']);
+
+  const st = json(await client.callTool({ name: 'generate_music', arguments: { stinger: 'guiltChild', out_path: 'music/guilt.wav' } }));
+  const sb = fs.readFileSync(st.pieces[0].file);
+  assert.ok(sb.slice(0, 4).toString() === 'RIFF' && sb.readUInt16LE(22) === 2, 'stereo stinger');
+  assert.ok(st.pieces[0].seconds <= 3.05, 'guilt stinger stays short');
+  const mu = json(await client.callTool({ name: 'generate_music', arguments: { mood: 'primitive', out_path: 'music/stone.wav', seed: 2 } }));
+  assert.ok(mu.pieces[0].seconds > 30 && mu.pieces[0].loop, 'music loop');
+  assert.ok(fs.readFileSync(mu.pieces[0].file).indexOf('smpl') > 0, 'music WAV carries a loop point');
 
   const presets = json(await client.callTool({ name: 'list_presets', arguments: {} }));
   assert.strictEqual(presets.length, lib.PRESETS.length);

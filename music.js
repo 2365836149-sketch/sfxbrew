@@ -17,7 +17,9 @@ function makeMusic(sfx) {
   /* Chinese pentatonic modes: same five notes, different tonic. Values are semitones above the tonic. */
   var MODES = { gong: [0, 2, 4, 7, 9], shang: [0, 2, 5, 7, 10], jue: [0, 3, 5, 8, 10], zhi: [0, 2, 5, 7, 9], yu: [0, 3, 5, 7, 10],
     /* miyako-bushi (in scale): still five notes, but with two semitones (1-b2, 5-b6) - the sound of East Asian dread */
-    miyako: [0, 1, 5, 7, 8] };
+    miyako: [0, 1, 5, 7, 8],
+    /* dorian: the minor pentatonic over a dorian seven-note scale (raised sixth) - the folk-tune colour of medieval Europe */
+    dorian: [0, 3, 5, 7, 10] };
   var PRESETS = {
     calm: { mode: 'gong', root: 50, tempo: 66, structure: ['intro', 'A', 'A', 'B', 'A', 'outro'], intensity: [0.25, 0.4, 0.45, 0.6, 0.45, 0.2],
       melody: 'guqin', melodyB: 'flute', accomp: 'guqin', bass: 'cello', strings: 0.6, perc: 'none', sparkle: true, density: 0.45, humanize: 0.7, reverb: 0.55 },
@@ -26,9 +28,18 @@ function makeMusic(sfx) {
     mystery: { mode: 'shang', root: 52, tempo: 56, structure: ['intro', 'A', 'B', 'A', 'outro'], intensity: [0.2, 0.35, 0.45, 0.35, 0.15],
       melody: 'flute', melodyB: 'guqin', accomp: 'none', bass: 'cello', strings: 0.55, perc: 'woodfish', sparkle: true, density: 0.3, humanize: 0.8, reverb: 0.65 },
     sad: { mode: 'yu', root: 45, tempo: 58, structure: ['intro', 'A', 'A', 'B', 'A', 'outro'], intensity: [0.25, 0.4, 0.5, 0.65, 0.5, 0.2],
-      melody: 'erhu', melodyB: 'erhu', accomp: 'guqin', bass: 'cello', strings: 0.65, perc: 'none', sparkle: false, density: 0.35, humanize: 0.75, reverb: 0.5 }
+      melody: 'erhu', melodyB: 'erhu', accomp: 'guqin', bass: 'cello', strings: 0.65, perc: 'none', sparkle: false, density: 0.35, humanize: 0.75, reverb: 0.5 },
+    /* Stone age: bone flute over a hummed drone, log drums, clapping sticks and a shaker. Open fourths, no chords. */
+    primitive: { mode: 'yu', root: 50, tempo: 70, structure: ['intro', 'A', 'B', 'A', 'outro'], intensity: [0.3, 0.45, 0.6, 0.5, 0.25], harmony: 'penta',
+      melody: 'boneflute', melodyB: 'boneflute', accomp: 'none', bass: 'none', choir: 0.8, strings: 0, perc: 'primitive', sparkle: false, density: 0.35, humanize: 0.9, reverb: 0.4 },
+    /* Early village: clay ocarina (xun) and bamboo flute, plucked zither broken chords, frame and log drums. */
+    tribal: { mode: 'gong', root: 55, tempo: 84, structure: ['intro', 'A', 'A', 'B', 'A', 'outro'], intensity: [0.3, 0.45, 0.5, 0.65, 0.5, 0.25], harmony: 'penta',
+      melody: 'xun', melodyB: 'flute', accomp: 'guqin', texture: 'arp', bass: 'none', choir: 0.45, strings: 0, perc: 'tribal', sparkle: false, density: 0.5, humanize: 0.8, reverb: 0.4 },
+    /* Medieval town: dorian tune on fiddle and shawm, lute chords, bagpipe drone, frame drum and tambourine. */
+    medieval: { mode: 'dorian', root: 50, tempo: 96, structure: ['intro', 'A', 'A', 'B', 'A', 'outro'], intensity: [0.35, 0.55, 0.6, 0.75, 0.6, 0.3],
+      melody: 'erhu', melodyB: 'shawm', accomp: 'lute', texture: 'arp', bass: 'bagpipe', strings: 0, perc: 'folk', sparkle: false, density: 0.55, humanize: 0.65, reverb: 0.35 }
   };
-  var REGISTER = { guqin: 3, flute: 6, erhu: 4, pipa: 6 };
+  var REGISTER = { guqin: 3, flute: 6, erhu: 4, pipa: 6, boneflute: 6, xun: 3, hum: 1, lute: 4, shawm: 5 };
   /* Erhu multisamples (CC0, tarane468 on Freesound): one recording roughly every minor third from D4 to B5,
      two takes on D4 and G#4 that alternate. Measured pitches; see samples/CREDITS.md. */
   var ERHU = [['erhu-n-d4', 293.9, 'erhu-n-d4b'], ['erhu-n-f4', 349.4], ['erhu-n-gs4', 415.5, 'erhu-n-gs4b'], ['erhu-n-b4', 493.8],
@@ -165,7 +176,77 @@ function makeMusic(sfx) {
       var len = name === 'drum-edge-loud' ? 3.3 : name === 'drum-rim' ? 1.6 : 2.5;
       return P([L({ type: 'sample', sample: name, pitch: pitch == null ? -2 : pitch, attack: 0.001, hold: len, decay: 0.15, vol: 0.7 * v })]);
     },
-    gong: function (v, pitch) { return P([L({ type: 'sample', sample: 'gong-1', pitch: pitch == null ? -3 : pitch, attack: 0.001, hold: 4, decay: 2.5, vol: 0.45 * v })]); }
+    gong: function (v, pitch) { return P([L({ type: 'sample', sample: 'gong-1', pitch: pitch == null ? -3 : pitch, attack: 0.001, hold: 4, decay: 2.5, vol: 0.45 * v })]); },
+
+    /* ---------- ancient ---------- */
+    /* bone flute: mostly breath, scoops up into each note, never quite in tune, a little overblown third harmonic */
+    boneflute: function (f, dur, v) {
+      var env = { attack: Math.min(0.08, dur * 0.2), hold: Math.max(0, dur - 0.2), decay: 0.25 };
+      return P([L(Object.assign({ type: 'tone', freq: f * 0.975, freqEnd: f, slideTime: 0.07, vol: 0.26 * v, vib: 22, vibRate: 5.2, vibDelay: Math.min(0.3, dur * 0.4) }, env)),
+        L(Object.assign({ type: 'tone', wave: 'triangle', freq: f * 3 * 0.975, freqEnd: f * 3, slideTime: 0.07, vol: 0.035 * v }, env)),
+        L(Object.assign({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: f * 1.6, cutoffEnd: f * 1.4, q: 2.5, vol: 0.32 * v }, env)),
+        L({ type: 'noise', filter: 'bandpass', cutoff: f * 4, cutoffEnd: f * 3, q: 3, attack: 0.004, decay: 0.05, vol: 0.25 * v })]);
+    },
+    /* xun (clay ocarina): almost a pure sine, dark and hollow, slow breath-in */
+    xun: function (f, dur, v) {
+      var env = { attack: Math.min(0.14, dur * 0.3), hold: Math.max(0, dur - 0.3), decay: 0.35 };
+      return P([L(Object.assign({ type: 'tone', freq: f, vol: 0.36 * v, vib: 9, vibRate: 4.6, vibDelay: Math.min(0.4, dur * 0.4) }, env)),
+        L(Object.assign({ type: 'tone', freq: f * 2, vol: 0.018 * v }, env)),
+        L(Object.assign({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: f, cutoffEnd: f, q: 12, vol: 0.2 * v }, env))]);
+    },
+    /* hum: a few voices humming through closed-mouth formants; used as a melody or as a low choir bed */
+    hum: function (f, dur, v) {
+      var env = { attack: Math.min(0.5, dur * 0.3), hold: Math.max(0, dur - 0.7), decay: 0.6, vib: 14, vibRate: 4.7, vibDelay: 0.3, unison: 3, detune: 16 };
+      return P([L(Object.assign({ type: 'tone', wave: 'sawtooth', freq: f, filter: 'bandpass', cutoff: 300, cutoffEnd: 330, q: 3, vol: 0.2 * v }, env)),
+        L(Object.assign({ type: 'tone', wave: 'sawtooth', freq: f, filter: 'bandpass', cutoff: 850, cutoffEnd: 800, q: 5, vol: 0.06 * v }, env)),
+        L(Object.assign({ type: 'tone', freq: f, vol: 0.08 * v }, env))]);
+    },
+    logdrum: function (f, v) {
+      return P([L({ type: 'tone', freq: f * 1.7, freqEnd: f, slideTime: 0.03, attack: 0.001, decay: 0.32, vol: 0.55 * v }),
+        L({ type: 'tone', freq: f * 2.4, freqEnd: f * 2.3, attack: 0.001, decay: 0.12, vol: 0.18 * v }),
+        L({ type: 'noise', filter: 'bandpass', cutoff: 1800, cutoffEnd: 1200, q: 1.5, attack: 0.0005, decay: 0.012, vol: 0.4 * v })]);
+    },
+    framedrum: function (v, high) {
+      var f = high ? 180 : 82;
+      return P([L({ type: 'tone', freq: f * 1.9, freqEnd: f, slideTime: 0.04, attack: 0.001, decay: high ? 0.22 : 0.45, vol: 0.6 * v }),
+        L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: high ? 900 : 420, cutoffEnd: 300, q: 1, attack: 0.001, decay: 0.07, vol: 0.45 * v }),
+        L({ type: 'noise', filter: 'highpass', cutoff: 2500, cutoffEnd: 2500, attack: 0.0005, decay: 0.014, vol: 0.18 * v })]);
+    },
+    sticks: function (v) {
+      return P([L({ type: 'bell', freq: 2200, partials: [[1, 1, 1], [2.7, 0.35, 0.5]], attack: 0.0005, decay: 0.05, vol: 0.3 * v }),
+        L({ type: 'noise', filter: 'bandpass', cutoff: 3200, cutoffEnd: 3200, q: 1.5, attack: 0.0005, decay: 0.008, vol: 0.35 * v })]);
+    },
+    shaker: function (v) { return P([L({ type: 'noise', filter: 'highpass', cutoff: 5000, cutoffEnd: 6000, attack: 0.025, decay: 0.06, vol: 0.16 * v })]); },
+
+    /* ---------- medieval Europe ---------- */
+    /* lute: a gut-strung course (two strings a hair apart), softer and rounder than the pipa */
+    lute: function (f, dur, v) {
+      var d = Math.max(0.9, dur * 1.3);
+      return P([L({ type: 'string', freq: f, bright: 0.32, filter: 'lowpass', cutoff: 3000, cutoffEnd: 1300, attack: 0.003, decay: d, vol: 0.36 * v }),
+        L({ type: 'string', freq: f * 1.0035, bright: 0.28, filter: 'lowpass', cutoff: 2600, cutoffEnd: 1100, attack: 0.003, decay: d, vol: 0.26 * v }),
+        L({ type: 'tone', freq: f, attack: 0.01, decay: Math.min(dur, 0.8), vol: 0.06 * v })]);
+    },
+    lutestrum: function (fs, v) {
+      return P(fs.slice(0, 5).map(function (f, i) { return L({ type: 'string', freq: f, bright: 0.3, start: i * 0.022, attack: 0.003, decay: 1.1, vol: 0.2 * v, filter: 'lowpass', cutoff: 2800, cutoffEnd: 1200 }); }));
+    },
+    /* shawm: the medieval double-reed, nasal and buzzy */
+    shawm: function (f, dur, v) {
+      var env = { attack: Math.min(0.06, dur * 0.2), hold: Math.max(0, dur - 0.16), decay: 0.18, vib: 12, vibRate: 5.8, vibDelay: Math.min(0.3, dur * 0.4) };
+      return P([L(Object.assign({ type: 'tone', wave: 'sawtooth', freq: f, filter: 'bandpass', cutoff: 1300, cutoffEnd: 1300, q: 0.9, vol: 0.2 * v }, env)),
+        L(Object.assign({ type: 'tone', wave: 'square', freq: f, filter: 'lowpass', cutoff: 2600, cutoffEnd: 2600, q: 0.7, vol: 0.05 * v }, env))]);
+    },
+    /* bagpipe / hurdy-gurdy drone: reedy sawtooth on the tonic with its fifth, steady */
+    bagpipe: function (f, dur, v) {
+      var env = { attack: 0.5, hold: Math.max(0, dur - 1.2), decay: 0.8 };
+      return P([L(Object.assign({ type: 'tone', wave: 'sawtooth', freq: f, filter: 'bandpass', cutoff: 800, cutoffEnd: 800, q: 0.8, unison: 2, detune: 5, vol: 0.12 * v }, env)),
+        L(Object.assign({ type: 'tone', wave: 'sawtooth', freq: f * 1.5, filter: 'bandpass', cutoff: 1000, cutoffEnd: 1000, q: 0.8, vol: 0.06 * v }, env)),
+        L(Object.assign({ type: 'tone', freq: f / 2, vol: 0.06 * v }, env))]);
+    },
+    tambourine: function (v) {
+      return P([L({ type: 'noise', filter: 'highpass', cutoff: 6500, cutoffEnd: 5000, attack: 0.001, decay: 0.2, vol: 0.2 * v }),
+        L({ type: 'bell', freq: 5400, partials: [[1, 1, 0.8], [1.37, 0.6, 0.6], [1.93, 0.4, 0.5]], attack: 0.001, decay: 0.16, vol: 0.05 * v }),
+        L({ type: 'tone', freq: 260, freqEnd: 200, slideTime: 0.02, attack: 0.001, decay: 0.05, vol: 0.12 * v })]);
+    }
   };
 
   /* ---------- mix: where each instrument sits ----------
@@ -178,7 +259,11 @@ function makeMusic(sfx) {
     cello: { pan: 0.32, send: 0.36, hp: 40 }, spic: { pan: 0.22, send: 0.22, hp: 55 },
     pad: { pan: 0, send: 0.65, hp: 120 }, drone: { pan: 0, send: 0.5, hp: 35 }, bass: { pan: 0.05, send: 0.2, hp: 35 },
     chime: { pan: -0.45, send: 0.7, hp: 500 }, bell: { pan: 0, send: 0.6, hp: 60 },
-    woodfish: { pan: 0.42, send: 0.35, hp: 300 }, gong: { pan: -0.18, send: 0.5, hp: 40 }, drum: { pan: 0, send: 0.25, hp: 30 }
+    woodfish: { pan: 0.42, send: 0.35, hp: 300 }, gong: { pan: -0.18, send: 0.5, hp: 40 }, drum: { pan: 0, send: 0.25, hp: 30 },
+    boneflute: { pan: 0.12, send: 0.45, hp: 250 }, xun: { pan: -0.08, send: 0.45, hp: 120 }, hum: { pan: 0, send: 0.55, hp: 60 },
+    logdrum: { pan: -0.25, send: 0.25, hp: 50 }, framedrum: { pan: 0.08, send: 0.22, hp: 40 }, sticks: { pan: 0.4, send: 0.3, hp: 800 }, shaker: { pan: 0.55, send: 0.25, hp: 3000 },
+    lute: { pan: -0.3, send: 0.32, hp: 80 }, lutestrum: { pan: -0.3, send: 0.32, hp: 90 }, shawm: { pan: 0.2, send: 0.38, hp: 200 },
+    bagpipe: { pan: 0.05, send: 0.35, hp: 45 }, tambourine: { pan: 0.45, send: 0.28, hp: 2000 }
   };
   var SECTION_MIX = { vc: { pan: 0.32, send: 0.45, hp: 45 }, va: { pan: 0.12, send: 0.5, hp: 110 }, vn: { pan: -0.32, send: 0.52, hp: 160 } };
   function mixed(p, m) { if (m) { p.pan = m.pan; p.send = m.send; p.hp = m.hp; } return p; }
@@ -210,7 +295,7 @@ function makeMusic(sfx) {
     B1: [[4, 3, 1, 3], [3, 4, 1, 4], [1, 4, 3, 4]],
     B2: [[4, 1, 3, 0], [3, 1, 4, 0], [1, 3, 4, 0]]
   };
-  var SCALE7 = { gong: [0, 2, 4, 5, 7, 9, 11], zhi: [0, 2, 4, 5, 7, 9, 10], shang: [0, 2, 3, 5, 7, 8, 10], yu: [0, 2, 3, 5, 7, 8, 10], jue: [0, 1, 3, 5, 7, 8, 10], miyako: [0, 1, 3, 5, 7, 8, 10] };
+  var SCALE7 = { gong: [0, 2, 4, 5, 7, 9, 11], zhi: [0, 2, 4, 5, 7, 9, 10], shang: [0, 2, 3, 5, 7, 8, 10], yu: [0, 2, 3, 5, 7, 8, 10], jue: [0, 1, 3, 5, 7, 8, 10], miyako: [0, 1, 3, 5, 7, 8, 10], dorian: [0, 2, 3, 5, 7, 9, 10] };
   var PROG7 = {
     minor: {
       A1: [[0, 5, 2, 6], [0, 3, 6, 2], [0, 5, 3, 6]],
@@ -422,6 +507,7 @@ function makeMusic(sfx) {
         if (inst === 'guqin') add(t, rArr() < 0.12 && nt.d >= 2 && deg >= mBase + 3 ? I.harmonic(f * 2, v) : I.guqin(f, dur, v, nt.d >= 2 && rArr() < 0.3 ? Math.pow(2, -2 / 12) : 0));
         else if (inst === 'flute') add(t, I.flute(f, dur, v));
         else if (inst === 'erhu') add(t, I.erhu(f, dur, v, sp.dark ? (nt.d >= 1 && rArr() < 0.55 ? -2 : 0) : nt.d >= 1.5 && rArr() < 0.45 ? (rArr() < 0.7 ? 2 : -1) : 0));
+        else if (inst === 'boneflute' || inst === 'xun' || inst === 'hum' || inst === 'lute' || inst === 'shawm') add(t, I[inst](f, dur, v));
         else add(t, I.pipa(f, dur, v, nt.d >= 2 && !sp.dark));
       });
     }
@@ -437,11 +523,14 @@ function makeMusic(sfx) {
         var r0 = prog[k % 4], tones = chordTones(r0), b0 = startBar + k, t0 = at(b0 * B);
         chordLog[b0] = r0;
         var low = tones.map(function (st) { return hz(R + st - 12); });
-        var plk = sp.accomp === 'guqin' || sp.accomp === 'pipa';
+        var plk = sp.accomp === 'guqin' || sp.accomp === 'pipa' || sp.accomp === 'lute';
         if (lay.rhythm && plk && tex === 'block') {
           if (sp.accomp === 'guqin') {
             var pattern = I0 < 0.35 ? [[0, 0], [2, 1]] : I0 < 0.7 ? [[0, 0], [1, 1], [2, 2], [3, 1]] : [[0, 0], [0.5, 1], [1, 2], [1.5, 1], [2, 0], [2.5, 1], [3, 2], [3.5, 1]];
             pattern.forEach(function (pt) { if (pt[0] < B) add(t0 + at(pt[0]) + jitter(), I.qin(low[pt[1]], beat * 1.5, (0.26 + 0.2 * I0) * lay.rhythm)); });
+          } else if (sp.accomp === 'lute') {
+            var lh = I0 < 0.5 ? [0, 2] : [0, 1, 2, 3];
+            lh.forEach(function (bt, i) { if (bt < B) add(t0 + at(bt) + jitter(), I.lutestrum([low[0], low[2], hz(R + tones[0]), hz(R + tones[1]), hz(R + tones[2])], (i === 0 ? 0.9 : 0.55) * (0.5 + 0.5 * I0) * lay.rhythm)); });
           } else {
             var hits = I0 < 0.6 ? [0, 2] : [0, 1.5, 2, 3];
             hits.forEach(function (bt, i) { if (bt < B) add(t0 + at(bt) + jitter(), I.strum(tones.map(function (st) { return hz(R + st); }), (i === 0 ? 0.9 : 0.6) * (0.5 + 0.5 * I0) * lay.rhythm)); });
@@ -452,7 +541,8 @@ function makeMusic(sfx) {
           var step = I0 > 0.6 ? 0.5 : 1, nArp = Math.round(B / step);
           for (var a = 0; a < nArp; a++) {
             var idx = a < 4 ? a : 8 - a, f = up[clamp(idx, 0, up.length - 1)];
-            add(t0 + at(a * step) + jitter(), I.qin(f, beat * 2, (a === 0 ? 0.3 : 0.2) * (0.6 + 0.5 * I0) * lay.rhythm));
+            if (sp.accomp === 'lute') add(t0 + at(a * step) + jitter(), I.lute(f, beat * 1.5, (a === 0 ? 0.42 : 0.3) * (0.6 + 0.5 * I0) * lay.rhythm));
+            else add(t0 + at(a * step) + jitter(), I.qin(f, beat * 2, (a === 0 ? 0.3 : 0.2) * (0.6 + 0.5 * I0) * lay.rhythm));
           }
         } else if (lay.rhythm && tex === 'pulse') {
           /* a low heartbeat on the cellos: long-short on the root */
@@ -482,6 +572,31 @@ function makeMusic(sfx) {
         }
         if (sp.bass === 'pulse' && lay.bed) {
           [0, 2].forEach(function (bt) { if (bt < B) add(t0 + at(bt), I.bass(hz(R + tones[0] - 24), beat * 1.8, 0.6 + 0.4 * I0)); });
+        }
+        if (sp.choir && lay.bed && k % 2 === 0) {
+          /* a few low voices humming the chord root and fifth, two bars at a time */
+          var cv = sp.choir * (0.5 + 0.5 * I0) * Math.min(1.2, lay.bed), cl = Math.min(2, bars - k) * barLen + 0.8;
+          add(t0 + jitter(), I.hum(hz(R + tones[0] - 12), cl, cv));
+          add(t0 + 0.15 + jitter(), I.hum(hz(R + tones[0] - 5), cl, cv * 0.55));
+        }
+        if (lay.perc && sp.perc === 'primitive') {
+          /* log drums: boom . . boom . boom . . ; sticks on the off-beats, shaker eighths once it builds */
+          var lg = B === 3 ? [[0, 1, 90], [1.5, 0.6, 120]] : [[0, 1, 90], [1.5, 0.6, 120], [2.5, 0.75, 90]];
+          lg.forEach(function (x) { add(t0 + at(x[0]) + jitter(), I.logdrum(x[2], x[1] * (0.5 + 0.5 * I0) * Math.min(1, lay.perc))); });
+          if (I0 > 0.4) for (var sb = 1; sb < B; sb += 2) add(t0 + at(sb + 0.5) + jitter(), I.sticks((0.4 + 0.4 * I0) * lay.perc));
+          if (I0 > 0.55) for (var sh = 0; sh < B * 2; sh++) add(t0 + at(sh * 0.5) + jitter(), I.shaker((sh % 2 ? 0.8 : 0.45) * lay.perc));
+        }
+        if (lay.perc && sp.perc === 'tribal') {
+          [[0, 0], [B === 3 ? 2 : 2.5, 0]].forEach(function (x) { add(t0 + at(x[0]) + jitter(), I.framedrum((0.55 + 0.4 * I0) * Math.min(1, lay.perc), false)); });
+          for (var tb = 1; tb < B; tb += 2) add(t0 + at(tb) + jitter(), I.logdrum(170, (0.3 + 0.3 * I0) * lay.perc));
+          if (I0 > 0.4) for (var ts = 0; ts < B * 2; ts++) add(t0 + at(ts * 0.5) + jitter(), I.shaker((ts % 2 ? 0.7 : 0.4) * lay.perc));
+        }
+        if (lay.perc && sp.perc === 'folk') {
+          /* frame drum on the strong beats, tambourine on two and four, a skip at the end of the bar when it is busy */
+          add(t0 + jitter(), I.framedrum((0.6 + 0.4 * I0) * Math.min(1, lay.perc), false));
+          if (B === 4) add(t0 + at(2) + jitter(), I.framedrum((0.4 + 0.3 * I0) * Math.min(1, lay.perc), true));
+          for (var tm = 1; tm < B; tm += 2) add(t0 + at(tm) + jitter(), I.tambourine((0.45 + 0.4 * I0) * lay.perc));
+          if (I0 > 0.6) add(t0 + at(B - 0.5) + jitter(), I.tambourine(0.4 * lay.perc));
         }
         if (lay.perc && sp.perc === 'woodfish' && (I0 > 0.3 || k % 2 === 0)) add(t0 + jitter(), I.woodfish((0.5 + 0.4 * I0) * lay.perc));
         if (lay.perc && sp.perc === 'drum') {
@@ -558,7 +673,7 @@ function makeMusic(sfx) {
       if (name === 'intro') {
         bars = 4;
         accompany(progA2, bar, bars, I0, false, lay);
-        if (sp.bass === 'drone') add(at(bar * B), I.drone(hz(midi(sp, -5)), bars * barLen + 2, 0.9));
+        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, -5) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 2, 0.9));
         if (rArr() < 0.6) playMelody(shiftNotes(motifA.filter(function (n) { return n.b < B; }), 2 * B), bar, sp.melodyB || sp.melody, I0 * 0.7, false, name, userA ? null : progA2);
       } else if (name === 'free') {
         /* rubato: the motif stretched out, each note held a little longer or shorter, breaths between phrases */
@@ -580,7 +695,7 @@ function makeMusic(sfx) {
         playMelody(phraseA2, bar + 4, sp.melody, I0, orn, name, userA ? null : progA2);
         accompany(progA1, bar, 4, I0, false, lay); accompany(progA2, bar + 4, 4, I0, isLast, lay);
         if (lay.counter && sp.strings) { counterLine(progA1, bar, 4, counterGain(lay, I0)); counterLine(progA2, bar + 4, 4, counterGain(lay, I0)); }
-        if (sp.bass === 'drone') add(at(bar * B), I.drone(hz(midi(sp, -5)), bars * barLen + 2, 0.8 + 0.2 * I0));
+        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, -5) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 2, 0.8 + 0.2 * I0));
       } else if (name === 'A2') {
         /* the theme again, told differently: other voice or octave, passing notes, the other accompaniment texture */
         bars = 8;
@@ -589,14 +704,14 @@ function makeMusic(sfx) {
         playMelody(shiftNotes(vary(rArr, phraseA2, amt), 0, octA2), bar + 4, leadA2, I0, true, name, userA ? null : progA2);
         accompany(progA1, bar, 4, I0, false, lay, texture2); accompany(progA2, bar + 4, 4, I0, isLast, lay, texture2);
         if (sp.strings) { counterLine(progA1, bar, 4, counterGain(lay, I0)); counterLine(progA2, bar + 4, 4, counterGain(lay, I0)); }
-        if (sp.bass === 'drone') add(at(bar * B), I.drone(hz(midi(sp, -5)), bars * barLen + 2, 0.9));
+        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, -5) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 2, 0.9));
       } else if (name === 'B') {
         bars = 8;
         playMelody(phraseB1, bar, sp.melodyB || sp.melody, I0, false, name, userB ? null : progB1);
         playMelody(phraseB2, bar + 4, sp.melodyB || sp.melody, I0, false, name, userB ? null : progB2);
         /* B opens thinner (half rhythm) and fills back in for its second phrase */
         accompany(progB1, bar, 4, I0, false, { bed: lay.bed, rhythm: 0.5, perc: 0.6, color: 1 }); accompany(progB2, bar + 4, 4, I0, isLast, lay);
-        if (sp.bass === 'drone') add(at(bar * B), I.drone(hz(midi(sp, -2)), bars * barLen + 2, 0.8));
+        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, sp.bass === 'bagpipe' ? -5 : -2) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 2, 0.8));
       } else if (name === 'C') {
         /* development: the head of the theme climbs in sequence, then the head of B comes down to the tonic;
            the lead is doubled an octave below by the second instrument */
@@ -636,7 +751,7 @@ function makeMusic(sfx) {
         }
         playMelody(aug, bar, sp.melody, I0, false, name, userA ? null : progA2);
         accompany(progA2, bar, bars, I0 * 0.7, false, lay);
-        if (sp.bass === 'drone') add(at(bar * B), I.drone(hz(midi(sp, -5)), bars * barLen + 3, 0.7));
+        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, -5) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 3, 0.7));
         if (sp.sparkle) add(at((bar + bars - 1) * B), I.chime(hz(midi(sp, 15)), 1));
       }
       /* gong marks the big arrivals, not every section */
@@ -811,6 +926,16 @@ function makeMusic(sfx) {
       [0, 1, 2, 3, 4, 5, 7].forEach(function (d, i) { ev.push({ t: i * 0.06, p: I.chime(hz(midi(SPH, d + 5)), 1.6) }); });
       ev.push({ t: 0.45, p: I.bell(hz(midi(SPH, 10)), 2.5, 0.7) });
       return ev;
+    },
+    /* guilt stingers for dark deeds: short (2-3 s), quiet, sit under the game sounds instead of on top of them */
+    guiltCannibal: function () {
+      return [{ t: 0, p: I.erhu(hz(midi(SPY, 7)), 0.9, 0.5) }, { t: 0.75, p: I.erhu(hz(midi(SPY, 6)), 1.3, 0.42, -2) }, { t: 0.1, p: I.hum(hz(SPY.root - 12), 2.2, 0.4) }];
+    },
+    guiltChild: function () {
+      return [{ t: 0, p: I.xun(hz(SP0.root + 15), 0.8, 0.55) }, { t: 0.75, p: I.xun(hz(SP0.root + 14), 1.4, 0.5) }];
+    },
+    grief: function () {
+      return [{ t: 0, p: I.hum(hz(SPY.root - 12), 2.2, 0.5) }, { t: 0, p: I.guqin(hz(midi(SPY, 5)), 1.6, 0.45) }, { t: 0.8, p: I.guqin(hz(midi(SPY, 3)), 1.6, 0.4) }];
     },
     breakthrough: function () {
       var ev = [{ t: 0, p: I.bell(hz(SP0.root - 12), 5, 0.9) }];

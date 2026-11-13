@@ -25,6 +25,7 @@
   },
   "files": [
     "engine.js",
+    "music.js",
     "presets.js",
     "catalog.js",
     "export.js",

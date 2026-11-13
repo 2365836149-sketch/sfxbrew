@@ -64,6 +64,19 @@ npx sfxbrew pack swordQi --count 8 --out .                   # Godot / Unity / w
 npx sfxbrew pack campfire --loop 20 --out .
 ```
 
+## Music
+
+Background music is composed and rendered locally too: one full piece per seed (intro, theme, contrast, theme, outro) as a seamless stereo WAV loop.
+
+```bash
+npx sfxbrew music list                                  # moods and stingers
+npx sfxbrew music medieval --count 3 --out music/town.wav
+npx sfxbrew music primitive --seed 7 --out music/stone-age.wav
+npx sfxbrew stinger guiltChild --out music/guilt-child.wav
+```
+
+Moods: `calm`, `battle`, `mystery`, `sad` (Eastern), `primitive` (bone flute, hummed drone, log drums, sticks, shaker), `tribal` (clay ocarina, bamboo flute, plucked zither, frame drum), `medieval` (dorian fiddle and shawm, lute, bagpipe drone, tambourine). Stingers: `victory`, `defeat`, `battleStart`, `treasure`, `breakthrough`, and three quiet 2-3 s ones for dark moments: `guiltCannibal`, `guiltChild`, `grief`. MCP tool: `generate_music`.
+
 ## Sound packs
 
 Ready-made WAV packs: [Xianxia & Wuxia Game Sound Pack on itch.io](https://2365836149-sketch.itch.io/xianxia-wuxia-sound-pack) (44 sounds), or download any pack as a ZIP from [sfxbrew.com/sounds](https://sfxbrew.com/sounds/).

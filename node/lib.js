@@ -14,6 +14,7 @@ const makeSfx = require('../engine.js');
 const { PRESETS, mutate, SAMPLES } = require('../presets.js');
 const CATALOG = require('../catalog.js');
 const EXPORT = require('../export.js');
+const makeMusic = require('../music.js');
 
 /* 原生音频模块用到时才加载：精简版 Linux 没装 ALSA(libasound2) 时，
    MCP 服务和 list_presets 照常可用，只有渲染 WAV 时才报出清楚的错误 */
@@ -40,6 +41,83 @@ const SFX = makeSfx({
     return b.buffer.slice(b.byteOffset, b.byteOffset + b.length);
   }
 });
+
+/* 配乐引擎：和网页音乐页同一份 music.js，每个音符是一个 patch，交给上面的 SFX 渲染 */
+const MUSIC = makeMusic(SFX);
+const MUSIC_META = {
+  calm: 'Calm Eastern piece: guqin and bamboo flute over strings. Exploration, villages, menus.',
+  battle: 'Eastern battle music: pipa, spiccato low strings and big war drums. Combat, bosses.',
+  mystery: 'Sparse, misty Eastern piece: flute and guqin over held strings, wooden fish. Caves, ruins, night.',
+  sad: 'Slow erhu lament over strings and guqin. Loss, farewells, sad story beats.',
+  primitive: 'Stone age: bone flute over a hummed drone, log drums, clapping sticks and a shaker. Cavemen, tribal camps, prehistory.',
+  tribal: 'Early village: clay ocarina (xun) and bamboo flute, plucked zither, frame and log drums, low hum. Farming villages, early civilisation.',
+  medieval: 'Medieval folk tune in dorian: fiddle and shawm, lute, bagpipe drone, frame drum and tambourine. Towns, taverns, markets, castles.'
+};
+const STINGER_META = {
+  victory: 'Bright drum hit, pipa run and bell. Win, quest complete.',
+  defeat: 'Falling guqin, low bell and erhu. Loss, game over.',
+  battleStart: 'Three war drum hits and a gong. A fight begins.',
+  treasure: 'Rising chimes and a bell. Treasure, rare item.',
+  breakthrough: 'Low bell, rising guqin and flute. Level up, realm breakthrough.',
+  guiltCannibal: 'About 2 s, quiet: an erhu note sags down over a low hum. A dark deed (eating your own kind).',
+  guiltChild: 'About 2 s, quiet: two ocarina notes a semitone apart. A terrible deed (harming a child).',
+  grief: 'About 2.5 s, quiet: a low hum with two guqin notes. Someone close has died.'
+};
+
+/** 一段配乐：渲染一首完整曲子，尾巴折回开头，得到无缝循环的双声道 WAV */
+async function renderMusic(mood, opt) {
+  opt = opt || {};
+  if (!MUSIC_META[mood]) throw new Error('Unknown mood "' + mood + '". Available: ' + Object.keys(MUSIC_META).join(', '));
+  loadAudio();
+  const seed = opt.seed == null ? newSeed() : opt.seed;
+  const r = await MUSIC.renderLoop({ preset: mood, seed }, { sampleRate: opt.sampleRate || 44100, volume: opt.volume });
+  /* every mood lands at about the same loudness (-18 dBFS RMS) so a game can switch between them without riding the fader */
+  if (opt.volume == null) levelTo(r.channels, -18);
+  return { bytes: encodeWavStereo(r.channels, r.sampleRate, { loop: true }).bytes, seconds: r.seconds, seed, bars: r.bars };
+}
+/** 短乐句（胜利、失败、负罪感……），双声道 WAV，尾部静音裁掉 */
+async function renderStinger(name, opt) {
+  if (!STINGER_META[name]) throw new Error('Unknown stinger "' + name + '". Available: ' + Object.keys(STINGER_META).join(', '));
+  loadAudio();
+  const r = await MUSIC.renderStinger(name, { sampleRate: (opt && opt.sampleRate) || 44100 });
+  /* guilt and grief stingers stay short: cut the reverb tail at 3 s with a half-second fade */
+  if (/^(guilt|grief)/.test(name)) r.channels = r.channels.map(d => {
+    const n = Math.min(d.length, Math.round(3 * r.sampleRate)), f = Math.round(0.5 * r.sampleRate), o = new Float32Array(n);
+    for (let i = 0; i < n; i++) o[i] = d[i] * Math.min(1, (n - i) / f);
+    return o;
+  });
+  return encodeWavStereo(r.channels, r.sampleRate, {});
+}
+function levelTo(ch, db) {
+  let s = 0, n = 0;
+  ch.forEach(d => { for (let i = 0; i < d.length; i++) s += d[i] * d[i]; n += d.length; });
+  const rms = Math.sqrt(s / Math.max(1, n));
+  if (rms < 1e-6) return;
+  const g = Math.pow(10, db / 20) / rms;
+  /* gain up, then a soft knee above 0.8 so drum peaks round off instead of clipping */
+  ch.forEach(d => { for (let i = 0; i < d.length; i++) { const x = d[i] * g, a = Math.abs(x); d[i] = a < 0.8 ? x : Math.sign(x) * (0.8 + 0.18 * Math.tanh((a - 0.8) / 0.18)); } });
+}
+function encodeWavStereo(ch, sr, opt) {
+  const L = ch[0], R = ch[1] || ch[0];
+  let n = L.length;
+  if (!opt.loop) { let end = n - 1; while (end > 0 && Math.abs(L[end]) < 0.0008 && Math.abs(R[end]) < 0.0008) end--; n = Math.min(n, end + Math.floor(sr * 0.05)); }
+  let peak = 0;
+  for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(L[i]), Math.abs(R[i]));
+  const k = peak > 0.98 ? 0.98 / peak : 1, smpl = opt.loop ? 68 : 0, data = n * 4;
+  const b = Buffer.alloc(44 + data + smpl);
+  b.write('RIFF', 0); b.writeUInt32LE(36 + data + smpl, 4); b.write('WAVE', 8); b.write('fmt ', 12);
+  b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(2, 22);
+  b.writeUInt32LE(sr, 24); b.writeUInt32LE(sr * 4, 28); b.writeUInt16LE(4, 32); b.writeUInt16LE(16, 34);
+  b.write('data', 36); b.writeUInt32LE(data, 40);
+  const q = x => Math.round(Math.max(-1, Math.min(1, x * k)) * 0x7fff);
+  for (let i = 0; i < n; i++) { b.writeInt16LE(q(L[i]), 44 + i * 4); b.writeInt16LE(q(R[i]), 46 + i * 4); }
+  if (opt.loop) {
+    const o = 44 + data;
+    b.write('smpl', o); b.writeUInt32LE(60, o + 4); b.writeUInt32LE(Math.round(1e9 / sr), o + 16); b.writeUInt32LE(60, o + 20);
+    b.writeUInt32LE(1, o + 36); b.writeUInt32LE(0, o + 52); b.writeUInt32LE(0, o + 56); b.writeUInt32LE(n - 1, o + 60);
+  }
+  return { bytes: b, seconds: n / sr };
+}
 
 /** 网站上线后填上，生成结果会附带"在网页里试听和微调"的链接 */
 const SITE_URL = process.env.SFXBREW_SITE_URL || 'https://sfxbrew.com/';
@@ -279,4 +357,4 @@ function writeFile(file, bytes) {
   return path.resolve(file);
 }
 
-module.exports = { PRESETS, CATALOG, META, PATCH_DOC, LOOPABLE: EXPORT.LOOPABLE, listPresets, generate, validatePatch, renderWav, renderLoop, exportPack, jsCode, editorLink, writeFile, SITE_URL };
+module.exports = { MUSIC_META, STINGER_META, renderMusic, renderStinger, PRESETS, CATALOG, META, PATCH_DOC, LOOPABLE: EXPORT.LOOPABLE, listPresets, generate, validatePatch, renderWav, renderLoop, exportPack, jsCode, editorLink, writeFile, SITE_URL };

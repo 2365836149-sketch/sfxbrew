@@ -4,7 +4,7 @@
    ----------------------------------------------------------------------------
    给 Claude Code / Cursor 等 agent 用：
      claude mcp add sfxbrew -- npx -y sfxbrew mcp
-   工具：list_presets / generate_sfx / render_patch / get_js_code / export_pack
+   工具：list_presets / generate_sfx / render_patch / get_js_code / export_pack / generate_music
    ★ 只写 .wav / .js 文件，防止 agent 传错路径把别的文件覆盖掉。
    ==========================================================================*/
 'use strict';
@@ -139,6 +139,33 @@ server.registerTool('export_pack', {
   try {
     const r = await lib.exportPack({ preset, outDir: out_dir, count, loopSeconds: loop_seconds, seed });
     return ok(r);
+  } catch (e) { return fail(e.message); }
+});
+
+server.registerTool('generate_music', {
+  title: 'Compose a music loop',
+  description: 'Compose and render background music locally as a seamless stereo WAV loop (the WAV carries a loop point; one full piece with intro, themes and outro, about 1-2 minutes). ' +
+    'Every seed is a different piece in the same style. Moods: ' + Object.entries(lib.MUSIC_META).map(([k, d]) => k + ' (' + d + ')').join('; ') + '. ' +
+    'Also renders short stingers instead when "stinger" is given: ' + Object.entries(lib.STINGER_META).map(([k, d]) => k + ' (' + d + ')').join('; ') + '.',
+  inputSchema: {
+    mood: z.enum(Object.keys(lib.MUSIC_META)).optional().describe('Music style for a loop'),
+    stinger: z.enum(Object.keys(lib.STINGER_META)).optional().describe('Render this short stinger instead of a loop'),
+    out_path: z.string().describe('WAV file to write, e.g. "assets/music/town.wav". With count > 1, files get -01, -02 ... suffixes.'),
+    count: z.number().int().min(1).max(10).optional().describe('Number of different pieces (default 1)'),
+    seed: z.number().int().optional().describe('Seed for a reproducible piece; piece i uses seed + i')
+  },
+  annotations: { destructiveHint: false }
+}, async ({ mood, stinger, out_path, count, seed }) => {
+  try {
+    checkExt(out_path, '.wav');
+    if (!mood && !stinger) throw new Error('give a mood or a stinger');
+    const n = stinger ? 1 : count || 1, pieces = [];
+    for (let i = 0; i < n; i++) {
+      const file = n === 1 ? out_path : out_path.replace(/\.wav$/i, '-' + String(i + 1).padStart(2, '0') + '.wav');
+      const r = stinger ? await lib.renderStinger(stinger) : await lib.renderMusic(mood, { seed: seed == null ? null : seed + i });
+      pieces.push({ file: lib.writeFile(file, r.bytes), seconds: +r.seconds.toFixed(2), seed: r.seed, loop: !stinger });
+    }
+    return ok({ mood, stinger, pieces });
   } catch (e) { return fail(e.message); }
 });
 
