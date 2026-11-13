@@ -14,15 +14,16 @@ const lib = require('./lib.js');
   const client = new Client({ name: 'test', version: '1' });
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [path.join(__dirname, 'mcp.js')], cwd: dir }));
   const json = r => JSON.parse(r.content[0].text);
+  const SLOW = { timeout: 180000 };   // 整首配乐在慢机器上要渲染 40~60 秒，超过 MCP 客户端默认的 60 秒
 
   const tools = (await client.listTools()).tools.map(t => t.name).sort();
   assert.deepStrictEqual(tools, ['export_pack', 'generate_music', 'generate_sfx', 'get_js_code', 'list_presets', 'render_patch']);
 
-  const st = json(await client.callTool({ name: 'generate_music', arguments: { stinger: 'guiltChild', out_path: 'music/guilt.wav' } }));
+  const st = json(await client.callTool({ name: 'generate_music', arguments: { stinger: 'guiltChild', out_path: 'music/guilt.wav' } }, undefined, SLOW));
   const sb = fs.readFileSync(st.pieces[0].file);
   assert.ok(sb.slice(0, 4).toString() === 'RIFF' && sb.readUInt16LE(22) === 2, 'stereo stinger');
   assert.ok(st.pieces[0].seconds <= 3.05, 'guilt stinger stays short');
-  const mu = json(await client.callTool({ name: 'generate_music', arguments: { mood: 'primitive', out_path: 'music/stone.wav', seed: 2 } }));
+  const mu = json(await client.callTool({ name: 'generate_music', arguments: { mood: 'primitive', out_path: 'music/stone.wav', seed: 2 } }, undefined, SLOW));
   assert.ok(mu.pieces[0].seconds > 30 && mu.pieces[0].loop, 'music loop');
   assert.ok(fs.readFileSync(mu.pieces[0].file).indexOf('smpl') > 0, 'music WAV carries a loop point');
 
