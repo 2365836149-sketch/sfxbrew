@@ -1,5 +1,7 @@
 # sfxbrew
 
+[![2365836149-sketch/sfxbrew MCP server](https://glama.ai/mcp/servers/2365836149-sketch/sfxbrew/badges/score.svg)](https://glama.ai/mcp/servers/2365836149-sketch/sfxbrew)
+
 Procedural game sound effects for humans **and AI coding agents**. Eastern (wuxia / xianxia) sounds plus the usual game sounds, synthesized locally, with no API keys, no network and no per-call cost.
 
 - 45 presets. Eastern instruments: guqin, pipa, erhu, bamboo flute, temple bell, gong, wind chime, wooden fish, war drum. Xianxia magic: sword qi, spell cast, heavenly thunder, lightning, breakthrough, talisman, alchemy, qi gathering. Combat: hit, explosion, laser, whoosh, arrow, sword clash, shield block. UI and items: click, confirm, error, notification, page turn, typing, coin, pickup, power-up, level up, chest open. Character: jump, land, footsteps on stone and grass. Ambience: rain, wind, campfire, stream, cave drip, monster growl
