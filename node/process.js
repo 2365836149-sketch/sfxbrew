@@ -234,12 +234,57 @@ function fade(ch, sr, inSec, outSec) {
   return ch;
 }
 
-/** 无缝循环：把最后 x 秒用等功率交叉淡化叠到开头，文件变短 x 秒，最后一个采样接回第一个是连续的 */
+/* 50ms 一帧的 RMS（所有声道合起来），用来看音量走势 */
+function frameRms(ch, sr, sec) {
+  const fr = Math.max(1, Math.round((sec || 0.05) * sr)), n = ch[0].length, out = [];
+  for (let s = 0; s + fr <= n; s += fr) {
+    let e = 0;
+    for (const c of ch) for (let i = s; i < s + fr; i++) e += c[i] * c[i];
+    out.push(Math.sqrt(e / (fr * ch.length)));
+  }
+  return { fr, rms: out };
+}
+const rmsRange = (ch, a, b) => { let e = 0; for (const c of ch) for (let i = a; i < b; i++) e += c[i] * c[i]; return Math.sqrt(e / Math.max(1, (b - a) * ch.length)); };
+
+/** 无缝循环，三步：
+    1. 切掉淡入淡出：开头结尾比整段中位音量低 10 dB 以上的部分去掉（否则接缝处会"掉一下"）
+    2. 音量对齐：结尾和开头的音量不一样时（比如录音越来越响），整段加一条按 dB 线性变化的增益，让结尾和开头一样响，最多改 12 dB
+    3. 交叉淡化：最后 x 秒用等功率淡化叠到开头，文件变短 x 秒，最后一个采样接回第一个是连续的
+    返回 { ch, notes } */
 function loopCrossfade(ch, sr, sec) {
+  const notes = [];
+  /* 1 */
+  const { fr, rms } = frameRms(ch, sr, 0.05);
+  if (rms.length >= 4) {
+    const med = rms.slice().sort((p, q) => p - q)[rms.length >> 1], thr = med * Math.pow(10, -10 / 20);
+    let a = 0, b = rms.length - 1;
+    while (a < b && rms[a] < thr) a++;
+    while (b > a && rms[b] < thr) b--;
+    const cutA = a * fr, cutB = (b + 1) * fr;
+    if (cutA > 0 || cutB < ch[0].length) {
+      const lost = (cutA + ch[0].length - cutB) / sr;
+      if (lost > 0.02) notes.push('cut ' + lost.toFixed(2) + ' s of fade/silence at the ends so the loop does not dip');
+      ch = ch.map(c => c.slice(cutA, cutB));
+    }
+  }
   const n = ch[0].length, x = Math.round(sec * sr);
-  if (x <= 0) return ch;
+  if (x <= 0) return { ch, notes };
   if (x * 2 > n) throw new Error('loop crossfade (' + sec + ' s) is longer than half the sound');
-  return ch.map(c => {
+  /* 2：比较开头和结尾各一段（交叉淡化长度，至少 0.5 秒）的音量。
+     交叉淡化之后，播放到结尾时听到的是"结尾前那段"，接回开头时是开头，所以两段要一样响 */
+  const w = Math.min(Math.floor(n / 4), Math.max(x, Math.round(0.5 * sr)));
+  const head = rmsRange(ch, x, x + w), tail = rmsRange(ch, n - x - w, n - x);
+  if (head > 0 && tail > 0) {
+    const diff = 20 * Math.log10(head / tail);
+    if (Math.abs(diff) > 1) {
+      const d = Math.max(-12, Math.min(12, diff));
+      ch = ch.map(c => { const o = new Float32Array(c.length); for (let i = 0; i < c.length; i++) o[i] = c[i] * Math.pow(10, d * (i / (c.length - 1)) / 20); return o; });
+      notes.push('end was ' + Math.abs(diff).toFixed(1) + ' dB ' + (diff > 0 ? 'quieter' : 'louder') + ' than the start; evened out' + (Math.abs(diff) > 12 ? ' by 12 dB (max), pick a steadier section' : '') +
+        (Math.abs(diff) > 6 ? '. Large jumps usually mean two different takes in one file: try --slice and loop one of them' : ''));
+    }
+  }
+  /* 3 */
+  ch = ch.map(c => {
     const o = c.slice(0, n - x);
     for (let i = 0; i < x; i++) {
       const t = (i + 0.5) / x;
@@ -247,6 +292,7 @@ function loopCrossfade(ch, sr, sec) {
     }
     return o;
   });
+  return { ch, notes };
 }
 
 /* 峰值限制器（离线，所以可以"提前看"）：每个采样算出要压多少，向前取 lookahead 内最小值，
@@ -390,7 +436,7 @@ async function processAudio(inputs, opt) {
       const notes = [], before = stats(p, d.sr, o.threshold);
       if (o.trim) { const t = trimSilence(p, d.sr, trimOpt); if (t) p = t; else notes.push('silent, not trimmed'); }
       p = fade(p, d.sr, o.fadeIn / 1000, o.fadeOut / 1000);
-      if (o.loopCrossfade) p = loopCrossfade(p, d.sr, o.loopCrossfade / 1000);
+      if (o.loopCrossfade) { const lc = loopCrossfade(p, d.sr, o.loopCrossfade / 1000); p = lc.ch; notes.push(...lc.notes); }
       const nm = normalize(p, d.sr, { lufs: o.lufs, peak: o.peak, limit: o.limit, maxReduction: o.maxReduction });
       if (nm.note) notes.push(nm.note);
       clips.push({ source: f, part: parts.length > 1 ? k + 1 : null, ch: nm.ch, sr: d.sr, before, gainDb: nm.gainDb, notes });
