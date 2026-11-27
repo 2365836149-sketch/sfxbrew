@@ -32,6 +32,7 @@
     "node/lib.js",
     "node/cli.js",
     "node/mcp.js",
+    "node/process.js",
     "node/sf2.js",
     "node/band.js",
     "node/neural.js",

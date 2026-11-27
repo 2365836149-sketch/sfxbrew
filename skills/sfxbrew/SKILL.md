@@ -2,7 +2,7 @@
 name: sfxbrew
 description: Generate royalty-free game sound effects (coins, clicks, jumps, hits, explosions, sword slashes, footsteps, guqin, gongs, war drums, rain and more) locally with the free SFX Brew engine, as WAV files or a dependency-free JavaScript snippet, plus looping background music and short stingers. Use when the user asks for sound effects, SFX, background music, a victory or game-over jingle, audio feedback or "make it sound better" in a game or interactive app.
 summary: Add free, commercially usable sound effects and background music to any game straight from your coding agent.
-version: 1.2.0
+version: 1.3.0
 tags: [game-development, audio, sound-effects, game-music, gamedev, web-audio]
 keywords: [sound effects, sfx, game audio, game music, background music, music loop, stinger, wav, procedural audio, web audio, mcp, xianxia, wuxia, retro, medieval]
 use_cases:
@@ -59,6 +59,16 @@ Run `list_presets` (or `npx sfxbrew list`) for one-line descriptions. Every call
 Ambience and sustained sounds (`rain`, `wind`, `campfire`, `stream`, `caveDrip`, `thunder`, `chime`, `drum`, `monsterGrowl`) can be rendered as seamless loops of 10 to 120 seconds (`loop_seconds` in `generate_sfx`, or `--loop 30` on the CLI). The WAV carries a loop point that Godot, FMOD, Wwise and GameMaker pick up.
 
 `export_pack` (CLI: `npx sfxbrew pack <preset> --count 8 --out .`) writes a folder with WAV variations or loops plus `godot/<name>.tres` (an AudioStreamRandomizer), `unity/SfxBrewPlayer.cs` and a plain Web Audio player. Use it when the project uses one of those engines.
+
+## Cleaning up existing audio
+
+`process_audio` works on any audio files the project already has (recordings, downloaded packs, other tools; WAV/MP3/OGG/FLAC), not only SFX Brew sounds. Call `analyze_audio` first to see loudness, peaks and padding, then `process_audio` with what is needed:
+
+- Sounds of uneven volume: `lufs: -20, limit: true` (ambience: -22 to -26). Report clips whose `notes` say they fell short.
+- A recording with many takes in one file: `slice: true, trim: true, name: "step"` gives `step-01.wav`, `step-02.wav` …
+- Ambience that clicks at the loop point: `loop_crossfade_ms: 500` to `1000`.
+- A web game with many small sounds: `sprite: "sfx"` writes one file plus a Howler.js sprite map.
+- Write into a new `out_dir`; the tool refuses to overwrite inputs or existing files unless `overwrite: true`. MP3/OGG output needs ffmpeg.
 
 ## Music
 

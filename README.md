@@ -36,6 +36,8 @@ Tools:
 | `render_patch` | Render a hand-tuned patch JSON |
 | `get_js_code` | One drop-in JS snippet with `playX()` functions for several sounds |
 | `export_pack` | A game-engine folder: WAV variations or seamless loops + Godot `.tres`, Unity script, web player, README |
+| `process_audio` | Make **any** audio files game-ready: same loudness (LUFS), trim silence, slice at silences, seamless loops, rename, WAV/MP3/OGG, audio sprite |
+| `analyze_audio` | Loudness, peak, length and leading/trailing silence of audio files |
 
 Then just ask: *"add a coin sound and a hit sound to my game"*.
 
@@ -52,6 +54,27 @@ An **engine pack** is a folder (or a zip from the web editor) with WAV variation
 - `godot/<name>.tres`: an `AudioStreamRandomizer` that plays a random variation each time (Godot 4)
 - `unity/SfxBrewPlayer.cs`: drop on a GameObject, drag in the clips, call `Play()` (or tick Loop)
 - `web/<name>.js`: plain Web Audio player, `playX()` or `startX()` / `stopX()` for loops
+
+## Process any audio
+
+`sfxbrew process` cleans up audio from anywhere (recordings, downloaded packs, other generators, WAV/MP3/OGG/FLAC) in one pass, and never touches the input files:
+
+- **Same loudness**: integrated loudness (ITU-R BS.1770, matches ffmpeg's `ebur128` within about 0.1 LU), a peak ceiling (default -1 dBFS) and an optional look-ahead limiter that stops at 6 dB so hits keep their attack
+- **Trim** silence at start and end, or **slice** one recording of many takes into separate clips
+- **Seamless loops**: crossfade the tail into the head and write a WAV loop point
+- **Rename** to `name-01.wav`, `name-02.wav` …, change channels, sample rate (high-quality sinc resampling) or bit depth
+- **WAV, MP3 or OGG** out (MP3 and OGG need ffmpeg installed; WAV needs nothing)
+- **Audio sprite**: all clips in one file plus a JSON map that Howler.js reads directly
+
+```bash
+npx sfxbrew analyze assets/sfx                    # find what is too loud, too quiet or padded
+npx sfxbrew process raw/footsteps.wav --slice --trim --lufs -20 --limit --name step --out assets/sfx
+npx sfxbrew process downloads/ --lufs -20 --limit --format ogg --out assets/sfx
+npx sfxbrew process ambience/forest.wav --loop-crossfade 800 --lufs -24 --out assets/sfx
+npx sfxbrew process ui/ --trim --lufs -20 --limit --sprite ui --out web/audio
+```
+
+About -20 LUFS suits one-shot SFX, -22 to -26 ambience. Very spiky sounds (a single click or hit) can end up a few LU under the target because the limiter stops at 6 dB; the output says how far short each clip is.
 
 ## CLI
 
