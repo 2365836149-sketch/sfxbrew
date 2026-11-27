@@ -41,6 +41,7 @@
     "node/band.js",
     "node/neural.js",
     "node/prompt.js",
+    "node/drums.js",
     "samples/",
     "README.md",
     "LICENSE"
@@ -49,7 +50,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node node/catalog-test.js && node node/test.js"
+    "test": "node node/catalog-test.js && node node/drums-test.js && node node/test.js"
   },
   "dependencies": {
     "@magenta/music": "^1.23.1",
