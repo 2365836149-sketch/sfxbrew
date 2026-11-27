@@ -17,7 +17,7 @@ const lib = require('./lib.js');
   const SLOW = { timeout: 180000 };   // 整首配乐在慢机器上要渲染 40~60 秒，超过 MCP 客户端默认的 60 秒
 
   const tools = (await client.listTools()).tools.map(t => t.name).sort();
-  assert.deepStrictEqual(tools, ['analyze_audio', 'export_pack', 'generate_music', 'generate_sfx', 'get_js_code', 'list_presets', 'process_audio', 'render_patch']);
+  assert.deepStrictEqual(tools, ['analyze_audio', 'export_pack', 'generate_music', 'generate_sfx', 'generate_vfx', 'get_js_code', 'list_presets', 'process_audio', 'render_patch']);
 
   const st = json(await client.callTool({ name: 'generate_music', arguments: { stinger: 'guiltChild', out_path: 'music/guilt.wav' } }, undefined, SLOW));
   const sb = fs.readFileSync(st.pieces[0].file);
@@ -106,6 +106,29 @@ const lib = require('./lib.js');
   assert.ok(self.isError, 'refuses to overwrite its input');
   const again2 = await client.callTool({ name: 'process_audio', arguments: { inputs: ['raw'], out_dir: 'clean', slice: true, name: 'hit' } });
   assert.ok(again2.isError, 'refuses to overwrite existing outputs');
+
+  /* 2D 特效：图集尺寸、帧数、JSON、Godot 文件、配套音效 */
+  const vx = json(await client.callTool({ name: 'generate_vfx', arguments: { effect: 'swordQi', out_dir: 'fx', style: 'pixel', variants: 2, seed: 4, palette: 'fire', scale: 2, with_sound: true } }));
+  assert.strictEqual(vx.variants.length, 2);
+  const png = fs.readFileSync(vx.variants[0].sheet);
+  assert.ok(png.slice(1, 4).toString() === 'PNG' && png.readUInt32BE(16) === vx.variants[0].size * vx.variants[0].frames && png.readUInt32BE(20) === vx.variants[0].size, 'sheet is one row of frames');
+  assert.strictEqual(vx.variants[0].size, 96, 'pixel 48 px x2');
+  assert.ok(/_strip12\.png$/.test(vx.variants[0].sheet), 'GameMaker strip name');
+  const atlas = JSON.parse(fs.readFileSync(vx.variants[0].atlas, 'utf8'));
+  assert.strictEqual(Object.keys(atlas.frames).length, 12);
+  assert.deepStrictEqual(atlas.animations['swordQi-01'].length, 12);
+  assert.strictEqual(vx.sound.length, 3);
+  const vtres = fs.readFileSync(path.join(vx.folder, 'godot/swordQi.tres'), 'utf8');
+  assert.ok(vtres.includes('&"swordQi_1"') && vtres.includes('&"swordQi_2"') && vtres.includes('path="../swordQi-02_strip12.png"'), 'two animations in SpriteFrames');
+  const scn = fs.readFileSync(path.join(vx.folder, 'godot/swordQi.tscn'), 'utf8');
+  assert.ok(scn.includes('animation = &"swordQi_1"') && scn.includes('AudioStreamPlayer2D'), 'scene plays sprite and sound');
+  assert.ok(fs.readFileSync(path.join(vx.folder, 'godot/swordQi_sfx.tres'), 'utf8').includes('path="../wav/swordQi-03.wav"'));
+  const v1 = json(await client.callTool({ name: 'generate_vfx', arguments: { effect: 'hit', out_dir: 'fx', seed: 9, frames: 6 } }));
+  const v2 = json(await client.callTool({ name: 'generate_vfx', arguments: { effect: 'hit', out_dir: 'fx2', seed: 9, frames: 6 } }));
+  assert.ok(fs.readFileSync(v1.variants[0].sheet).equals(fs.readFileSync(v2.variants[0].sheet)), 'same seed, same frames');
+  assert.strictEqual(v1.variants[0].fps, 18, 'fewer frames keep the duration');
+  const badPal = await client.callTool({ name: 'generate_vfx', arguments: { effect: 'hit', out_dir: 'fx', palette: ['#fff', '#000', '#111', '#222'] } });
+  assert.ok(badPal.isError, 'rejects bad colours');
 
   await client.close();
   fs.rmSync(dir, { recursive: true, force: true });

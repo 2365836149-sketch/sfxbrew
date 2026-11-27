@@ -23,6 +23,9 @@ Usage:
   sfxbrew process <files|folders...>     clean up ANY audio for a game: loudness, trim, slice,
                                          loop, rename, convert, audio sprite (see below)
   sfxbrew analyze <files|folders...>     loudness (LUFS), peak, length, silence at start/end
+  sfxbrew vfx list                       list 2D effects and colour palettes
+  sfxbrew vfx <effect> [options]         2D effect as sprite sheet + frames + Godot/Phaser/Pixi/
+                                         GameMaker files, optionally with the matching sound
   sfxbrew mcp                            run the MCP server (stdio)
 
 Options:
@@ -51,6 +54,15 @@ Process options (wav/mp3/ogg/flac in; WAV out needs nothing, MP3/OGG out need ff
   --sprite <name>      join all clips into one <name>.wav + <name>.json (Howler.js sprite map)
   --recursive          look into sub-folders;  --overwrite  replace existing outputs
 
+Effect options:
+  --style hd|pixel     smooth glow (128 px) or pixel art (48 px, 5 colours)
+  --size <px>          frame size;  --frames <n>  frame count;  --speed <x>  1.5 = faster
+  --palette <name>     fire, ice, thunder, dark, holy, poison, blood, jade, or 4 colours
+                       "#ffffff,#bff4ff,#4fd2ff,#1a5cff" (core, light, mid, dark)
+  --variants <n>       several variations (different particles) in one pack
+  --scale <n>          pixel style: enlarge n times with hard edges
+  --sound [preset]     add the matching sound (same name, or the preset you give)
+
 Examples:
   npx sfxbrew coin --out assets/sfx/coin.wav
   npx sfxbrew swordQi --count 5 --out assets/sfx/sword.wav
@@ -64,6 +76,8 @@ Examples:
   npx sfxbrew process downloads/ --lufs -18 --limit --format ogg --out assets/sfx
   npx sfxbrew process ui/ --trim --lufs -18 --sprite ui --out web/audio
   npx sfxbrew analyze assets/sfx
+  npx sfxbrew vfx swordQi --sound --out assets/fx
+  npx sfxbrew vfx hit --style pixel --palette ice --variants 3 --scale 2 --out assets/fx
 `;
 
 const BOOL = new Set(['json', 'help', 'trim', 'slice', 'limit', 'mono', 'stereo', 'recursive', 'overwrite']);
@@ -122,6 +136,28 @@ async function main() {
       console.log((x.file ? path.relative('.', x.file) : (x.id + ' @ ' + x.start + ' s')) + '  ' + f(x.before.lufs) + ' → ' + f(x.after.lufs) + ' LUFS, peak ' + f(x.after.peakDb) + ' dB, ' + x.after.seconds + ' s' + (x.notes.length ? '  (' + x.notes.join('; ') + ')' : ''));
     });
     if (r.sprite) console.log('sprite: ' + path.relative('.', r.sprite.audio) + ' + ' + path.relative('.', r.sprite.json) + ' (' + r.sprite.clips + ' clips, ' + r.sprite.seconds + ' s)');
+    return;
+  }
+
+  if (cmd === 'vfx') {
+    const V = require('../vfx.js');
+    const name = o._[1];
+    if (!name || name === 'list') {
+      console.log('\nEffects (sfxbrew vfx <effect>)');
+      V.LIST.forEach(k => console.log('  ' + k.padEnd(10) + V.EFFECTS[k].label + '  (' + V.EFFECTS[k].frames + ' frames)'));
+      console.log('\nPalettes (--palette)\n  ' + Object.keys(V.THEMES).join(', '));
+      return;
+    }
+    const num = k => o[k] != null && o[k] !== true ? parseFloat(o[k]) : undefined;
+    const pal = typeof o.palette === 'string' && o.palette.includes('#') ? o.palette.split(',').map(x => x.trim()) : o.palette;
+    const r = await require('./vfx-export.js').exportVfx({
+      effect: name, outDir: o.out || '.', style: o.style, size: num('size'), frames: num('frames'), seed: num('seed'),
+      variants: num('variants'), palette: pal === true ? undefined : pal, speed: num('speed'), scale: num('scale'), withSound: o.sound
+    });
+    if (o.json) { console.log(JSON.stringify(r, null, 2)); return; }
+    console.log(path.relative('.', r.folder) + '/');
+    r.variants.forEach(v => console.log('  ' + path.relative(r.folder, v.sheet) + '  (' + v.frames + ' frames, ' + v.size + ' px, ' + v.fps + ' fps, seed ' + v.seed + ')'));
+    console.log('  godot/' + name + '.tscn, ' + r.variants.map(v => path.basename(v.atlas)).join(', ') + ', frames/' + (r.sound.length ? ', wav/ (' + r.sound.length + ' sounds)' : '') + ', README.txt');
     return;
   }
 

@@ -38,6 +38,7 @@ Tools:
 | `export_pack` | A game-engine folder: WAV variations or seamless loops + Godot `.tres`, Unity script, web player, README |
 | `process_audio` | Make **any** audio files game-ready: same loudness (LUFS), trim silence, slice at silences, seamless loops, rename, WAV/MP3/OGG, audio sprite |
 | `analyze_audio` | Loudness, peak, length and leading/trailing silence of audio files |
+| `generate_vfx` | A 2D effect (sword qi, spell, hit) as a sprite sheet + Godot scene + Phaser/Pixi atlas, optionally with its matching sound |
 
 Then just ask: *"add a coin sound and a hit sound to my game"*.
 
@@ -75,6 +76,24 @@ npx sfxbrew process ui/ --trim --lufs -20 --limit --sprite ui --out web/audio
 ```
 
 About -20 LUFS suits one-shot SFX, -22 to -26 ambience. Very spiky sounds (a single click or hit) can end up a few LU under the target because the limiter stops at 6 dB; the output says how far short each clip is.
+
+## 2D effects
+
+Effects that match the sounds, drawn in code (no image assets): `swordQi`, `spell`, `hit`, in a smooth glow style or as pixel art. One command writes a folder every common engine can use:
+
+- `<name>_strip12.png`: the sprite sheet (the `_stripN` name lets GameMaker slice it on import) and `frames/` with one PNG per frame
+- `<name>.json`: TexturePacker-format atlas with an `animations` entry, for Phaser `load.atlas` and PixiJS `AnimatedSprite`
+- `godot/<name>.tres` (SpriteFrames) and `godot/<name>.tscn`, a scene that plays the effect and its sound once and frees itself
+- `wav/` with the matching sound when you pass `--sound`, and a README with Unity, Phaser, PixiJS and GameMaker steps
+
+```bash
+npx sfxbrew vfx list
+npx sfxbrew vfx swordQi --sound --out assets/fx
+npx sfxbrew vfx hit --style pixel --palette ice --variants 3 --scale 2 --out assets/fx
+npx sfxbrew vfx spell --palette "#ffffff,#e0ffe0,#40d080,#105030" --frames 24 --speed 0.8
+```
+
+Palettes: fire, ice, thunder, dark, holy, poison, blood, jade, or any four colours (core, light, mid, dark).
 
 ## CLI
 
