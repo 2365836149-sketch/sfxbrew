@@ -2,18 +2,18 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "com.sfxbrew/sfxbrew",
   "title": "SFX Brew",
-  "description": "Free game sound effects for AI agents: 45 Eastern and general SFX rendered locally to WAV or JS.",
+  "description": "Game SFX, music, audio cleanup and engine-ready 2D effects for AI agents, rendered locally.",
   "websiteUrl": "https://sfxbrew.com/",
   "repository": {
     "url": "https://github.com/2365836149-sketch/sfxbrew",
     "source": "github"
   },
-  "version": "0.1.4",
+  "version": "0.3.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "sfxbrew",
-      "version": "0.1.4",
+      "version": "0.3.0",
       "runtimeHint": "npx",
       "packageArguments": [
         {

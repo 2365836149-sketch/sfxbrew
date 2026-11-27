@@ -1,6 +1,6 @@
 {
   "name": "sfxbrew",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "mcpName": "com.sfxbrew/sfxbrew",
   "description": "Procedural game sound effects for humans and AI agents: Eastern (wuxia/xianxia) and general SFX, rendered locally to WAV or drop-in JavaScript. CLI + MCP server.",
   "keywords": [
@@ -36,6 +36,7 @@
     "node/vfx-export.js",
     "node/png.js",
     "vfx.js",
+    "vfxpack.js",
     "node/sf2.js",
     "node/band.js",
     "node/neural.js",
