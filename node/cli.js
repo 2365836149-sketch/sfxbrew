@@ -20,6 +20,9 @@ Usage:
   sfxbrew music list                     list music moods and stingers
   sfxbrew music <mood> [options]         compose and render a seamless music loop (stereo WAV)
   sfxbrew stinger <name> [--out f.wav]   render a short musical stinger (victory, guilt ...)
+  sfxbrew process <files|folders...>     clean up ANY audio for a game: loudness, trim, slice,
+                                         loop, rename, convert, audio sprite (see below)
+  sfxbrew analyze <files|folders...>     loudness (LUFS), peak, length, silence at start/end
   sfxbrew mcp                            run the MCP server (stdio)
 
 Options:
@@ -32,6 +35,22 @@ Options:
   --js <file.js>       also write a drop-in JavaScript file that plays the sound(s)
   --json               machine-readable output (paths, seeds, patches)
 
+Process options (wav/mp3/ogg/flac in; WAV out needs nothing, MP3/OGG out need ffmpeg):
+  --out <dir>          output folder (default ./processed); inputs are never overwritten
+  --lufs <n>           make every clip this loud (integrated LUFS; about -20 for one-shot SFX)
+  --limit              peak limiter (max 6 dB) so loud targets are reached; else gain stops at --peak
+  --peak <dB>          peak ceiling, default -1 dBFS
+  --trim               cut silence at start and end (keeps 5 ms before, 50 ms after)
+  --slice              split each file at silences into separate clips
+  --threshold <dB>     what counts as silence, default -50 dBFS (--min-silence 0.15 s)
+  --fade-in/--fade-out <ms>   short fades against clicks
+  --loop               mark as loop (WAV smpl chunk); --loop-crossfade <ms> also makes it seamless
+  --mono | --stereo    channel count;  --rate <hz> default 44100;  --bits 16|24
+  --name <base>        rename outputs to base-01, base-02 ...
+  --format wav|mp3|ogg output format (default wav)
+  --sprite <name>      join all clips into one <name>.wav + <name>.json (Howler.js sprite map)
+  --recursive          look into sub-folders;  --overwrite  replace existing outputs
+
 Examples:
   npx sfxbrew coin --out assets/sfx/coin.wav
   npx sfxbrew swordQi --count 5 --out assets/sfx/sword.wav
@@ -41,7 +60,13 @@ Examples:
   npx sfxbrew pack campfire --loop 20 --out assets/sfx
   npx sfxbrew music medieval --count 3 --out music/town.wav   # three different town pieces
   npx sfxbrew stinger guiltChild --out music/guilt-child.wav
+  npx sfxbrew process raw/footsteps.wav --slice --trim --lufs -20 --limit --name step --out assets/sfx
+  npx sfxbrew process downloads/ --lufs -18 --limit --format ogg --out assets/sfx
+  npx sfxbrew process ui/ --trim --lufs -18 --sprite ui --out web/audio
+  npx sfxbrew analyze assets/sfx
 `;
+
+const BOOL = new Set(['json', 'help', 'trim', 'slice', 'limit', 'mono', 'stereo', 'recursive', 'overwrite']);
 
 function args(argv) {
   const o = { _: [] };
@@ -49,7 +74,7 @@ function args(argv) {
     const a = argv[i];
     if (a.startsWith('--')) {
       const k = a.slice(2), next = argv[i + 1];
-      if (next == null || next.startsWith('--')) o[k] = true; else { o[k] = next; i++; }
+      if (BOOL.has(k) || next == null || next.startsWith('--')) o[k] = true; else { o[k] = next; i++; }
     } else o._.push(a);
   }
   return o;
@@ -67,6 +92,36 @@ async function main() {
       console.log(g === 'east' ? '\nEastern' : '\nGeneral');
       list.filter(p => p.group === g).forEach(p => console.log('  ' + p.id.padEnd(13) + (p.loopable ? '[loop] ' : '') + p.description));
     }
+    return;
+  }
+
+  if (cmd === 'process' || cmd === 'analyze') {
+    const proc = require('./process.js');
+    const inputs = o._.slice(1);
+    if (!inputs.length) throw new Error(cmd + ' needs files or folders, e.g. sfxbrew ' + cmd + ' raw/');
+    const num = (k, d) => o[k] != null && o[k] !== true ? parseFloat(o[k]) : d;
+    if (cmd === 'analyze') {
+      const r = await proc.analyzeAudio(inputs, { recursive: o.recursive, threshold: num('threshold', -50) });
+      if (o.json) { console.log(JSON.stringify(r, null, 2)); return; }
+      const f = v => v == null ? '-inf' : String(v);
+      console.log('LUFS'.padStart(7) + 'peak'.padStart(7) + '  length  silence start/end  file');
+      r.forEach(x => console.log(f(x.lufs).padStart(7) + f(x.peakDb).padStart(7) + (x.seconds.toFixed(2) + ' s').padStart(8) + ('  ' + x.leadingSilence.toFixed(2) + ' / ' + x.trailingSilence.toFixed(2) + ' s').padEnd(19) + '  ' + path.relative('.', x.file) + (x.channels > 1 ? '  (' + x.channels + ' ch, ' + x.sampleRate + ' Hz)' : '  (' + x.sampleRate + ' Hz)') + (x.clippedSamples ? '  CLIPPED x' + x.clippedSamples : '')));
+      return;
+    }
+    const r = await proc.processAudio(inputs, {
+      outDir: o.out || 'processed', lufs: num('lufs', null), peak: num('peak', -1), limit: o.limit,
+      trim: o.trim, slice: o.slice, threshold: num('threshold', -50), minSilence: num('min-silence', 0.15),
+      fadeIn: num('fade-in', 0), fadeOut: num('fade-out', 0), loop: !!o.loop || o['loop-crossfade'] != null, loopCrossfade: num('loop-crossfade', 0),
+      channels: o.mono ? 1 : o.stereo ? 2 : null, rate: num('rate', 44100), bits: num('bits', 16),
+      name: o.name || null, format: o.format || 'wav', sprite: o.sprite || null, recursive: o.recursive, overwrite: o.overwrite
+    });
+    if (o.json) { console.log(JSON.stringify(r, null, 2)); return; }
+    const f = v => v == null ? '-inf' : String(v);
+    r.files.forEach(x => {
+      if (x.skipped) { console.log('skipped ' + path.relative('.', x.source) + ': ' + x.skipped); return; }
+      console.log((x.file ? path.relative('.', x.file) : (x.id + ' @ ' + x.start + ' s')) + '  ' + f(x.before.lufs) + ' → ' + f(x.after.lufs) + ' LUFS, peak ' + f(x.after.peakDb) + ' dB, ' + x.after.seconds + ' s' + (x.notes.length ? '  (' + x.notes.join('; ') + ')' : ''));
+    });
+    if (r.sprite) console.log('sprite: ' + path.relative('.', r.sprite.audio) + ' + ' + path.relative('.', r.sprite.json) + ' (' + r.sprite.clips + ' clips, ' + r.sprite.seconds + ' s)');
     return;
   }
 

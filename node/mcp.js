@@ -4,7 +4,7 @@
    ----------------------------------------------------------------------------
    给 Claude Code / Cursor 等 agent 用：
      claude mcp add sfxbrew -- npx -y sfxbrew mcp
-   工具：list_presets / generate_sfx / render_patch / get_js_code / export_pack / generate_music
+   工具：list_presets / generate_sfx / render_patch / get_js_code / export_pack / generate_music / process_audio / analyze_audio
    ★ 只写 .wav / .js 文件，防止 agent 传错路径把别的文件覆盖掉。
    ==========================================================================*/
 'use strict';
@@ -205,6 +205,66 @@ server.registerTool('generate_music', {
     }
     return ok({ mood, stinger, pieces });
   } catch (e) { return fail(e.message); }
+});
+
+/* ---------- 音频处理：任何音频文件，不只是 SFX Brew 生成的（只往 out_dir 里写 .wav/.mp3/.ogg/.json，不覆盖输入） ---------- */
+const proc = require('./process.js');
+
+server.registerTool('process_audio', {
+  title: 'Process audio files for a game',
+  description: 'Clean up ANY audio files (WAV, MP3, OGG, FLAC; recordings, downloads or generated sounds) so they are game-ready, in one pass: ' +
+    'consistent loudness (integrated LUFS, BS.1770) with a peak ceiling and optional limiter, trim silence, split a file at silences into clips, fades, ' +
+    'seamless loops (crossfade + WAV loop point), channel/sample-rate conversion, renaming to name-01, name-02 ..., WAV/MP3/OGG output, ' +
+    'or one audio sprite file + JSON map (Howler.js format). Inputs are never overwritten. Returns before/after loudness, peak and length per clip. ' +
+    'Typical targets: about -20 LUFS with limit true for one-shot SFX (very spiky hits may land a few LU lower; the limiter stops at 6 dB to keep the attack), -20 to -24 for ambience loops. MP3/OGG output need ffmpeg installed.',
+  inputSchema: {
+    inputs: z.array(z.string()).min(1).describe('Audio files and/or folders (folders: all audio files inside)'),
+    out_dir: z.string().describe('Folder to write results into, e.g. "assets/sfx". Must not be where the inputs are if names would collide.'),
+    lufs: z.number().min(-40).max(-6).optional().describe('Target loudness for every clip, e.g. -18'),
+    limit: z.boolean().optional().describe('Use a peak limiter so the target is reached even for spiky sounds (default false: gain stops at the peak ceiling and the result says how far short)'),
+    peak_db: z.number().min(-12).max(0).optional().describe('Peak ceiling in dBFS (default -1)'),
+    trim: z.boolean().optional().describe('Cut silence at start and end'),
+    slice: z.boolean().optional().describe('Split each file at silences into separate clips (e.g. a recording of 10 footsteps)'),
+    threshold_db: z.number().min(-90).max(-10).optional().describe('Level below which audio counts as silence (default -50)'),
+    min_silence: z.number().min(0.01).max(5).optional().describe('Seconds of silence that separate two clips when slicing (default 0.15)'),
+    fade_in_ms: z.number().min(0).max(5000).optional(),
+    fade_out_ms: z.number().min(0).max(5000).optional(),
+    loop: z.boolean().optional().describe('Mark outputs as loops (WAV smpl loop point, read by Godot, FMOD, Wwise, GameMaker)'),
+    loop_crossfade_ms: z.number().min(0).max(5000).optional().describe('Make a loop seamless by crossfading its tail into its head (implies loop). 200-1000 ms for ambience'),
+    channels: z.union([z.literal(1), z.literal(2)]).optional().describe('1 = mono, 2 = stereo (default: keep)'),
+    sample_rate: z.number().int().min(8000).max(96000).optional().describe('Default 44100'),
+    bits: z.union([z.literal(16), z.literal(24)]).optional().describe('WAV bit depth (default 16)'),
+    name: z.string().regex(/^[A-Za-z0-9_-]+$/).optional().describe('Rename outputs to name-01, name-02 ... (in input order)'),
+    format: z.enum(proc.FORMATS).optional().describe('Output format (default wav)'),
+    sprite: z.string().regex(/^[A-Za-z0-9_-]+$/).optional().describe('Join all clips into one audio sprite <sprite>.<format> plus <sprite>.json with start/duration of each clip'),
+    recursive: z.boolean().optional().describe('Also look into sub-folders'),
+    overwrite: z.boolean().optional().describe('Replace existing files in out_dir (default false)')
+  },
+  annotations: { destructiveHint: false }
+}, async (a) => {
+  try {
+    const r = await proc.processAudio(a.inputs, {
+      outDir: a.out_dir, lufs: a.lufs, limit: a.limit, peak: a.peak_db == null ? -1 : a.peak_db, trim: a.trim, slice: a.slice,
+      threshold: a.threshold_db == null ? -50 : a.threshold_db, minSilence: a.min_silence == null ? 0.15 : a.min_silence,
+      fadeIn: a.fade_in_ms || 0, fadeOut: a.fade_out_ms || 0, loop: !!a.loop || !!a.loop_crossfade_ms, loopCrossfade: a.loop_crossfade_ms || 0,
+      channels: a.channels || null, rate: a.sample_rate || 44100, bits: a.bits || 16, name: a.name || null,
+      format: a.format || 'wav', sprite: a.sprite || null, recursive: a.recursive, overwrite: a.overwrite
+    });
+    return ok(r);
+  } catch (e) { return fail(e.message); }
+});
+
+server.registerTool('analyze_audio', {
+  title: 'Measure audio files',
+  description: 'Measure audio files (WAV, MP3, OGG, FLAC): integrated loudness (LUFS), peak (dBFS), length, sample rate, channels, silence at start and end, clipped samples. ' +
+    'Use it to find sounds that are too loud, too quiet or padded with silence before calling process_audio.',
+  inputSchema: {
+    inputs: z.array(z.string()).min(1).describe('Audio files and/or folders'),
+    recursive: z.boolean().optional()
+  },
+  annotations: { readOnlyHint: true }
+}, async ({ inputs, recursive }) => {
+  try { return ok(await proc.analyzeAudio(inputs, { recursive })); } catch (e) { return fail(e.message); }
 });
 
 server.connect(new StdioServerTransport()).catch(e => { console.error(e); process.exit(1); });

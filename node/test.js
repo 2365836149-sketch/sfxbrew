@@ -17,7 +17,7 @@ const lib = require('./lib.js');
   const SLOW = { timeout: 180000 };   // 整首配乐在慢机器上要渲染 40~60 秒，超过 MCP 客户端默认的 60 秒
 
   const tools = (await client.listTools()).tools.map(t => t.name).sort();
-  assert.deepStrictEqual(tools, ['export_pack', 'generate_music', 'generate_sfx', 'get_js_code', 'list_presets', 'render_patch']);
+  assert.deepStrictEqual(tools, ['analyze_audio', 'export_pack', 'generate_music', 'generate_sfx', 'get_js_code', 'list_presets', 'process_audio', 'render_patch']);
 
   const st = json(await client.callTool({ name: 'generate_music', arguments: { stinger: 'guiltChild', out_path: 'music/guilt.wav' } }, undefined, SLOW));
   const sb = fs.readFileSync(st.pieces[0].file);
@@ -80,6 +80,32 @@ const lib = require('./lib.js');
   const pl = json(await client.callTool({ name: 'export_pack', arguments: { preset: 'campfire', out_dir: 'game', loop_seconds: 6 } }));
   assert.strictEqual(pl.sounds.length, 2);
   new Function('document', 'location', fs.readFileSync(path.join(dir, 'game/sfxbrew-campfire/web/campfire.js'), 'utf8') + '; if (typeof startCampfire !== "function" || typeof stopCampfire !== "function") throw new Error("missing");')({ currentScript: null }, { href: 'http://x/web/a.js' });
+
+  /* 音频处理：把生成的 hit 拼成一条带静音的"录音"，切开、统一响度、改名、出图集 */
+  const h = fs.readFileSync(g.sounds[0].file), hs = h.slice(44), sil = Buffer.alloc(44100 * 2 * 0.4);
+  const body = Buffer.concat([sil, hs, sil, hs, sil, hs, sil]);
+  const raw = Buffer.from(h.slice(0, 44)); raw.writeUInt32LE(36 + body.length, 4); raw.writeUInt32LE(body.length, 40);
+  fs.mkdirSync(path.join(dir, 'raw'));
+  fs.writeFileSync(path.join(dir, 'raw/take.wav'), Buffer.concat([raw, body]));
+  const pa = json(await client.callTool({ name: 'process_audio', arguments: { inputs: ['raw'], out_dir: 'clean', slice: true, trim: true, lufs: -18, limit: true, name: 'hit' } }));
+  assert.deepStrictEqual(pa.files.map(f => path.basename(f.file)), ['hit-01.wav', 'hit-02.wav', 'hit-03.wav'], 'sliced into 3 named clips');
+  pa.files.forEach(f => {
+    assert.ok(Math.abs(f.after.lufs + 18) <= 0.6, 'loudness near target: ' + f.after.lufs);
+    assert.ok(f.after.peakDb <= -0.99, 'peak under ceiling');
+    assert.ok(f.after.leadingSilence < 0.02, 'trimmed start');
+  });
+  const an = json(await client.callTool({ name: 'analyze_audio', arguments: { inputs: ['clean/hit-02.wav'] } }));
+  assert.strictEqual(an[0].lufs, pa.files[1].after.lufs);
+  const sp = json(await client.callTool({ name: 'process_audio', arguments: { inputs: ['clean'], out_dir: 'web', sprite: 'combat' } }));
+  const map = JSON.parse(fs.readFileSync(sp.sprite.json, 'utf8'));
+  assert.deepStrictEqual(Object.keys(map.sprite), ['hit-01', 'hit-02', 'hit-03']);
+  assert.ok(map.sprite['hit-02'][0] > map.sprite['hit-01'][0] + map.sprite['hit-01'][1], 'sprite clips do not overlap');
+  const lpp = json(await client.callTool({ name: 'process_audio', arguments: { inputs: [lp.sounds[0].file], out_dir: 'loops2', loop_crossfade_ms: 300 } }));
+  assert.ok(fs.readFileSync(lpp.files[0].file).includes(Buffer.from('smpl')), 'processed loop keeps a loop point');
+  const self = await client.callTool({ name: 'process_audio', arguments: { inputs: ['raw/take.wav'], out_dir: 'raw' } });
+  assert.ok(self.isError, 'refuses to overwrite its input');
+  const again2 = await client.callTool({ name: 'process_audio', arguments: { inputs: ['raw'], out_dir: 'clean', slice: true, name: 'hit' } });
+  assert.ok(again2.isError, 'refuses to overwrite existing outputs');
 
   await client.close();
   fs.rmSync(dir, { recursive: true, force: true });
