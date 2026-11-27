@@ -4,7 +4,7 @@
    ----------------------------------------------------------------------------
    给 Claude Code / Cursor 等 agent 用：
      claude mcp add sfxbrew -- npx -y sfxbrew mcp
-   工具：list_presets / generate_sfx / render_patch / get_js_code / export_pack / generate_music / process_audio / analyze_audio
+   工具：list_presets / generate_sfx / render_patch / get_js_code / export_pack / generate_music / process_audio / analyze_audio / generate_vfx
    ★ 只写 .wav / .js 文件，防止 agent 传错路径把别的文件覆盖掉。
    ==========================================================================*/
 'use strict';
@@ -265,6 +265,37 @@ server.registerTool('analyze_audio', {
   annotations: { readOnlyHint: true }
 }, async ({ inputs, recursive }) => {
   try { return ok(await proc.analyzeAudio(inputs, { recursive })); } catch (e) { return fail(e.message); }
+});
+
+/* ---------- 2D 特效：序列帧图集 + 各引擎文件（只往 out_dir/sfxbrew-vfx-<name>/ 里写） ---------- */
+const VFX = require('../vfx.js');
+const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+
+server.registerTool('generate_vfx', {
+  title: 'Generate a 2D effect (sprite sheet)',
+  description: 'Render a procedural 2D visual effect (' + VFX.LIST.map(k => k + ': ' + VFX.EFFECTS[k].label).join('; ') + ') as transparent PNG frames and write a ready-to-use folder: ' +
+    'a sprite sheet (<name>_strip<N>.png, GameMaker auto-slices it), single frames, a TexturePacker-format atlas JSON (Phaser load.atlas, PixiJS Assets.load), ' +
+    'Godot 4 SpriteFrames .tres plus a .tscn scene that plays the effect and its sound and frees itself, and a README with Unity/Phaser/Pixi/GameMaker steps. ' +
+    'with_sound adds the matching SFX Brew sound (same name) as WAV variations. Free for commercial use.',
+  inputSchema: {
+    effect: z.enum(VFX.LIST).describe('Effect name'),
+    out_dir: z.string().describe('Folder to write into, e.g. "assets/fx"; files go to <out_dir>/sfxbrew-vfx-<effect>/'),
+    style: z.enum(['hd', 'pixel']).optional().describe('hd = smooth glow (default 128 px), pixel = pixel art (default 48 px, 5 colours, hard edges)'),
+    size: z.number().int().min(8).max(512).optional().describe('Frame width/height in px'),
+    frames: z.number().int().min(2).max(60).optional().describe('Number of frames (duration stays the same)'),
+    speed: z.number().min(0.25).max(4).optional().describe('Playback speed multiplier (changes fps)'),
+    palette: z.union([z.enum(Object.keys(VFX.THEMES)), z.array(hexColor).length(4)]).optional().describe('Colour theme name or 4 colours [core, light, mid, dark]; default is the effect\'s own colours'),
+    variants: z.number().int().min(1).max(10).optional().describe('Number of variations (different particles); the Godot scene picks one at random each play'),
+    seed: z.number().int().optional().describe('Seed for a reproducible result; variant i uses seed + i'),
+    scale: z.number().int().min(1).max(8).optional().describe('Pixel style only: enlarge by this factor with hard edges'),
+    with_sound: z.union([z.boolean(), z.enum(presetIds)]).optional().describe('true = add the sound preset with the same name; or a preset id to pair a different sound')
+  },
+  annotations: { destructiveHint: false }
+}, async (a) => {
+  try {
+    const r = await require('./vfx-export.js').exportVfx({ effect: a.effect, outDir: a.out_dir, style: a.style, size: a.size, frames: a.frames, speed: a.speed, palette: a.palette, variants: a.variants, seed: a.seed, scale: a.scale, withSound: a.with_sound });
+    return ok({ folder: r.folder, variants: r.variants, sound: r.sound, godot_scene: path.join(r.folder, 'godot', a.effect + '.tscn'), readme: path.join(r.folder, 'README.txt') });
+  } catch (e) { return fail(e.message); }
 });
 
 server.connect(new StdioServerTransport()).catch(e => { console.error(e); process.exit(1); });

@@ -216,6 +216,31 @@
     }
   };
 
+  /* ---------- 色板：任何特效都能换成这些颜色（核心 / 亮 / 中 / 暗 四色，像素风再自动加一档更暗的描边色） ---------- */
+  const THEMES = {
+    fire: ['#fffbe6', '#ffd36b', '#ff7a1a', '#c2240c'],
+    ice: ['#ffffff', '#d4f7ff', '#6fd6ff', '#2a6fe0'],
+    thunder: ['#ffffff', '#f2e9ff', '#b58cff', '#5b2bd6'],
+    dark: ['#f3e8ff', '#c084fc', '#7e22ce', '#2e0b52'],
+    holy: ['#fffef5', '#fff2b0', '#ffd24a', '#d48a0b'],
+    poison: ['#f7ffe8', '#c8ff7a', '#5fd13a', '#1d6b2a'],
+    blood: ['#ffe9e9', '#ff8a8a', '#d61f2c', '#5c0710'],
+    jade: ['#f2fffa', '#a8f5d6', '#2fbf8f', '#0e5e4a']
+  };
+  function darker(h, k) { const c = hex(h); return '#' + c.map(v => Math.round(v * k * 255).toString(16).padStart(2, '0')).join(''); }
+  /** palette: 色板名、4 个颜色的数组，或 { hd: [4 色], pixel: [5 色] }；不给就用特效自己的 */
+  function resolvePalette(fx, palette) {
+    if (!palette) return fx.palette;
+    let four = null;
+    if (typeof palette === 'string') {
+      four = THEMES[palette];
+      if (!four) throw new Error('unknown palette "' + palette + '". Palettes: ' + Object.keys(THEMES).join(', ') + ', or 4 colours like ["#ffffff","#bff4ff","#4fd2ff","#1a5cff"]');
+    } else if (Array.isArray(palette)) four = palette;
+    else if (palette.hd) return { hd: palette.hd, pixel: palette.pixel || palette.hd.concat([darker(palette.hd[3], 0.45)]) };
+    if (!four || four.length !== 4 || !four.every(c => /^#[0-9a-fA-F]{6}$/.test(c))) throw new Error('palette needs 4 colours "#rrggbb": core, light, mid, dark');
+    return { hd: four, pixel: four.concat([darker(four[3], 0.45)]) };
+  }
+
   /* ---------- 渲染 ---------- */
 
   /** 浮点能量 → RGBA8。hd：平滑色调映射；pixel：按亮度落到调色板，硬透明 */
@@ -244,7 +269,8 @@
 
   /**
    * 渲染一个特效的所有帧。
-   * opt: { style: 'hd'|'pixel', size, frames, seed }
+   * opt: { style: 'hd'|'pixel', size, frames, seed, palette, speed }
+   *   palette 见 resolvePalette；speed 播放速度倍数（1.5 = 快 1.5 倍，帧数不变，fps 变）
    * 返回 { name, size, frames: [Uint8ClampedArray RGBA], fps, style, seed }
    */
   function render(name, opt) {
@@ -254,9 +280,12 @@
     const style = opt.style === 'pixel' ? 'pixel' : 'hd';
     const size = opt.size || (style === 'pixel' ? 48 : 128);
     const n = opt.frames || fx.frames, seed = opt.seed == null ? 1 : opt.seed;
+    if (size < 8 || size > 1024) throw new Error('size must be 8-1024');
+    if (n < 2 || n > 120) throw new Error('frames must be 2-120');
+    const pal = resolvePalette(fx, opt.palette), speed = opt.speed || 1;
     const P = fx.setup(rng(seed));
     /* 颜色：调色板 hd 用 4 色（核心/亮/中/暗），pixel 用 5 色 */
-    const C = fx.palette.hd.map(hex);
+    const C = pal.hd.map(hex);
     const frames = [];
     for (let f = 0; f < n; f++) {
       const cv = Canvas(size);
@@ -268,9 +297,23 @@
         fx.draw(tmp, t, P, C);
         for (let i = 0; i < cv.buf.length; i++) cv.buf[i] += tmp.buf[i] / sub;
       }
-      frames.push(develop(cv, style, style === 'pixel' ? fx.palette.pixel : fx.palette.hd));
+      frames.push(develop(cv, style, style === 'pixel' ? pal.pixel : pal.hd));
     }
-    return { name, size, frames, fps: fx.fps, style, seed };
+    /* 帧数改了的话 fps 跟着变，总时长保持原样；speed 再整体加快或放慢 */
+    const fps = Math.max(1, Math.round(fx.fps * n / fx.frames * speed * 10) / 10);
+    return { name, size, frames, fps, style, seed, palette: style === 'pixel' ? pal.pixel : pal.hd };
+  }
+
+  /** 像素风放大：最近邻，每个像素变成 k×k */
+  function upscale(r, k) {
+    if (!k || k === 1) return r;
+    const S = r.size, T = S * k;
+    const frames = r.frames.map(f => {
+      const o = new Uint8ClampedArray(T * T * 4);
+      for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) { const si = ((y / k | 0) * S + (x / k | 0)) * 4, di = (y * T + x) * 4; o[di] = f[si]; o[di + 1] = f[si + 1]; o[di + 2] = f[si + 2]; o[di + 3] = f[si + 3]; }
+      return o;
+    });
+    return Object.assign({}, r, { size: T, frames });
   }
 
   /** 横排图集：frames → 一张 (size*n)×size 的 RGBA（cols 指定时按网格排） */
@@ -284,16 +327,17 @@
     return { width: W2, height: H2, cols: c, rows, data: out };
   }
 
-  /** Godot 4 SpriteFrames（.tres）：每帧一个 AtlasTexture，指向图集里的区域 */
-  function godotTres(r, sheetInfo, pngPath) {
+  /** Godot 4 SpriteFrames（.tres）：每帧一个 AtlasTexture，指向图集里的区域。
+      pngPath 可以是相对 .tres 所在文件夹的路径（Godot 4 支持），这样整个文件夹放到项目里哪儿都能用 */
+  function godotTres(r, sheetInfo, pngPath, animName) {
     const n = r.frames.length, S = r.size;
     let s = '[gd_resource type="SpriteFrames" load_steps=' + (n + 2) + ' format=3]\n\n[ext_resource type="Texture2D" path="' + pngPath + '" id="1"]\n\n';
     for (let i = 0; i < n; i++) s += '[sub_resource type="AtlasTexture" id="f' + i + '"]\natlas = ExtResource("1")\nregion = Rect2(' + (i % sheetInfo.cols) * S + ', ' + Math.floor(i / sheetInfo.cols) * S + ', ' + S + ', ' + S + ')\n\n';
-    s += '[resource]\nanimations = [{\n"frames": [' + Array.from({ length: n }, (_, i) => '{\n"duration": 1.0,\n"texture": SubResource("f' + i + '")\n}').join(', ') + '],\n"loop": false,\n"name": &"' + r.name + '",\n"speed": ' + r.fps.toFixed(1) + '\n}]\n';
+    s += '[resource]\nanimations = [{\n"frames": [' + Array.from({ length: n }, (_, i) => '{\n"duration": 1.0,\n"texture": SubResource("f' + i + '")\n}').join(', ') + '],\n"loop": false,\n"name": &"' + (animName || r.name) + '",\n"speed": ' + r.fps.toFixed(1) + '\n}]\n';
     return s;
   }
 
-  const API = { EFFECTS, LIST: Object.keys(EFFECTS), render, sheet, godotTres };
+  const API = { EFFECTS, LIST: Object.keys(EFFECTS), THEMES, resolvePalette, render, upscale, sheet, godotTres };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   else window.SFX_VFX = API;
 })();
