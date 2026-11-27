@@ -536,3 +536,36 @@ a.lab-tab:hover { border-color: var(--line-2); color: var(--ink); }
   .ts-row > .btn { flex: 1; }
   .ts-form { flex-direction: column; }
 }
+
+/* ---------------- 2D 特效页（/vfx/） ---------------- */
+.vx { max-width: 1140px; margin: 0 auto; padding: 40px 24px 72px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.vx h1 { font-family: var(--serif); font-weight: 700; font-size: 36px; line-height: 1.2; margin: 0; }
+.vx h2 { font-family: var(--serif); font-weight: 700; font-size: 18px; margin: 0 0 10px; }
+.vx-head .ts-sub { max-width: 68ch; }
+.vx-fx { display: flex; flex-wrap: wrap; gap: 8px; }
+.vx-fx .vx-opt { height: 44px; padding: 0 20px; font-size: 16px; }
+.vx-body { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+.vx-stage { flex: 1 1 420px; min-width: 0; max-width: 560px; display: grid; gap: 12px; }
+.vx-stage canvas { width: 100%; aspect-ratio: 1; display: block; border-radius: 12px; border: 1px solid var(--line); }
+.vx-desc { margin: 0; color: var(--ink-2); }
+.vx-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.vx-ctl .btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-tint); }
+.vx-meta { font-family: var(--mono); font-size: 12px; color: var(--ink-2); margin-left: auto; }
+.vx-side { flex: 1 1 320px; min-width: 0; display: grid; gap: 16px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; }
+.vx-row { display: grid; gap: 6px; }
+.vx-lbl { font-size: 13px; color: var(--ink-2); }
+.vx-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.vx-opt { font: inherit; font-size: 14px; height: 34px; padding: 0 12px; border-radius: 6px; border: 1px solid var(--line-2); background: transparent; color: var(--ink-3); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.vx-opt:hover { border-color: var(--accent); }
+.vx-opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.vx-sw { width: 12px; height: 12px; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 1px rgba(0,0,0,.15); }
+.vx-chk { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+.vx-chk input { width: 18px; height: 18px; accent-color: var(--accent); }
+.vx-wide { width: 100%; }
+.vx-cmdbox { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; }
+.vx-cmdrow { display: flex; gap: 8px; align-items: stretch; }
+.vx-cmdrow pre { flex: 1; min-width: 0; margin: 0; overflow-x: auto; }
+.vx-cmdbox .ts-note { margin-top: 10px; }
+.vx-cmdbox a { color: var(--accent); }
+@media (max-width: 640px) { .vx { padding: 24px 16px 56px; } .vx h1 { font-size: 26px; } .vx-meta { margin-left: 0; width: 100%; } }
+.vx-cmdbox .cmd { background: var(--bg); margin: 0; }

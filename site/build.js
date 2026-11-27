@@ -37,6 +37,7 @@ const privacyUrl = lang => PREFIX[lang] + 'privacy/';
 const API_BASE = 'https://api.sfxbrew.com';
 const TURNSTILE_SITEKEY = '0x4AAAAAAF51qx0EEEg_ckOM';
 const textSfxUrl = lang => PREFIX[lang] + 'lab/sfx/';
+const vfxUrl = lang => PREFIX[lang] + 'vfx/';
 const SITE = 'https://sfxbrew.com';
 const VARIANTS = 12;
 const TODAY = new Date().toISOString().slice(0, 10);
@@ -91,7 +92,7 @@ const packUrl = (lang, slug) => PREFIX[lang] + 'packs/' + slug + '/';
 /* ---------------- 全站顶栏（音效库和实验室都用这一份） ---------------- */
 function siteBar(lang, active, altPath) {
   const u = UI[lang];
-  const tabs = [[textSfxUrl(lang), u.navAI, 'ai'], [editorUrl(lang), u.navEditor, 'editor'], [PREFIX[lang] + 'sounds/', u.navLibrary, 'library'], [PREFIX[lang] + 'lab/', u.navLab, 'lab']]
+  const tabs = [[textSfxUrl(lang), u.navAI, 'ai'], [editorUrl(lang), u.navEditor, 'editor'], [PREFIX[lang] + 'sounds/', u.navLibrary, 'library'], [vfxUrl(lang), u.navVfx, 'vfx'], [PREFIX[lang] + 'lab/', u.navLab, 'lab']]
     .map(([href, label, key]) => '<a href="' + href + '"' + (key === 'ai' ? ' data-ai' : '') + (key === active ? ' class="on" aria-current="page"' : '') + '>' + esc(label) + '</a>').join('');
   return `<header class="bar">
   <a class="bar-brand" href="${introUrl(lang)}"><img src="/favicon.svg" alt=""><span>SFX Brew</span></a>
@@ -225,12 +226,13 @@ function llmsTxt() {
 - Make or tweak a sound in the browser: https://sfxbrew.com/editor/
 - Let an AI coding agent add sound effects to a game: the MCP server below
 - Procedural game music, Eastern (guqin, pipa, erhu, pentatonic) and Western (8-bit, guitars, drum kit): https://sfxbrew.com/lab/
+- Free 2D game effects (sword qi, spell, hit) with matching sounds, as a pack for Godot 4, Unity, Phaser, PixiJS or GameMaker: https://sfxbrew.com/vfx/
 
 ## Use it from an AI coding agent
 
 - MCP server (local, stdio, no network): \`npx -y sfxbrew mcp\` (older form \`npx -y -p sfxbrew sfxbrew-mcp\` also works). Listed in the official MCP Registry as \`com.sfxbrew/sfxbrew\`.
   - Claude Code: \`claude mcp add sfxbrew -- npx -y sfxbrew mcp\`
-  - Tools: \`list_presets\`, \`generate_sfx\` (writes WAV files, returns seeds and patch JSON), \`render_patch\` (custom patch to WAV), \`get_js_code\` (one JS snippet with playX() functions)
+  - Tools: \`list_presets\`, \`generate_sfx\` (writes WAV files, returns seeds and patch JSON), \`render_patch\` (custom patch to WAV), \`get_js_code\` (one JS snippet with playX() functions), \`process_audio\` / \`analyze_audio\` (clean up any existing audio: loudness, trim, slice, seamless loops, sprites), \`generate_vfx\` (2D effect sprite sheets with Godot/Phaser/Unity files and the matching sound)
 - CLI: \`npx sfxbrew <preset> --out assets/sfx/name.wav [--count n] [--seed n] [--js src/sfx.js]\`; \`npx sfxbrew list\`
 - npm package: https://www.npmjs.com/package/sfxbrew
 - Agent skill (SKILL.md): https://github.com/2365836149-sketch/sfxbrew/tree/main/skills/sfxbrew , also on Agensi: https://www.agensi.io/skills/sfx-brew-game-sound-effects
@@ -627,6 +629,96 @@ ${analyticsTag()}
   return { file: PREFIX[lang].slice(1) + 'lab/sfx/index.html', html };
 }
 
+/* ---------------- 2D 特效（预览 + 下载引擎包） ---------------- */
+const VFXPAGE = {
+  en: { title: 'Free 2D Game VFX with Matching Sounds: Sword Qi, Spell, Hit | SFX Brew', metaDesc: 'Procedural 2D effects for games, in smooth or pixel-art style, each paired with its sound. Download a ready pack for Godot 4, Unity, Phaser, PixiJS or GameMaker. Free for commercial use.',
+    h: '2D effects', sub: 'Every effect is drawn by code, not painted, so each seed gives a new take. Pick a style and colours, then download a pack your engine opens directly, with the matching sound inside.',
+    fx: { swordQi: 'A crescent of sword energy that sweeps and fades.', spell: 'A magic circle that gathers, flashes and releases a burst.', hit: 'A sharp impact star with sparks, for punches and blade hits.' },
+    names: { swordQi: 'Sword qi', spell: 'Spell', hit: 'Hit' },
+    play: 'Play', again: 'New take', loop: 'Loop', style: 'Style', hd: 'Smooth', pixel: 'Pixel art', colours: 'Colours', dflt: 'Default', speed: 'Speed', scale: 'Pixel size', bg: 'Preview background',
+    bgs: { night: 'Night', grass: 'Grass', stone: 'Stone', paper: 'Paper', check: 'Transparent' },
+    themes: { fire: 'Fire', ice: 'Ice', thunder: 'Thunder', dark: 'Shadow', holy: 'Holy', poison: 'Poison', blood: 'Blood', jade: 'Jade' },
+    sound: 'With the matching sound', zip: 'Download engine pack (.zip)', png: 'Sprite sheet only (.png)',
+    inZip: 'The pack has a sprite sheet, single frames, atlas JSON (Phaser, PixiJS), a Godot 4 scene that plays the effect with its sound and frees itself, 3 sound variations, and a README with steps for Godot, Unity, Phaser, PixiJS and GameMaker.',
+    cmdH: 'Same thing from the command line or an AI agent', copy: 'Copy', copied: 'Copied',
+    meta: '{n} frames · {fps} fps · {s} px · seed {seed}', license: 'Free for commercial and non-commercial use, no attribution required.' },
+  zh: { title: '免费 2D 游戏特效，带配套音效：剑气、法术、击中 | SFX Brew', metaDesc: '程序生成的 2D 游戏特效，高清或像素风，每个都配好音效。一键下载 Godot 4、Unity、Phaser、PixiJS、GameMaker 能直接用的素材包，可免费商用。',
+    h: '2D 特效', sub: '每个特效都是代码画出来的，不是手绘，所以每个种子都是新的一版。选好画风和颜色，下载的素材包引擎能直接打开，同名音效也在里面。',
+    fx: { swordQi: '一道月牙形剑气，扫过去再散开。', spell: '法阵聚气、一闪，再放出一圈冲击。', hit: '带火花的击中星芒，适合拳脚和刀剑命中。' },
+    names: { swordQi: '剑气', spell: '法术', hit: '击中' },
+    play: '播放', again: '换一个', loop: '循环', style: '画风', hd: '高清', pixel: '像素风', colours: '颜色', dflt: '默认', speed: '速度', scale: '像素放大', bg: '预览背景',
+    bgs: { night: '夜色', grass: '草地', stone: '石板', paper: '宣纸', check: '透明' },
+    themes: { fire: '火', ice: '冰', thunder: '雷', dark: '暗', holy: '圣光', poison: '毒', blood: '血', jade: '玉' },
+    sound: '附带同名音效', zip: '下载引擎素材包（.zip）', png: '只下载图集（.png）',
+    inZip: '素材包里有横排图集、单帧 PNG、图集 JSON（Phaser、PixiJS 用）、Godot 4 场景（播放特效和音效，播完自动删除）、3 个音效变体，以及 Godot、Unity、Phaser、PixiJS、GameMaker 的使用说明。',
+    cmdH: '用命令行或 AI 助手也能生成同样的东西', copy: '复制', copied: '已复制',
+    meta: '{n} 帧 · {fps} fps · {s} 像素 · 种子 {seed}', license: '可免费用于商业和非商业项目，无需署名。' }
+};
+const VFX_LIST = ['swordQi', 'spell', 'hit'];
+const VFX_THEMES = { fire: '#ff7a1a', ice: '#6fd6ff', thunder: '#b58cff', dark: '#7e22ce', holy: '#ffd24a', poison: '#5fd13a', blood: '#d61f2c', jade: '#2fbf8f' };
+function vfxPage(lang) {
+  const t = VFXPAGE[lang], u = UI[lang];
+  const urlPath = vfxUrl(lang), altPath = vfxUrl(other(lang));
+  const seg = (attr, items) => items.map(([v, label, extra]) => `<button type="button" class="vx-opt" data-${attr}="${v}" aria-pressed="false">${extra || ''}${esc(label)}</button>`).join('');
+  const sounds = {};
+  VFX_LIST.forEach(id => { sounds[id] = Array.from({ length: 6 }, (_, i) => variant(id, i)); });
+  const data = { lang, i18n: { meta: t.meta, copied: t.copied }, fx: t.fx, sounds };
+  const sw = c => `<i class="vx-sw" style="background:${c}"></i>`;
+  const html = `<!doctype html>
+<html lang="${HTML_LANG[lang]}">
+<head>
+${headTags(lang, { title: t.title, description: t.metaDesc, urlPath, altPath })}
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+${siteBar(lang, 'vfx', altPath)}
+<main class="vx">
+  <div class="vx-head"><h1>${esc(t.h)}</h1><p class="ts-sub">${esc(t.sub)}</p></div>
+  <div class="vx-fx" role="group" aria-label="${esc(t.h)}">${seg('fx', VFX_LIST.map(id => [id, t.names[id]]))}</div>
+  <div class="vx-body">
+    <div class="vx-stage">
+      <canvas id="vx-cv" width="512" height="512" aria-label="${esc(t.h)}"></canvas>
+      <p id="vx-desc" class="vx-desc"></p>
+      <div class="vx-ctl">
+        <button type="button" id="vx-play" class="btn primary">${PLAY_SVG}${esc(t.play)}</button>
+        <button type="button" id="vx-again" class="btn">${ICON.reroll}${esc(t.again)}</button>
+        <button type="button" id="vx-loop" class="btn" aria-pressed="false">${esc(t.loop)}</button>
+        <span id="vx-meta" class="vx-meta"></span>
+      </div>
+      <div class="vx-row"><span class="vx-lbl">${esc(t.bg)}</span><div class="vx-opts">${seg('bg', Object.entries(t.bgs))}</div></div>
+    </div>
+    <div class="vx-side">
+      <div class="vx-row"><span class="vx-lbl">${esc(t.style)}</span><div class="vx-opts">${seg('style', [['hd', t.hd + ' 128'], ['pixel', t.pixel + ' 48']])}</div></div>
+      <div class="vx-row" id="vx-scale-row" hidden><span class="vx-lbl">${esc(t.scale)}</span><div class="vx-opts">${seg('scale', [[1, '1×'], [2, '2×'], [4, '4×']])}</div></div>
+      <div class="vx-row"><span class="vx-lbl">${esc(t.colours)}</span><div class="vx-opts">${seg('pal', [['', t.dflt]].concat(Object.keys(VFX_THEMES).map(k => [k, t.themes[k], sw(VFX_THEMES[k])])))}</div></div>
+      <div class="vx-row"><span class="vx-lbl">${esc(t.speed)}</span><div class="vx-opts">${seg('speed', [[0.75, '0.75×'], [1, '1×'], [1.5, '1.5×']])}</div></div>
+      <label class="vx-chk"><input type="checkbox" id="vx-sound" checked> ${esc(t.sound)}</label>
+      <button type="button" id="vx-zip" class="btn primary big vx-wide">${ICON.dl}${esc(t.zip)}</button>
+      <button type="button" id="vx-png" class="btn vx-wide">${esc(t.png)}</button>
+      <p class="ts-note">${esc(t.inZip)}</p>
+      <p class="ts-note">${esc(t.license)}</p>
+    </div>
+  </div>
+  <section class="vx-cmdbox">
+    <h2>${esc(t.cmdH)}</h2>
+    <div class="vx-cmdrow"><pre id="vx-cmd" class="cmd"></pre><button type="button" id="vx-copy" class="btn">${esc(t.copy)}</button></div>
+    <p class="ts-note"><a href="${introUrl(lang)}#agents">${esc(u.navAgents)}</a></p>
+  </section>
+</main>
+<footer class="site-foot"><div class="site-foot-in"><b>SFX Brew</b><span>${esc(u.footShort)}</span><span class="site-foot-links"><a href="${PREFIX[lang]}sounds/">${esc(u.navLibrary)}</a><a href="${privacyUrl(lang)}">${esc(PRIVACY[lang].h)}</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></span></div></footer>
+<script type="application/json" id="vx-data">${jsonForHtml(data)}</script>
+<script src="/engine.js"></script>
+<script src="/shared.js"></script>
+<script src="/vfx.js"></script>
+<script src="/vfxpack.js"></script>
+<script src="/vfxpage.js"></script>
+${analyticsTag()}
+</body>
+</html>
+`;
+  return { file: PREFIX[lang].slice(1) + 'vfx/index.html', html };
+}
+
 /* 旧地址 /music/ 搬到 /lab/：留一个跳转页（canonical 指向新地址） */
 function musicRedirect(lang) {
   const to = PREFIX[lang] + 'lab/';
@@ -697,12 +789,12 @@ const missing = lib.PRESETS.filter(p => !SOUNDS[p.id]).map(p => p.id);
 if (missing.length) throw new Error('data.js 缺少这些预设的文案: ' + missing.join(', '));
 const out = [];
 LANGS.forEach(lang => {
-  out.push(searchPage(lang, null), ...usedCats().map(c => searchPage(lang, c)), labPage(lang), textSfxPage(lang), musicRedirect(lang), privacyPage(lang), ...Object.keys(SOUNDS).map(id => soundPage(lang, id)), ...Object.keys(PACKS).map(slug => packPage(lang, slug)));
+  out.push(searchPage(lang, null), ...usedCats().map(c => searchPage(lang, c)), labPage(lang), textSfxPage(lang), vfxPage(lang), musicRedirect(lang), privacyPage(lang), ...Object.keys(SOUNDS).map(id => soundPage(lang, id)), ...Object.keys(PACKS).map(slug => packPage(lang, slug)));
 });
-for (const dir of ['sounds', 'packs', 'zh', 'music', 'lab', 'privacy']) fs.rmSync(path.join(ROOT, dir), { recursive: true, force: true });
+for (const dir of ['sounds', 'packs', 'zh', 'music', 'lab', 'privacy', 'vfx']) fs.rmSync(path.join(ROOT, dir), { recursive: true, force: true });
 out.forEach(o => { lib.writeFile(path.join(ROOT, o.file), stampAssets(o.html)); });
 
-const urls = ['/', '/editor/', ...LANGS.flatMap(l => [PREFIX[l] + 'sounds/', ...usedCats().map(c => catUrl(l, c)), PREFIX[l] + 'lab/', textSfxUrl(l), privacyUrl(l), ...Object.keys(SOUNDS).map(id => soundUrl(l, id)), ...Object.keys(PACKS).map(k => packUrl(l, k))]), '/llms.txt'];
+const urls = ['/', '/editor/', ...LANGS.flatMap(l => [PREFIX[l] + 'sounds/', ...usedCats().map(c => catUrl(l, c)), PREFIX[l] + 'lab/', textSfxUrl(l), vfxUrl(l), privacyUrl(l), ...Object.keys(SOUNDS).map(id => soundUrl(l, id)), ...Object.keys(PACKS).map(k => packUrl(l, k))]), '/llms.txt'];
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   urls.map(u => '  <url><loc>' + SITE + u + '</loc><lastmod>' + TODAY + '</lastmod></url>').join('\n') + '\n</urlset>\n');
 

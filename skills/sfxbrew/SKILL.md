@@ -2,7 +2,7 @@
 name: sfxbrew
 description: Generate royalty-free game sound effects (coins, clicks, jumps, hits, explosions, sword slashes, footsteps, guqin, gongs, war drums, rain and more) locally with the free SFX Brew engine, as WAV files or a dependency-free JavaScript snippet, plus looping background music and short stingers. Use when the user asks for sound effects, SFX, background music, a victory or game-over jingle, audio feedback or "make it sound better" in a game or interactive app.
 summary: Add free, commercially usable sound effects and background music to any game straight from your coding agent.
-version: 1.3.0
+version: 1.4.0
 tags: [game-development, audio, sound-effects, game-music, gamedev, web-audio]
 keywords: [sound effects, sfx, game audio, game music, background music, music loop, stinger, wav, procedural audio, web audio, mcp, xianxia, wuxia, retro, medieval]
 use_cases:
@@ -69,6 +69,14 @@ Ambience and sustained sounds (`rain`, `wind`, `campfire`, `stream`, `caveDrip`,
 - Ambience that clicks at the loop point: `loop_crossfade_ms: 500` to `1000`.
 - A web game with many small sounds: `sprite: "sfx"` writes one file plus a Howler.js sprite map.
 - Write into a new `out_dir`; the tool refuses to overwrite inputs or existing files unless `overwrite: true`. MP3/OGG output needs ffmpeg.
+
+## 2D effects with matching sounds
+
+`generate_vfx` (CLI: `npx sfxbrew vfx <effect> --sound --out assets/vfx/`) draws a short animated effect (`swordQi`, `spell`, `hit`; `npx sfxbrew vfx list`) and writes a folder an engine opens directly: a sprite sheet (`<name>_stripN.png`, GameMaker cuts it by the name), single frames, a TexturePacker JSON atlas (Phaser, PixiJS), Godot 4 `SpriteFrames` plus a `.tscn` that plays the effect with its sound and frees itself, the matching sound variations in `wav/` when `with_sound` is set, and a README for Godot, Unity, Phaser, PixiJS and GameMaker.
+
+- `style: "pixel"` for pixel-art games (48 px, hard edges; `scale` 2-4 enlarges with nearest neighbour), otherwise smooth 128 px glow.
+- `palette`: `fire`, `ice`, `thunder`, `dark`, `holy`, `poison`, `blood`, `jade`, or 4 hex colours (core, light, mid, dark) to match the game.
+- `variants` gives several takes in one SpriteFrames (one animation each); `seed` reproduces one. People can preview and download the same packs at https://sfxbrew.com/vfx/ .
 
 ## Music
 
