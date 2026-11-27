@@ -32,10 +32,20 @@ function makeSfx(env) {
     var r = rng(7), sr = c.sampleRate, i, ch;
     var nb = c.createBuffer(1, sr * 2, sr), nd = nb.getChannelData(0);
     for (i = 0; i < nd.length; i++) nd[i] = r() * 2 - 1;
-    var len = Math.floor(sr * 2.5), ir = c.createBuffer(2, len, sr);
+    var len = Math.floor(sr * 1.2), ir = c.createBuffer(2, len, sr);
+    var taps = [0.005, 0.011, 0.019, 0.029];
     for (ch = 0; ch < 2; ch++) {
-      var d = ir.getChannelData(ch);
-      for (i = 0; i < len; i++) d[i] = (r() * 2 - 1) * Math.pow(1 - i / len, 3);
+      var d = ir.getChannelData(ch), lp = 0, ti;
+      for (ti = 0; ti < taps.length; ti++) {
+        var idx = Math.floor((taps[ti] + (ch ? 0.0013 : 0)) * sr);
+        if (idx < len) d[idx] += (ti % 2 === ch ? 1 : -0.75) * 0.16 * Math.pow(0.75, ti);
+      }
+      for (i = Math.floor(sr * 0.008); i < len; i++) {
+        var tNorm = i / len;
+        var damp = 0.35 - 0.25 * tNorm;
+        lp += damp * ((r() * 2 - 1) - lp);
+        d[i] += lp * Math.pow(1 - tNorm, 3.8) * 0.35;
+      }
     }
     var pb = c.createBuffer(1, sr * 2, sr), pd0 = pb.getChannelData(0), b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, w;
     for (i = 0; i < pd0.length; i++) {
@@ -256,6 +266,42 @@ function makeSfx(env) {
       ss.start(t); ss.stop(stopAt);
       return;
     }
+    if (L.type === 'modal') {
+      var mParts = (L.modes && L.modes.length) ? L.modes : (L.partials && L.partials.length ? L.partials : [[1, 1, 1], [2.76, 0.55, 0.65], [5.4, 0.28, 0.45], [8.93, 0.14, 0.3]]);
+      var exDec = Math.max(0.002, L.exciterDecay || 0.008);
+      var exVol = L.exciterVol == null ? 0.35 : L.exciterVol;
+      if (exVol > 0) {
+        var ex = c.createBufferSource(), exf = c.createBiquadFilter(), exg = c.createGain();
+        ex.buffer = L.color === 'pink' ? A.pink : A.noise; ex.loop = true;
+        exf.type = 'bandpass'; exf.frequency.value = Math.min(18000, Math.max(80, L.exciterFreq || f0 * 2.2)); exf.Q.value = L.exciterQ || 1.1;
+        exg.gain.setValueAtTime(exVol * va, t);
+        exg.gain.exponentialRampToValueAtTime(0.0001, t + exDec);
+        ex.connect(exf); exf.connect(exg); exg.connect(dst);
+        ex.start(t, (k * 0.19) % 1.2); ex.stop(t + exDec + 0.01);
+        if (L.resQ > 0) {
+          var rq = Math.min(45, L.resQ), rMax = Math.min(3, mParts.length);
+          for (var ri = 0; ri < rMax; ri++) {
+            var rf = c.createBiquadFilter(), rg = c.createGain();
+            rf.type = 'bandpass'; rf.frequency.value = Math.min(18000, Math.max(40, f0 * mParts[ri][0])); rf.Q.value = rq;
+            rg.gain.value = (mParts[ri][1] || 0.5) * 0.45;
+            exg.connect(rf); rf.connect(rg); rg.connect(dst);
+          }
+        }
+      }
+      for (var mi = 0; mi < mParts.length; mi++) {
+        var mr = mParts[mi][0], ma = mParts[mi][1], mdm = mParts[mi][2] != null ? Math.min(1, mParts[mi][2]) : 1 / Math.pow(mr, 0.55);
+        var mo = c.createOscillator(), mg2 = c.createGain();
+        mo.type = 'sine';
+        mo.frequency.setValueAtTime(f0 * mr, t);
+        if (f1 !== f0) mo.frequency.exponentialRampToValueAtTime(f1 * mr, tSlide);
+        if (lfoGain) lfoGain.connect(mo.detune);
+        mg2.gain.setValueAtTime(Math.max(0.0002, ma * 0.7), t);
+        mg2.gain.exponentialRampToValueAtTime(0.0001, t + L.attack + hold + Math.max(0.01, L.decay * mdm));
+        mo.connect(mg2); mg2.connect(dst);
+        mo.start(t); mo.stop(stopAt);
+      }
+      return;
+    }
     var parts = L.type === 'bell' ? (L.partials && L.partials.length ? L.partials : [[1, 1], [2.76, 0.5], [5.4, 0.25], [8.93, 0.12]])
       : L.type === 'pluck' ? [[1, 1], [2.01, 0.3]] : [[1, 1]];
     var uni = Math.max(1, Math.min(5, Math.round(L.unison || 1))), spread = L.detune || 0;
@@ -286,7 +332,13 @@ function makeSfx(env) {
           m.connect(mg); mg.connect(o.frequency);
           m.start(t); m.stop(stopAt);
         }
-        o.connect(pg);
+        if (nv > 1 && c.createStereoPanner) {
+          var up = c.createStereoPanner();
+          up.pan.value = (u / (nv - 1) - 0.5) * 0.7;
+          o.connect(up); up.connect(pg);
+        } else {
+          o.connect(pg);
+        }
         o.start(t); o.stop(stopAt);
       }
     }
@@ -314,11 +366,18 @@ function makeSfx(env) {
       cs.curve = curve(function (x) { return Math.round(x * steps) / steps; });
       node.connect(cs); node = cs;
     }
-    var comp = c.createWaveShaper();
-    comp.curve = curve(function (x) {
+    var lim = c.createWaveShaper();
+    lim.curve = curve(function (x) {
       var a = Math.abs(x), s = x < 0 ? -1 : 1;
-      return a < 0.7 ? x : s * (0.7 + 0.3 * Math.tanh((a - 0.7) / 0.3));
+      return a < 0.78 ? x : s * (0.78 + 0.22 * Math.tanh((a - 0.78) / 0.22));
     });
+    var bus = lim;
+    if (p.comp !== false && c.createDynamicsCompressor) {
+      var dc = c.createDynamicsCompressor();
+      dc.threshold.value = -14; dc.knee.value = 12; dc.ratio.value = 3.5;
+      dc.attack.value = 0.003; dc.release.value = 0.12;
+      dc.connect(lim); bus = dc;
+    }
     /* optional stereo position (p.pan, -1 left .. 1 right) */
     var outNode = dest;
     if (p.pan && c.createStereoPanner) {
@@ -326,17 +385,17 @@ function makeSfx(env) {
       pn.pan.value = Math.max(-1, Math.min(1, p.pan));
       pn.connect(dest); outNode = pn;
     }
-    comp.connect(outNode);
-    node.connect(comp);
+    lim.connect(outNode);
+    node.connect(bus);
     if (p.reverb > 0) {
       var cv = c.createConvolver(), wet = c.createGain();
       cv.buffer = A.ir; wet.gain.value = p.reverb;
-      node.connect(cv); cv.connect(wet); wet.connect(comp);
+      node.connect(cv); cv.connect(wet); wet.connect(lim);
     }
     if (p.echo > 0) {
       var dl = c.createDelay(2), fb = c.createGain(), eg = c.createGain();
       dl.delayTime.value = p.echoTime; fb.gain.value = Math.min(0.9, p.echo); eg.gain.value = 0.6;
-      node.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(eg); eg.connect(comp);
+      node.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(eg); eg.connect(lim);
     }
     for (i = 0; i < p.layers.length; i++) {
       var L = p.layers[i], n = Math.max(1, L.rep || 1);

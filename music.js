@@ -37,9 +37,40 @@ function makeMusic(sfx) {
       melody: 'xun', melodyB: 'flute', accomp: 'guqin', texture: 'arp', bass: 'none', choir: 0.45, strings: 0, perc: 'tribal', sparkle: false, density: 0.5, humanize: 0.8, reverb: 0.4 },
     /* Medieval town: dorian tune on fiddle and shawm, lute chords, bagpipe drone, frame drum and tambourine. */
     medieval: { mode: 'dorian', root: 50, tempo: 96, structure: ['intro', 'A', 'A', 'B', 'A', 'outro'], intensity: [0.35, 0.55, 0.6, 0.75, 0.6, 0.3],
-      melody: 'erhu', melodyB: 'shawm', accomp: 'lute', texture: 'arp', bass: 'bagpipe', strings: 0, perc: 'folk', sparkle: false, density: 0.55, humanize: 0.65, reverb: 0.35 }
+      melody: 'erhu', melodyB: 'shawm', accomp: 'lute', texture: 'arp', bass: 'bagpipe', strings: 0, perc: 'folk', sparkle: false, density: 0.55, humanize: 0.65, reverb: 0.35 },
+
+    /* ---------- Western: seven-note melodies (scale: 'diatonic') and functional harmony with a real V-I ---------- */
+    /* 8-bit overworld: square-wave lead, fast arpeggios, triangle bass, noise drums. Major, bright, quick. */
+    chiptune: { mode: 'gong', root: 48, tempo: 140, scale: 'diatonic', harmony: 'functional', structure: ['intro', 'A', 'A', 'B', 'A'], intensity: [0.5, 0.65, 0.7, 0.8, 0.75],
+      melody: 'chip', melodyB: 'chip2', accomp: 'chip', texture: 'arp', bass: 'chipbass', strings: 0, perc: 'chip', sparkle: false, density: 0.7, humanize: 0, reverb: 0.12 },
+    /* 8-bit boss / dungeon: harmonic minor (the raised seventh over V), driving bass, busier drums. */
+    chipBoss: { mode: 'yu', root: 45, tempo: 156, scale: 'diatonic', harmony: 'functional', structure: ['intro', 'A', 'A', 'B', 'A'], intensity: [0.65, 0.8, 0.85, 0.95, 0.9],
+      melody: 'chip', melodyB: 'chip2', accomp: 'chip', texture: 'arp', bass: 'chipbass', strings: 0, perc: 'chip', sparkle: false, density: 0.75, humanize: 0, reverb: 0.1 },
+    /* Western adventure: violins over picked nylon guitar, string bed, light drum kit. Major. */
+    adventure: { mode: 'gong', root: 50, tempo: 100, scale: 'diatonic', harmony: 'functional', structure: ['intro', 'A', 'A', 'B', 'A', 'outro'], intensity: [0.3, 0.5, 0.55, 0.7, 0.6, 0.25],
+      melody: 'violin', melodyB: 'violin', accomp: 'guitar', texture: 'arp', bass: 'cello', strings: 0.5, perc: 'kitlight', sparkle: false, density: 0.5, humanize: 0.5, reverb: 0.45 },
+    /* Rock action: distorted guitar lead and palm-muted power chords, electric bass, full kit. Harmonic minor. */
+    action: { mode: 'yu', root: 45, tempo: 132, scale: 'diatonic', harmony: 'functional', structure: ['intro', 'A', 'A', 'B', 'A'], intensity: [0.6, 0.75, 0.8, 0.95, 0.85],
+      melody: 'eguitar', melodyB: 'eguitar', accomp: 'power', texture: 'chug', bass: 'ebass', strings: 0.35, perc: 'kit', sparkle: false, density: 0.6, humanize: 0.25, reverb: 0.25 },
+    /* Campfire acoustic: nylon guitar tune and bamboo flute over strummed steel-string chords, soft bass, a light brushed kit. */
+    acoustic: { mode: 'gong', root: 50, tempo: 88, scale: 'diatonic', harmony: 'functional', structure: ['intro', 'A', 'A', 'B', 'A', 'outro'], intensity: [0.25, 0.4, 0.45, 0.6, 0.5, 0.2],
+      melody: 'nylon', melodyB: 'flute', accomp: 'steel', texture: 'block', bass: 'pulse', strings: 0.3, perc: 'kitlight', sparkle: false, density: 0.45, humanize: 0.7, reverb: 0.35 },
+
+    /* ---------- orchestra (recorded VSCO 2 CE instruments) ---------- */
+    /* Fantasy orchestral: flute and oboe over harp, strings and a horn counter-line feel; timpani only at the big arrivals. Major. */
+    fantasy: { mode: 'gong', root: 50, tempo: 80, scale: 'diatonic', harmony: 'functional', structure: ['intro', 'A', 'A2', 'B', 'A', 'outro'], intensity: [0.25, 0.45, 0.55, 0.7, 0.55, 0.2],
+      melody: 'orchflute', melodyB: 'horn', melodyA2: 'oboe', accomp: 'harp', texture: 'arp', bass: 'cello', strings: 0.6, perc: 'timpani', sparkle: false, density: 0.45, humanize: 0.6, reverb: 0.55 },
+    /* Epic battle: horns then trumpets over driving cello spiccato, brass stabs and timpani. Harmonic minor. */
+    epic: { mode: 'yu', root: 45, tempo: 124, scale: 'diatonic', harmony: 'functional', structure: ['intro', 'A', 'A2', 'B', 'C', 'A2'], intensity: [0.6, 0.75, 0.82, 0.9, 1, 0.9],
+      melody: 'horn', melodyB: 'trumpet', accomp: 'brass', texture: 'block', bass: 'cello', strings: 0.7, ostinato: 'spic', perc: 'timpani', sparkle: false, density: 0.5, humanize: 0.35, reverb: 0.45 },
+    /* Piano: a reflective solo piano over soft strings. Menus, memories, quiet endings. Minor. */
+    piano: { mode: 'yu', root: 45, tempo: 72, scale: 'diatonic', harmony: 'functional', structure: ['intro', 'A', 'A', 'B', 'A', 'outro'], intensity: [0.25, 0.4, 0.45, 0.6, 0.45, 0.2],
+      melody: 'piano', melodyB: 'piano', accomp: 'piano', texture: 'arp', bass: 'none', strings: 0.35, perc: 'none', sparkle: false, density: 0.45, humanize: 0.75, reverb: 0.45 },
+    /* Pastoral village: clarinet and oboe over harp and pizzicato-like guitar, light strings. Major. */
+    pastoral: { mode: 'gong', root: 53, tempo: 92, scale: 'diatonic', harmony: 'functional', structure: ['intro', 'A', 'A2', 'B', 'A', 'outro'], intensity: [0.3, 0.45, 0.5, 0.6, 0.5, 0.25],
+      melody: 'clarinet', melodyB: 'oboe', melodyA2: 'orchflute', accomp: 'harp', texture: 'block', bass: 'cello', strings: 0.4, perc: 'none', sparkle: false, density: 0.5, humanize: 0.6, reverb: 0.45 }
   };
-  var REGISTER = { guqin: 3, flute: 6, erhu: 4, pipa: 6, boneflute: 6, xun: 3, hum: 1, lute: 4, shawm: 5 };
+  var REGISTER = { guqin: 3, flute: 6, erhu: 4, pipa: 6, boneflute: 6, xun: 3, hum: 1, lute: 4, shawm: 5, chip: 6, chip2: 5, violin: 6, eguitar: 5, nylon: 4, steel: 4, horn: 3, trumpet: 5, trombone: 2, orchflute: 6, oboe: 5, clarinet: 4, harp: 5, piano: 5 };
   /* Erhu multisamples (CC0, tarane468 on Freesound): one recording roughly every minor third from D4 to B5,
      two takes on D4 and G#4 that alternate. Measured pitches; see samples/CREDITS.md. */
   var ERHU = [['erhu-n-d4', 293.9, 'erhu-n-d4b'], ['erhu-n-f4', 349.4], ['erhu-n-gs4', 415.5, 'erhu-n-gs4b'], ['erhu-n-b4', 493.8],
@@ -51,6 +82,19 @@ function makeMusic(sfx) {
     va: [['str-va-c3', 130.8], ['str-va-e3', 164.8], ['str-va-g3', 196], ['str-va-b3', 246.9], ['str-va-d4', 293.7], ['str-va-f4', 349.2], ['str-va-a4', 440], ['str-va-c5', 523.3]],
     vn: [['str-vn-g3', 196], ['str-vn-b3', 246.9], ['str-vn-d4', 293.7], ['str-vn-fs4', 370], ['str-vn-a4', 440], ['str-vn-c5', 523.3], ['str-vn-e5', 659.3], ['str-vn-b5', 987.8]],
     spic: [['str-vcspic-e2', 82.4], ['str-vcspic-g2', 98], ['str-vcspic-b2', 123.5], ['str-vcspic-d3', 146.8], ['str-vcspic-f3', 174.6], ['str-vcspic-a3', 220], ['str-vcspic-c4', 261.6], ['str-vcspic-e4', 329.6]]
+  };
+  /* Orchestral multisamples (CC0, Versilian Studios VSCO 2 Community Edition): horn, trumpet, trombone, flute, oboe,
+     clarinet, harp, upright piano. Measured pitches; [name, Hz, lowest Hz, highest Hz] - notes are folded by octaves into the range. */
+  var ORCH = {
+    horn: [[['hn-g2', 97.7], ['hn-as2', 116.9], ['hn-d3', 146], ['hn-f3', 174], ['hn-a3', 220.1], ['hn-c4', 261.5]], 110, 370],
+    trumpet: [[['tp-a3', 219.7], ['tp-c4', 261.7], ['tp-ds4', 310.7], ['tp-g4', 393.6], ['tp-as4', 466.8], ['tp-d5', 588.7], ['tp-f5', 697.2], ['tp-a5', 882.6]], 220, 880],
+    trombone: [[['tb-f2', 87.3], ['tb-as2', 116.5], ['tb-d3', 146.8], ['tb-f3', 174.6], ['tb-c4', 261.6], ['tb-ds4', 311.1]], 82, 330],
+    orchflute: [[['fl-c4', 261.3], ['fl-e4', 329.2], ['fl-a4', 440.7], ['fl-c5', 523.8], ['fl-e5', 660], ['fl-a5', 881.1], ['fl-c6', 1047.2], ['fl-e6', 1318.1]], 262, 1320],
+    oboe: [[['ob-as3', 233], ['ob-d4', 294.3], ['ob-f4', 349.5], ['ob-as4', 466.2], ['ob-d5', 588.3], ['ob-as5', 934.2], ['ob-d6', 1167.5]], 233, 1175],
+    clarinet: [[['cl-d3', 147], ['cl-f3', 174.8], ['cl-as3', 233.2], ['cl-d4', 293.7], ['cl-f4', 350.3], ['cl-as4', 466.7], ['cl-d5', 588.1], ['cl-f5', 699.8], ['cl-as5', 935.1]], 147, 940],
+    harp: [[['hp-a2', 109.8], ['hp-e3', 164.5], ['hp-g3', 195.3], ['hp-b3', 245.3], ['hp-d4', 291.7], ['hp-f4', 349.1], ['hp-a4', 437.5], ['hp-c5', 519.8], ['hp-e5', 654.9], ['hp-g5', 781], ['hp-b5', 983.1]], 98, 1050],
+    piano: [[['pno-cs2', 69.3], ['pno-f2', 87.3], ['pno-a2', 110], ['pno-cs3', 138.6], ['pno-f3', 174.6], ['pno-a3', 220], ['pno-cs4', 277.2], ['pno-f4', 349.2], ['pno-a4', 440],
+      ['pno-cs5', 554.4], ['pno-f5', 698.5], ['pno-a5', 880], ['pno-cs6', 1108.7]], 65, 1175]
   };
   /* nearest recorded note and the semitone shift to reach f */
   function nearest(table, f) {
@@ -80,8 +124,10 @@ function makeMusic(sfx) {
     out.seed = (out.seed || 1) | 0;
     return out;
   }
+  /* melody scale: the pentatonic mode, or with spec.scale = 'diatonic' its full seven-note scale (Western tunes) */
+  function melScale(sp) { return sp.scale === 'diatonic' ? SCALE7[MODES[sp.mode] ? sp.mode : 'gong'] : MODES[sp.mode] || MODES.gong; }
   function midi(sp, d) {
-    var sc = MODES[sp.mode] || MODES.gong, o = Math.floor(d / 5), i = ((d % 5) + 5) % 5;
+    var sc = melScale(sp), n = sc.length, o = Math.floor(d / n), i = ((d % n) + n) % n;
     return sp.root + 12 * o + sc[i];
   }
 
@@ -246,8 +292,152 @@ function makeMusic(sfx) {
       return P([L({ type: 'noise', filter: 'highpass', cutoff: 6500, cutoffEnd: 5000, attack: 0.001, decay: 0.2, vol: 0.2 * v }),
         L({ type: 'bell', freq: 5400, partials: [[1, 1, 0.8], [1.37, 0.6, 0.6], [1.93, 0.4, 0.5]], attack: 0.001, decay: 0.16, vol: 0.05 * v }),
         L({ type: 'tone', freq: 260, freqEnd: 200, slideTime: 0.02, attack: 0.001, decay: 0.05, vol: 0.12 * v })]);
+    },
+
+    /* ---------- 8-bit (chiptune): square and triangle waves, noise drums ---------- */
+    /* square lead, gated, with a late vibrato on long notes */
+    chip: function (f, dur, v) {
+      return P([L({ type: 'tone', wave: 'square', freq: f, attack: 0.003, hold: Math.max(0.02, dur * 0.88 - 0.04), decay: 0.05, vol: 0.16 * v,
+        vib: dur > 0.4 ? 12 : 0, vibRate: 6.5, vibDelay: Math.min(0.25, dur * 0.4), filter: 'lowpass', cutoff: 7000, cutoffEnd: 7000, q: 0.5 })]);
+    },
+    /* second lead: thinner, buzzier (a filtered sawtooth stands in for the narrow pulse wave) */
+    chip2: function (f, dur, v) {
+      return P([L({ type: 'tone', wave: 'sawtooth', freq: f, attack: 0.003, hold: Math.max(0.02, dur * 0.85 - 0.04), decay: 0.05, vol: 0.12 * v,
+        vib: dur > 0.4 ? 10 : 0, vibRate: 6, vibDelay: Math.min(0.25, dur * 0.4), filter: 'lowpass', cutoff: 4200, cutoffEnd: 4200, q: 0.7 })]);
+    },
+    /* one blip of the fast arpeggio */
+    chiparp: function (f, v) { return P([L({ type: 'tone', wave: 'square', freq: f, attack: 0.002, hold: 0.035, decay: 0.04, vol: 0.07 * v, filter: 'lowpass', cutoff: 5000, cutoffEnd: 5000, q: 0.5 })]); },
+    chipbass: function (f, dur, v) { return P([L({ type: 'tone', wave: 'triangle', freq: f, attack: 0.002, hold: Math.max(0.02, dur * 0.8), decay: 0.03, vol: 0.26 * v })]); },
+    chipkick: function (v) { return P([L({ type: 'tone', wave: 'triangle', freq: 190, freqEnd: 45, slideTime: 0.07, attack: 0.001, decay: 0.13, vol: 0.5 * v })]); },
+    chipsnare: function (v) {
+      var p = P([L({ type: 'noise', filter: 'highpass', cutoff: 1200, cutoffEnd: 2500, attack: 0.001, decay: 0.13, vol: 0.32 * v }),
+        L({ type: 'tone', wave: 'triangle', freq: 240, freqEnd: 150, slideTime: 0.04, attack: 0.001, decay: 0.06, vol: 0.3 * v })]);
+      p.crush = 5;
+      return p;
+    },
+    chiphat: function (v, open) { var p = P([L({ type: 'noise', filter: 'highpass', cutoff: 7000, cutoffEnd: 7000, attack: 0.001, decay: open ? 0.16 : 0.03, vol: 0.13 * v })]); p.crush = 5; return p; },
+    chipcrash: function (v) { var p = P([L({ type: 'noise', filter: 'highpass', cutoff: 3000, cutoffEnd: 5000, attack: 0.001, decay: 0.9, vol: 0.2 * v })]); p.crush = 4; return p; },
+
+    /* ---------- drum kit (synthesized) ---------- */
+    kick: function (v) {
+      return P([L({ type: 'tone', freq: 150, freqEnd: 46, slideTime: 0.07, attack: 0.001, decay: 0.38, vol: 0.7 * v }),
+        L({ type: 'noise', filter: 'bandpass', cutoff: 3500, cutoffEnd: 2500, q: 0.8, attack: 0.0005, decay: 0.01, vol: 0.3 * v })]);
+    },
+    snare: function (v) {
+      return P([L({ type: 'tone', wave: 'triangle', freq: 210, freqEnd: 180, slideTime: 0.03, attack: 0.001, decay: 0.1, vol: 0.38 * v }),
+        L({ type: 'noise', filter: 'highpass', cutoff: 1400, cutoffEnd: 1800, attack: 0.001, decay: 0.2, vol: 0.4 * v }),
+        L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: 900, cutoffEnd: 700, q: 1, attack: 0.001, decay: 0.07, vol: 0.25 * v })]);
+    },
+    /* brushed snare: a soft swish for quiet songs */
+    brush: function (v) { return P([L({ type: 'noise', filter: 'bandpass', cutoff: 3500, cutoffEnd: 2500, q: 0.6, attack: 0.012, decay: 0.16, vol: 0.2 * v })]); },
+    hat: function (v, open) {
+      var d = open ? 0.38 : 0.045;
+      return P([L({ type: 'noise', filter: 'highpass', cutoff: 7500, cutoffEnd: 7500, attack: 0.001, decay: d, vol: 0.18 * v }),
+        L({ type: 'bell', freq: 6200, partials: [[1, 1, 1], [1.47, 0.8, 0.8], [1.93, 0.6, 0.6], [2.62, 0.4, 0.5]], attack: 0.001, decay: d, vol: 0.025 * v })]);
+    },
+    crash: function (v) {
+      return P([L({ type: 'noise', filter: 'highpass', cutoff: 3800, cutoffEnd: 6000, attack: 0.001, decay: 2.2, vol: 0.24 * v }),
+        L({ type: 'bell', freq: 4100, partials: [[1, 1, 1], [1.38, 0.8, 0.8], [1.91, 0.6, 0.6], [2.53, 0.5, 0.5], [3.21, 0.3, 0.4]], attack: 0.001, decay: 1.6, vol: 0.04 * v })]);
+    },
+    tom: function (v, f) {
+      return P([L({ type: 'tone', freq: f * 1.5, freqEnd: f, slideTime: 0.05, attack: 0.001, decay: 0.42, vol: 0.6 * v }),
+        L({ type: 'noise', filter: 'bandpass', cutoff: 1500, cutoffEnd: 900, q: 1, attack: 0.0005, decay: 0.03, vol: 0.25 * v })]);
+    },
+    clap: function (v) { return P([L({ type: 'noise', filter: 'bandpass', cutoff: 1300, cutoffEnd: 1100, q: 1.3, attack: 0.001, decay: 0.1, vol: 0.4 * v, rep: 3, repGap: 0.011 })]); },
+
+    /* ---------- guitars (Karplus-Strong strings) ---------- */
+    nylon: function (f, dur, v) {
+      return P([L({ type: 'string', freq: f, bright: 0.36, filter: 'lowpass', cutoff: 3400, cutoffEnd: 1500, attack: 0.003, decay: Math.max(1, dur * 1.4), vol: 0.44 * v }),
+        L({ type: 'tone', freq: f, attack: 0.008, decay: Math.min(dur, 0.8), vol: 0.05 * v })]);
+    },
+    /* steel strings: brighter, with a second string a hair sharp for shimmer */
+    steel: function (f, dur, v) {
+      var d = Math.max(1, dur * 1.5);
+      return P([L({ type: 'string', freq: f, bright: 0.64, filter: 'lowpass', cutoff: 6000, cutoffEnd: 2600, attack: 0.002, decay: d, vol: 0.36 * v }),
+        L({ type: 'string', freq: f * 1.0025, bright: 0.58, filter: 'lowpass', cutoff: 5000, cutoffEnd: 2200, attack: 0.002, decay: d, vol: 0.18 * v })]);
+    },
+    /* a strum across the chord; up-strokes go high to low and are lighter */
+    guitarstrum: function (fs, v, up, steel) {
+      var order = up ? fs.slice().reverse() : fs;
+      return P(order.slice(0, 6).map(function (f, i) {
+        return L({ type: 'string', freq: f, bright: steel ? 0.6 : 0.34, start: i * (up ? 0.009 : 0.014), attack: 0.002, decay: 1, vol: (up ? 0.12 : 0.17) * v,
+          filter: 'lowpass', cutoff: steel ? 5200 : 3000, cutoffEnd: steel ? 2200 : 1300 });
+      }));
+    },
+    /* distorted lead guitar: plucked attack plus a sustaining reedy tone, both driven */
+    eguitar: function (f, dur, v) {
+      var p = P([L({ type: 'string', freq: f, bright: 0.7, filter: 'lowpass', cutoff: 3200, cutoffEnd: 2400, attack: 0.002, decay: Math.max(1.2, dur * 2), vol: 0.32 * v }),
+        L({ type: 'tone', wave: 'sawtooth', freq: f, filter: 'lowpass', cutoff: 2200, cutoffEnd: 1800, attack: 0.012, hold: Math.max(0, dur - 0.12), decay: 0.18, vol: 0.09 * v,
+          vib: dur > 0.5 ? 22 : 0, vibRate: 5.6, vibDelay: Math.min(0.3, dur * 0.4) })], 0.22);
+      p.drive = 0.55;
+      return p;
+    },
+    /* power chord: root, fifth, octave; mute = palm-muted chug */
+    power: function (f, v, mute) {
+      var p = P([1, 1.4983, 2].map(function (r, i) {
+        return L({ type: 'string', freq: f * r, bright: 0.62, filter: 'lowpass', cutoff: mute ? 1500 : 2600, cutoffEnd: mute ? 900 : 1800, attack: 0.002, hold: 0, decay: mute ? 0.14 : 1, vol: (i === 0 ? 0.32 : 0.24) * v });
+      }), 0.38);
+      p.drive = 0.7;
+      return p;
+    },
+    ebass: function (f, dur, v) {
+      var p = P([L({ type: 'string', freq: f, bright: 0.45, filter: 'lowpass', cutoff: 1800, cutoffEnd: 900, attack: 0.002, decay: Math.max(0.5, dur * 1.2), vol: 0.4 * v }),
+        L({ type: 'tone', wave: 'triangle', freq: f, attack: 0.005, hold: Math.max(0, dur * 0.7), decay: 0.12, vol: 0.2 * v })], 0.55);
+      p.drive = 0.12;
+      return p;
     }
   };
+  /* lead instruments with the plain (f, dur, v) signature */
+  /* ---------- orchestra (recorded, see ORCH) ---------- */
+  /* a sustained wind or brass note: soft tongue-in, hold, release; louder notes open the lowpass (brighter brass) */
+  function wind(kind, f, dur, v, o) {
+    var t = ORCH[kind], n = nearest(t[0], fold(f, t[1], t[2]));
+    return P([L({ type: 'sample', sample: n.name, pitch: n.st, offset: o.offset || 0.02, attack: Math.min(o.attack, dur * 0.3), hold: Math.max(0.05, dur - 0.12), decay: o.release,
+      vol: o.vol * v, filter: 'lowpass', cutoff: o.dark + o.bright * Math.min(1, v), cutoffEnd: o.dark + o.bright * Math.min(1, v), q: 0.5,
+      vib: o.vib && dur > 0.6 ? o.vib : 0, vibRate: 5.2, vibDelay: Math.min(0.4, dur * 0.4) })]);
+  }
+  I.horn = function (f, dur, v) { return wind('horn', f, dur, v, { attack: 0.09, release: 0.4, vol: 0.5, dark: 1200, bright: 2600 }); };
+  I.trumpet = function (f, dur, v) { return wind('trumpet', f, dur, v, { attack: 0.03, release: 0.25, vol: 0.4, dark: 2000, bright: 4500, vib: 8 }); };
+  I.trombone = function (f, dur, v) { return wind('trombone', f, dur, v, { attack: 0.06, release: 0.3, vol: 0.5, dark: 900, bright: 2600 }); };
+  I.orchflute = function (f, dur, v) { return wind('orchflute', f, dur, v, { attack: 0.06, release: 0.3, vol: 0.38, dark: 5000, bright: 3000, offset: 0.05 }); };
+  I.oboe = function (f, dur, v) { return wind('oboe', f, dur, v, { attack: 0.04, release: 0.25, vol: 0.34, dark: 3200, bright: 3000, offset: 0.04 }); };
+  I.clarinet = function (f, dur, v) { return wind('clarinet', f, dur, v, { attack: 0.05, release: 0.3, vol: 0.38, dark: 3000, bright: 3000, offset: 0.04 }); };
+  I.harp = function (f, dur, v) {
+    var n = nearest(ORCH.harp[0], fold(f, ORCH.harp[1], ORCH.harp[2]));
+    return P([L({ type: 'sample', sample: n.name, pitch: n.st, attack: 0.002, hold: Math.min(2.4, Math.max(0.8, dur * 1.5)), decay: 0.8, vol: 0.5 * v })]);
+  };
+  /* piano: the key is held for the note, then the damper comes down (a short release) */
+  I.piano = function (f, dur, v) {
+    var n = nearest(ORCH.piano[0], fold(f, ORCH.piano[1], ORCH.piano[2]));
+    return P([L({ type: 'sample', sample: n.name, pitch: n.st, attack: 0.002, hold: Math.max(0.05, Math.min(4, dur)), decay: 0.35, vol: 0.5 * v,
+      filter: 'lowpass', cutoff: 1800 + 5000 * Math.min(1, v), cutoffEnd: 1800 + 5000 * Math.min(1, v), q: 0.5 })]);
+  };
+  /* brass section chord: trombones on the root, horns on the rest (a swell for long chords, a stab for short ones) */
+  I.brass = function (fs, dur, v) {
+    var layers = [];
+    fs.slice(0, 4).forEach(function (f, i) {
+      var kind = i === 0 ? 'trombone' : 'horn', t = ORCH[kind], n = nearest(t[0], fold(f, t[1], t[2]));
+      layers.push(L({ type: 'sample', sample: n.name, pitch: n.st, offset: 0.02, attack: dur > 1 ? Math.min(0.5, dur * 0.3) : 0.02, hold: Math.max(0.05, dur - 0.15), decay: dur > 1 ? 0.6 : 0.2,
+        vol: (i === 0 ? 0.3 : 0.24) * v, filter: 'lowpass', cutoff: 1100 + 2600 * Math.min(1, v), cutoffEnd: 1100 + 2600 * Math.min(1, v), q: 0.5 }));
+    });
+    return P(layers);
+  };
+  /* timpani: two recorded drums pitched to the note, or a roll held for dur */
+  I.timpani = function (f, v, roll, dur) {
+    f = fold(f, 82, 165);
+    if (roll) return P([L({ type: 'sample', sample: 'timp-roll', pitch: 12 * Math.log2(f / 90), attack: Math.min(1.5, dur * 0.7), hold: Math.max(0, dur - 1.5), decay: 1.2, vol: 0.55 * v })]);
+    var hi = f > 115, st = 12 * Math.log2(f / (hi ? 142 : 90));
+    return P([L({ type: 'sample', sample: hi ? 'timp-hi' : 'timp-lo', pitch: st, attack: 0.001, hold: 2.5, decay: 1, vol: 0.7 * v })]);
+  };
+  var ORCH_MIX = {
+    horn: { pan: -0.3, send: 0.5, hp: 70 }, trumpet: { pan: 0.18, send: 0.42, hp: 150 }, trombone: { pan: 0.3, send: 0.45, hp: 50 },
+    orchflute: { pan: -0.12, send: 0.5, hp: 250 }, oboe: { pan: 0.05, send: 0.45, hp: 200 }, clarinet: { pan: 0.15, send: 0.45, hp: 120 },
+    harp: { pan: -0.42, send: 0.5, hp: 80 }, piano: { pan: 0, send: 0.38, hp: 40 }, brass: { pan: 0.1, send: 0.48, hp: 60 }, timpani: { pan: -0.08, send: 0.4, hp: 35 }
+  };
+  Object.keys(ORCH_MIX).forEach(function (name) { var fn = I[name]; I[name] = function () { return mixed(fn.apply(null, arguments), ORCH_MIX[name]); }; });
+
+  /* lead instruments with the plain (f, dur, v) signature */
+  var LEADS = { chip: 1, chip2: 1, violin: 1, eguitar: 1, nylon: 1, steel: 1, horn: 1, trumpet: 1, trombone: 1, orchflute: 1, oboe: 1, clarinet: 1, harp: 1, piano: 1 };
 
   /* ---------- mix: where each instrument sits ----------
      pan (-1 left .. 1 right, orchestral seating: violins left, violas centre-right, cellos right),
@@ -263,7 +453,13 @@ function makeMusic(sfx) {
     boneflute: { pan: 0.12, send: 0.45, hp: 250 }, xun: { pan: -0.08, send: 0.45, hp: 120 }, hum: { pan: 0, send: 0.55, hp: 60 },
     logdrum: { pan: -0.25, send: 0.25, hp: 50 }, framedrum: { pan: 0.08, send: 0.22, hp: 40 }, sticks: { pan: 0.4, send: 0.3, hp: 800 }, shaker: { pan: 0.55, send: 0.25, hp: 3000 },
     lute: { pan: -0.3, send: 0.32, hp: 80 }, lutestrum: { pan: -0.3, send: 0.32, hp: 90 }, shawm: { pan: 0.2, send: 0.38, hp: 200 },
-    bagpipe: { pan: 0.05, send: 0.35, hp: 45 }, tambourine: { pan: 0.45, send: 0.28, hp: 2000 }
+    bagpipe: { pan: 0.05, send: 0.35, hp: 45 }, tambourine: { pan: 0.45, send: 0.28, hp: 2000 },
+    chip: { pan: 0, send: 0.12, hp: 150 }, chip2: { pan: -0.2, send: 0.12, hp: 150 }, chiparp: { pan: 0.25, send: 0.1, hp: 200 }, chipbass: { pan: 0, send: 0.04, hp: 30 },
+    chipkick: { pan: 0, send: 0.04, hp: 30 }, chipsnare: { pan: 0.05, send: 0.1, hp: 150 }, chiphat: { pan: 0.3, send: 0.08, hp: 3000 }, chipcrash: { pan: -0.3, send: 0.15, hp: 1500 },
+    kick: { pan: 0, send: 0.08, hp: 30 }, snare: { pan: 0.04, send: 0.22, hp: 120 }, brush: { pan: 0.08, send: 0.25, hp: 800 }, hat: { pan: 0.3, send: 0.12, hp: 4000 },
+    crash: { pan: -0.35, send: 0.3, hp: 1500 }, tom: { pan: -0.15, send: 0.2, hp: 60 }, clap: { pan: -0.08, send: 0.25, hp: 400 },
+    nylon: { pan: -0.18, send: 0.32, hp: 80 }, steel: { pan: 0.25, send: 0.3, hp: 90 }, guitarstrum: { pan: 0.25, send: 0.3, hp: 90 },
+    eguitar: { pan: -0.1, send: 0.3, hp: 120 }, power: { pan: 0.3, send: 0.15, hp: 70 }, ebass: { pan: 0, send: 0.06, hp: 30 }
   };
   var SECTION_MIX = { vc: { pan: 0.32, send: 0.45, hp: 45 }, va: { pan: 0.12, send: 0.5, hp: 110 }, vn: { pan: -0.32, send: 0.52, hp: 160 } };
   function mixed(p, m) { if (m) { p.pan = m.pan; p.send = m.send; p.hp = m.hp; } return p; }
@@ -283,6 +479,8 @@ function makeMusic(sfx) {
   };
   var lineFn = I.line;
   I.line = function (f, dur, v, sec) { var m = SECTION_MIX[sec || 'vn']; return mixed(lineFn(f, dur, v, sec), { pan: m.pan * 1.2, send: m.send + 0.05, hp: m.hp }); };
+  /* violins as a lead voice */
+  I.violin = function (f, dur, v) { return I.line(f, dur, v * 1.5, 'vn'); };
 
   /* ---------- harmony ----------
      Default ('diatonic'): the melody stays pentatonic, but the chords underneath are triads of the full
@@ -310,6 +508,13 @@ function makeMusic(sfx) {
       B1: [[5, 1, 5, 6], [3, 5, 1, 6], [1, 0, 5, 1]],
       B2: [[5, 6, 1, 0], [3, 1, 0, 0], [1, 1, 0, 0]]
     },
+    /* minor with a major V (harmonic minor): every phrase leans on V and the second one resolves V-i */
+    harmonic: {
+      A1: [[0, 5, 3, 4], [0, 3, 4, 4], [0, 6, 5, 4]],
+      A2: [[0, 5, 4, 0], [0, 3, 4, 0], [5, 3, 4, 0]],
+      B1: [[5, 6, 0, 4], [3, 0, 5, 4], [5, 2, 3, 4]],
+      B2: [[5, 3, 4, 0], [3, 4, 0, 0], [5, 6, 4, 0]]
+    },
     major: {
       A1: [[0, 5, 3, 4], [0, 4, 5, 3], [0, 3, 4, 0]],
       A2: [[5, 3, 4, 0], [3, 4, 0, 0], [0, 5, 4, 0]],
@@ -318,34 +523,46 @@ function makeMusic(sfx) {
     }
   };
   /* harmony context of the piece being composed (set at the top of compose) */
-  var hx = { diat: false, pent: MODES.gong, s7: SCALE7.gong, jue: false };
+  /* n: melody degrees per octave (5 pentatonic, 7 diatonic); mel: the melody scale; func: functional harmony (V-I, harmonic minor) */
+  var hx = { diat: false, pent: MODES.gong, s7: SCALE7.gong, jue: false, n: 5, mel: MODES.gong, func: false };
   function harmonyFor(sp) {
-    var m = MODES[sp.mode] ? sp.mode : 'gong';
-    hx = { diat: sp.harmony !== 'penta', dark: sp.harmony === 'dark', pent: MODES[m], s7: SCALE7[m], jue: m === 'jue' || m === 'miyako', major: m === 'gong' || m === 'zhi' };
+    var m = MODES[sp.mode] ? sp.mode : 'gong', seven = sp.scale === 'diatonic';
+    hx = { diat: seven || sp.harmony !== 'penta', dark: sp.harmony === 'dark', func: sp.harmony === 'functional', pent: MODES[m], s7: SCALE7[m], jue: m === 'jue' || m === 'miyako', major: m === 'gong' || m === 'zhi',
+      n: seven ? 7 : 5, mel: seven ? SCALE7[m] : MODES[m] };
   }
+  /* a span given in pentatonic steps (fifths of an octave) as melody steps of the current scale */
+  function U(k) { return Math.round(k * hx.n / 5); }
   function progs() {
     if (!hx.diat) return PROG;
     if (hx.dark) return PROG7.dark;
+    if (hx.func) return hx.major ? PROG7.major : PROG7.harmonic;
     var t = PROG7[hx.major ? 'major' : 'minor'], out = {};
     /* phrygian v is diminished: use VII instead */
     for (var k in t) out[k] = t[k].map(function (pr) { return pr.map(function (r) { return hx.jue && r === 4 ? 6 : r; }); });
     return out;
   }
   function pentSemi(d) { var i = ((d % 5) + 5) % 5; return hx.pent[i] + 12 * Math.floor(d / 5); }
+  /* a melody degree in semitones above the tonic */
+  function melSemi(d) { var n = hx.n, i = ((d % n) + n) % n; return hx.mel[i] + 12 * Math.floor(d / n); }
+  /* is chord r the dominant that harmonic minor sharpens (V in a minor key)? */
+  function raisedV(r) { return hx.func && !hx.major && ((r % 7) + 7) % 7 === 4; }
   /* chord tones in semitones above the tonic (root position, close voicing) */
   function chordTones(r) {
     if (!hx.diat) return [r, r + 2, r + 3].map(pentSemi);
-    return [0, 2, 4].map(function (k) { var i = r + k; return hx.s7[((i % 7) + 7) % 7] + 12 * Math.floor(i / 7); });
+    var t = [0, 2, 4].map(function (k) { var i = r + k; return hx.s7[((i % 7) + 7) % 7] + 12 * Math.floor(i / 7); });
+    if (raisedV(r)) t[1] += 1;
+    return t;
   }
-  function onChord(d, r) { var pc = ((pentSemi(d) % 12) + 12) % 12; return chordTones(r).some(function (c) { return ((c % 12) + 12) % 12 === pc; }); }
+  function onChord(d, r) { var pc = ((melSemi(d) + (raisedV(r) && hx.n === 7 && ((d % 7) + 7) % 7 === 6 ? 1 : 0)) % 12 + 12) % 12; return chordTones(r).some(function (c) { return ((c % 12) + 12) % 12 === pc; }); }
   /* a melody note a semitone away from a chord tone sounds like a wrong note */
   function clashes(d, r) {
-    var pc = ((pentSemi(d) % 12) + 12) % 12;
+    var pc = ((melSemi(d) % 12) + 12) % 12;
+    if (raisedV(r) && hx.n === 7 && ((d % 7) + 7) % 7 === 6) pc = (pc + 1) % 12;
     return chordTones(r).some(function (c) { var x = Math.abs(((c % 12) + 12) % 12 - pc); return x === 1 || x === 11; });
   }
   function nearestChordTone(d, r) { for (var k = 0; k < 4; k++) { if (onChord(d + k, r)) return d + k; if (onChord(d - k, r)) return d - k; } return d; }
   /* how far (in melody steps) to move a motif when the harmony moves from chord a to chord b */
-  function degShift(a, b) { return hx.diat ? Math.round((b - a) * 5 / 7) : b - a; }
+  function degShift(a, b) { return hx.diat && hx.n === 5 ? Math.round((b - a) * 5 / 7) : b - a; }
   /* nearest pentatonic degree to a chord root, for tools that only know pentatonic chords */
   function pentRoot(r) {
     if (!hx.diat) return r;
@@ -380,7 +597,7 @@ function makeMusic(sfx) {
         if (!(bar === 0 && i === 0)) {
           var step = r() < 0.7 ? (r() < 0.5 ? -1 : 1) : (r() < 0.5 ? -2 : 2);
           if (r() < 0.06) step = 0;
-          d = clamp(d + step, base - 2, base + 7);
+          d = clamp(d + step, base - U(2), base + U(7));
         }
         if (b % 2 === 0 && r() < (hx.diat ? 0.85 : 0.6)) d = nearestChordTone(d, chords[bar]);
         notes.push({ b: bar * B + b, d: len, deg: d });
@@ -404,8 +621,8 @@ function makeMusic(sfx) {
   }
   /* Cadence target in the melody's register: a full cadence lands on the tonic, a half cadence on the fifth (mode degree 3). */
   function cadence(base, full) {
-    var t = full ? Math.ceil((base + 2) / 5) * 5 : Math.floor(base / 5) * 5 + 3;
-    if (!full && t < base) t += 5;
+    var n = hx.n, t = full ? Math.ceil((base + U(2)) / n) * n : Math.floor(base / n) * n + (n === 7 ? 4 : 3);
+    if (!full && t < base) t += n;
     return t;
   }
   /* Variation of a phrase: some long notes split into a note plus a passing step, some short pairs merged. */
@@ -456,7 +673,8 @@ function makeMusic(sfx) {
     var form = formOf(sp, input, cycle), structure = form.names, levels = form.lv || [];
     harmonyFor(sp);
     var PR = progs();
-    var mBase = sp.register != null ? sp.register : REGISTER[sp.melody] || 4, bBase = sp.registerB != null ? sp.registerB : (REGISTER[sp.melodyB || sp.melody] || 4) + 2;
+    var mBase = U(sp.register != null ? sp.register : REGISTER[sp.melody] || 4), bBase = U(sp.registerB != null ? sp.registerB : (REGISTER[sp.melodyB || sp.melody] || 4) + 2);
+    var N = hx.n;
     var progA1 = pick(rTheme, PR.A1), progA2 = pick(rTheme, PR.A2);
     var motifA = makeMotif(rTheme, sp, progA1, mBase, B);
     var phraseA1 = makePhrase(rTheme, motifA, progA1, cadence(mBase, false), B), phraseA2 = makePhrase(rTheme, motifA, progA2, cadence(mBase, true), B);
@@ -471,7 +689,7 @@ function makeMusic(sfx) {
     }
     var progB1 = pick(rB, PR.B1), progB2 = pick(rB, PR.B2);
     var motifB = makeMotif(rB, sp, progB1, bBase, B);
-    var phraseB1 = makePhrase(rB, motifB, progB1, cadence(bBase, false), B), phraseB2 = makePhrase(rB, motifB, progB2, cadence(mBase + 5, true), B);
+    var phraseB1 = makePhrase(rB, motifB, progB1, cadence(bBase, false), B), phraseB2 = makePhrase(rB, motifB, progB2, cadence(mBase + N, true), B);
     var genB = phraseB1.concat(phraseB2.map(function (n) { return { b: n.b + PH, d: n.d, deg: n.deg }; }));
     if (userB) {
       phraseB1 = userB.filter(function (n) { return n.b < PH; });
@@ -481,7 +699,7 @@ function makeMusic(sfx) {
     var texture = sp.texture || 'block', texture2 = sp.texture2 || (texture === 'block' ? 'arp' : texture === 'arp' ? 'block' : texture);
     /* second voice for A2: the B instrument if it differs, otherwise the same one an octave up */
     var leadA2 = sp.melodyA2 || (sp.melodyB && sp.melodyB !== sp.melody ? sp.melodyB : sp.melody);
-    var octA2 = leadA2 === sp.melody && (REGISTER[sp.melody] || 4) < 5 ? 5 : 0;
+    var octA2 = leadA2 === sp.melody && (REGISTER[sp.melody] || 4) < 5 ? N : 0;
 
     function at(b) { return b * beat; }
     function add(t, p) { events.push({ t: Math.max(0, t), p: p }); }
@@ -495,19 +713,20 @@ function makeMusic(sfx) {
         var pos = nt.b / PH, arch = 0.82 + 0.18 * Math.sin(Math.PI * Math.min(1, pos));
         var v = clamp((0.55 + 0.45 * I0) * arch * (1 + (rHum() - 0.5) * 0.25 * h), 0.2, 1.1) * (gain || 1);
         var deg = nt.deg + (ornament && rArr() < 0.12 && nt.d < 2 ? (rArr() < 0.5 ? 1 : -1) : 0);
-        var strong = B === 3 ? nt.b % 3 === 0 : nt.b % 2 === 0;
+        var strong = B === 3 ? nt.b % 3 === 0 : nt.b % 2 === 0, ch = prog ? prog[Math.floor(nt.b / B) % 4] : null;
         if (prog && hx.diat) {
-          var ch = prog[Math.floor(nt.b / B) % 4];
           if ((strong || nt.d >= 1.5) && clashes(deg, ch)) deg = nearestChordTone(deg, ch);
         }
-        var f = hz(midi(sp, deg)), t = (startBar * B + nt.b) * beat + jitter();
+        /* harmonic minor: the seventh degree is a leading note (a semitone below the tonic) over V */
+        var m0 = midi(sp, deg) + (ch != null && raisedV(ch) && hx.n === 7 && ((deg % 7) + 7) % 7 === 6 ? 1 : 0);
+        var f = hz(m0), t = (startBar * B + nt.b) * beat + jitter();
         var next = notes[i + 1], phraseEnd = !next || next.b - nt.b > nt.d || i === n - 1;
         var dur = nt.d * beat * (phraseEnd ? 0.92 : 1);
-        melody.push({ bar: startBar + Math.floor(nt.b / B), beat: nt.b % B, beats: nt.d, deg: deg, inst: inst, section: sectionName });
-        if (inst === 'guqin') add(t, rArr() < 0.12 && nt.d >= 2 && deg >= mBase + 3 ? I.harmonic(f * 2, v) : I.guqin(f, dur, v, nt.d >= 2 && rArr() < 0.3 ? Math.pow(2, -2 / 12) : 0));
+        melody.push({ bar: startBar + Math.floor(nt.b / B), beat: nt.b % B, beats: nt.d, deg: deg, midi: m0, inst: inst, section: sectionName });
+        if (inst === 'guqin') add(t, rArr() < 0.12 && nt.d >= 2 && deg >= mBase + U(3) ? I.harmonic(f * 2, v) : I.guqin(f, dur, v, nt.d >= 2 && rArr() < 0.3 ? Math.pow(2, -2 / 12) : 0));
         else if (inst === 'flute') add(t, I.flute(f, dur, v));
         else if (inst === 'erhu') add(t, I.erhu(f, dur, v, sp.dark ? (nt.d >= 1 && rArr() < 0.55 ? -2 : 0) : nt.d >= 1.5 && rArr() < 0.45 ? (rArr() < 0.7 ? 2 : -1) : 0));
-        else if (inst === 'boneflute' || inst === 'xun' || inst === 'hum' || inst === 'lute' || inst === 'shawm') add(t, I[inst](f, dur, v));
+        else if (inst === 'boneflute' || inst === 'xun' || inst === 'hum' || inst === 'lute' || inst === 'shawm' || LEADS[inst]) add(t, I[inst](f, dur, v));
         else add(t, I.pipa(f, dur, v, nt.d >= 2 && !sp.dark));
       });
     }
@@ -524,7 +743,8 @@ function makeMusic(sfx) {
         chordLog[b0] = r0;
         var low = tones.map(function (st) { return hz(R + st - 12); });
         var plk = sp.accomp === 'guqin' || sp.accomp === 'pipa' || sp.accomp === 'lute';
-        if (lay.rhythm && plk && tex === 'block') {
+        if (lay.rhythm && WESTERN_ACC[sp.accomp]) westernAccomp(tones, low, t0, I0, lay.rhythm, tex);
+        else if (lay.rhythm && plk && tex === 'block') {
           if (sp.accomp === 'guqin') {
             var pattern = I0 < 0.35 ? [[0, 0], [2, 1]] : I0 < 0.7 ? [[0, 0], [1, 1], [2, 2], [3, 1]] : [[0, 0], [0.5, 1], [1, 2], [1.5, 1], [2, 0], [2.5, 1], [3, 2], [3.5, 1]];
             pattern.forEach(function (pt) { if (pt[0] < B) add(t0 + at(pt[0]) + jitter(), I.qin(low[pt[1]], beat * 1.5, (0.26 + 0.2 * I0) * lay.rhythm)); });
@@ -573,6 +793,17 @@ function makeMusic(sfx) {
         if (sp.bass === 'pulse' && lay.bed) {
           [0, 2].forEach(function (bt) { if (bt < B) add(t0 + at(bt), I.bass(hz(R + tones[0] - 24), beat * 1.8, 0.6 + 0.4 * I0)); });
         }
+        if ((sp.bass === 'chipbass' || sp.bass === 'ebass') && lay.bed) {
+          /* driving eighths on the root (octave jumps on the chip bass, a fifth before the next bar on the electric) */
+          var bm = R + tones[0] - 12;
+          if (bm > 52) bm -= 12;
+          var eighths = I0 >= 0.6, nb = eighths ? B * 2 : B, bstep = eighths ? 0.5 : 1;
+          for (var be = 0; be < nb; be++) {
+            var off = sp.bass === 'chipbass' ? (be % 2 && eighths ? 12 : 0) : (be === nb - 1 && eighths ? 7 : 0);
+            var bv = (be % (eighths ? 4 : 2) === 0 ? 1 : 0.75) * (0.6 + 0.4 * I0) * Math.min(1.2, lay.bed);
+            add(t0 + at(be * bstep) + jitter() * 0.3, (sp.bass === 'chipbass' ? I.chipbass : I.ebass)(hz(bm + off), beat * bstep * 0.9, bv));
+          }
+        }
         if (sp.choir && lay.bed && k % 2 === 0) {
           /* a few low voices humming the chord root and fifth, two bars at a time */
           var cv = sp.choir * (0.5 + 0.5 * I0) * Math.min(1.2, lay.bed), cl = Math.min(2, bars - k) * barLen + 0.8;
@@ -598,6 +829,15 @@ function makeMusic(sfx) {
           for (var tm = 1; tm < B; tm += 2) add(t0 + at(tm) + jitter(), I.tambourine((0.45 + 0.4 * I0) * lay.perc));
           if (I0 > 0.6) add(t0 + at(B - 0.5) + jitter(), I.tambourine(0.4 * lay.perc));
         }
+        if (lay.perc && (sp.perc === 'kit' || sp.perc === 'kitlight' || sp.perc === 'chip')) kitBar(t0, I0, lay.perc, last && k === bars - 1);
+        if (lay.perc && sp.perc === 'timpani') {
+          /* timpani on the chord root: a downbeat every few bars when calm, a pattern with the fifth when it drives,
+             and a roll swelling into the next section */
+          var tr = hz(R + tones[0] - 24), tv = (0.45 + 0.5 * I0) * Math.min(1.2, lay.perc);
+          if (last && k === bars - 1 && I0 > 0.35) add(t0 + at(B / 2), I.timpani(tr, tv * 0.8, true, (B / 2) * beat + 0.2));
+          else if (I0 >= 0.75) [[0, 0, 1], [B === 3 ? 2 : 2, 0, 0.7], [B - 0.5, 7, 0.55]].forEach(function (x) { add(t0 + at(x[0]) + jitter() * 0.3, I.timpani(tr * Math.pow(2, x[1] / 12), tv * x[2], false)); });
+          else if (k % (I0 < 0.5 ? 4 : 2) === 0) add(t0 + jitter() * 0.3, I.timpani(tr, tv * 0.75, false));
+        }
         if (lay.perc && sp.perc === 'woodfish' && (I0 > 0.3 || k % 2 === 0)) add(t0 + jitter(), I.woodfish((0.5 + 0.4 * I0) * lay.perc));
         if (lay.perc && sp.perc === 'drum') {
           add(t0, I.drum('drum-center-soft', (0.4 + 0.5 * I0) * Math.min(1, lay.perc), -3));
@@ -615,15 +855,90 @@ function makeMusic(sfx) {
           });
           if (fill) for (var q = 0; q < B; q++) add(t0 + at(B / 2 + q * 0.5), I.drum('drum-center-loud', 0.5 + q * 0.15, -1));
         }
-        if (lay.color && sp.sparkle && rArr() < 0.18 * (1 - I0 * 0.5)) add(t0 + at(Math.floor(rArr() * B)), I.chime(hz(midi(sp, 13 + Math.floor(rArr() * 4))), 1));
+        if (lay.color && sp.sparkle && rArr() < 0.18 * (1 - I0 * 0.5)) add(t0 + at(Math.floor(rArr() * B)), I.chime(hz(midi(sp, U(13) + Math.floor(rArr() * 4))), 1));
       }
     }
+
+    /* Western accompaniment: picked or strummed guitar, fast chip arpeggios, palm-muted power chords */
+    function westernAccomp(tones, low, t0, I0, g, tex) {
+      var R = sp.root, a, up = [low[0], low[2], hz(R + tones[1]), hz(R + tones[2]), hz(R + tones[0] + 12)];
+      var full = [low[0], low[2], hz(R + tones[0]), hz(R + tones[1]), hz(R + tones[2]), hz(R + tones[0] + 12)];
+      if (sp.accomp === 'chip') {
+        /* the classic 8-bit arpeggio: chord tones cycling in sixteenths (eighths when it is quiet) */
+        var cyc = [hz(R + tones[0]), hz(R + tones[1]), hz(R + tones[2]), hz(R + tones[0] + 12)], st = I0 >= 0.5 ? 0.25 : 0.5;
+        for (a = 0; a < B / st; a++) add(t0 + at(a * st), I.chiparp(cyc[a % 4], (a % 4 === 0 ? 1 : 0.8) * (0.6 + 0.4 * I0) * g));
+      } else if (sp.accomp === 'power') {
+        var pm = R + tones[0] - 12;
+        if (pm > 52) pm -= 12;
+        if (tex === 'chug' && I0 >= 0.5) {
+          /* chugs on the eighths, accents on one and the and-of-two; an open chord rings on the downbeat when it peaks */
+          for (a = 0; a < B * 2; a++) add(t0 + at(a * 0.5) + jitter() * 0.3, I.power(hz(pm), (a === 0 || a === 3 ? 1 : 0.7) * (0.6 + 0.4 * I0) * g, !(a === 0 && I0 > 0.85)));
+        } else add(t0, I.power(hz(pm), (0.6 + 0.4 * I0) * g, false));
+      } else if (sp.accomp === 'brass') {
+        /* brass: a held chord when it is calm; stabs on one and the and-of-two (and four) when it drives */
+        var bfs = [low[0], hz(R + tones[1]), hz(R + tones[2]), hz(R + tones[0] + 12)];
+        if (I0 < 0.7) add(t0 + jitter(), I.brass(bfs, B * beat + 0.3, (0.55 + 0.4 * I0) * g));
+        else (B === 3 ? [[0, 1], [1.5, 0.8]] : [[0, 1], [1.5, 0.8], [3, 0.85]]).forEach(function (x) { add(t0 + at(x[0]) + jitter() * 0.4, I.brass(bfs, beat * 0.7, x[1] * (0.6 + 0.4 * I0) * g)); });
+      } else if (sp.accomp === 'piano' && tex !== 'arp') {
+        /* piano block chords: bass note, then the chord on the off-beats */
+        add(t0 + jitter(), I.piano(low[0], B * beat, 0.5 * (0.6 + 0.4 * I0) * g));
+        for (a = 1; a < B; a++) [1, 2].forEach(function (k) { add(t0 + at(a) + jitter(), I.piano(hz(R + tones[k]), beat * 0.9, 0.3 * (0.6 + 0.4 * I0) * g)); });
+      } else if (sp.accomp === 'harp' && tex !== 'arp') {
+        /* harp: a rolled chord on the strong beats, low to high */
+        (B === 3 ? [0] : I0 < 0.45 ? [0] : [0, 2]).forEach(function (bt) {
+          up.forEach(function (f, i) { add(t0 + at(bt) + i * 0.045 + jitter(), I.harp(f, B * beat, (i === 0 ? 0.5 : 0.36) * (0.6 + 0.4 * I0) * g)); });
+        });
+      } else if (tex === 'arp') {
+        /* broken chord (harp and piano reach higher and go in eighths sooner) */
+        var orch = sp.accomp === 'harp' || sp.accomp === 'piano', step = I0 > (orch ? 0.4 : 0.6) ? 0.5 : 1;
+        var inst = sp.accomp === 'steel' ? I.steel : sp.accomp === 'harp' ? I.harp : sp.accomp === 'piano' ? I.piano : I.nylon;
+        if (orch) up = [low[0], low[2], hz(R + tones[0]), hz(R + tones[1]), hz(R + tones[2]), hz(R + tones[0] + 12)];
+        for (a = 0; a < Math.round(B / step); a++) {
+          var idx = a < 4 ? a : 8 - a;
+          add(t0 + at(a * step) + jitter(), inst(up[clamp(idx, 0, up.length - 1)], beat * 1.5, (a === 0 ? 0.5 : 0.36) * (0.6 + 0.5 * I0) * g));
+        }
+      } else {
+        /* folk strum: down, down-up, up-down-up; just the downbeats when it is quiet */
+        var pat = B === 3 ? [[0, 0, 1], [1, 0, 0.7], [1.5, 1, 0.5], [2, 0, 0.7], [2.5, 1, 0.5]]
+          : I0 < 0.4 ? [[0, 0, 1], [2, 0, 0.8]] : [[0, 0, 1], [1, 0, 0.75], [1.5, 1, 0.55], [2.5, 1, 0.55], [3, 0, 0.75], [3.5, 1, 0.5]];
+        pat.forEach(function (x) { add(t0 + at(x[0]) + jitter(), I.guitarstrum(full, x[2] * (0.6 + 0.4 * I0) * g, !!x[1], sp.accomp === 'steel')); });
+      }
+    }
+    /* one bar of drum kit: rock/pop beat ('kit'), brushes ('kitlight') or 8-bit noise drums ('chip'); fill = tom or snare fill at the end of a section */
+    function kitBar(t0, I0, g, fill) {
+      var chip = sp.perc === 'chip', light = sp.perc === 'kitlight', V = (0.55 + 0.45 * I0) * Math.min(1, g), thin = g < 0.6, x;
+      var K = chip ? I.chipkick : I.kick, S = chip ? I.chipsnare : light ? I.brush : I.snare;
+      function hit(b, fn, v, arg) { add(t0 + at(b) + (chip ? 0 : jitter() * 0.4), fn(v, arg)); }
+      hit(0, K, V);
+      if (thin) { for (x = 0; x < B; x++) hit(x, chip ? I.chiphat : I.hat, V * 0.6); return; }
+      if (B === 4) {
+        if (!light || I0 > 0.45) hit(2, K, V * 0.85);
+        if (I0 > 0.7 && !light) hit(2.5, K, V * 0.6);
+      }
+      var backs = B === 3 ? [1, 2] : [1, 3];
+      backs.forEach(function (b) { if (!(fill && b >= B / 2)) hit(b, S, V * (light ? 0.8 : 0.9)); });
+      var hs = light ? 1 : 0.5;
+      for (x = 0; x < B / hs; x++) {
+        var b = x * hs;
+        if (fill && b >= B / 2) break;
+        var open = !light && I0 > 0.6 && b === B - 0.5;
+        hit(b, chip ? I.chiphat : I.hat, V * (x % 2 ? 0.5 : 0.75) * (light ? 0.4 : 1), open);
+      }
+      if (fill) {
+        for (x = 0; x < 4; x++) {
+          var fb = B / 2 + x * (B / 8);
+          if (chip || light) hit(fb, S, V * (0.55 + x * 0.12));
+          else hit(fb, I.tom, V * (0.6 + x * 0.1), [196, 165, 131, 98][x]);
+        }
+      }
+    }
+    var WESTERN_ACC = { guitar: 1, steel: 1, chip: 1, power: 1, harp: 1, piano: 1, brass: 1 };
 
     /* Counter-melody: a slow string line (one or two notes a bar) that moves to the nearest chord tone,
        below the tune when the tune sits high (violas), above it when the tune sits low (violins). */
     var cPrev = null;
     function counterLine(prog, startBar, bars, gain) {
-      var high = mBase < 5, R = sp.root, lo = high ? R + 12 : R - 2, hi = lo + 12, half = B === 3 ? 2 : 2;
+      var high = mBase < N, R = sp.root, lo = high ? R + 12 : R - 2, hi = lo + 12, half = B === 3 ? 2 : 2;
       for (var k = 0; k < bars; k++) {
         var tones = chordTones(prog[k % 4]), t0 = at((startBar + k) * B);
         var cands = [];
@@ -652,7 +967,7 @@ function makeMusic(sfx) {
     }
 
     /* which layers play in each section: build up through the piece, thin out at the ends */
-    var battleLike = sp.perc === 'battle';
+    var battleLike = sp.perc === 'battle' || sp.perc === 'kit' || sp.perc === 'chip' || (sp.perc === 'timpani' && !!sp.ostinato);
     var lastA = structure.lastIndexOf('A');
     function layersFor(name, si, aSoFar) {
       if (name === 'intro') return { bed: 0.8, rhythm: battleLike ? 0.6 : 0, perc: battleLike ? 0.6 : 0, color: 1 };
@@ -673,7 +988,7 @@ function makeMusic(sfx) {
       if (name === 'intro') {
         bars = 4;
         accompany(progA2, bar, bars, I0, false, lay);
-        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, -5) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 2, 0.9));
+        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, -N) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 2, 0.9));
         if (rArr() < 0.6) playMelody(shiftNotes(motifA.filter(function (n) { return n.b < B; }), 2 * B), bar, sp.melodyB || sp.melody, I0 * 0.7, false, name, userA ? null : progA2);
       } else if (name === 'free') {
         /* rubato: the motif stretched out, each note held a little longer or shorter, breaths between phrases */
@@ -695,7 +1010,7 @@ function makeMusic(sfx) {
         playMelody(phraseA2, bar + 4, sp.melody, I0, orn, name, userA ? null : progA2);
         accompany(progA1, bar, 4, I0, false, lay); accompany(progA2, bar + 4, 4, I0, isLast, lay);
         if (lay.counter && sp.strings) { counterLine(progA1, bar, 4, counterGain(lay, I0)); counterLine(progA2, bar + 4, 4, counterGain(lay, I0)); }
-        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, -5) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 2, 0.8 + 0.2 * I0));
+        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, -N) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 2, 0.8 + 0.2 * I0));
       } else if (name === 'A2') {
         /* the theme again, told differently: other voice or octave, passing notes, the other accompaniment texture */
         bars = 8;
@@ -704,14 +1019,14 @@ function makeMusic(sfx) {
         playMelody(shiftNotes(vary(rArr, phraseA2, amt), 0, octA2), bar + 4, leadA2, I0, true, name, userA ? null : progA2);
         accompany(progA1, bar, 4, I0, false, lay, texture2); accompany(progA2, bar + 4, 4, I0, isLast, lay, texture2);
         if (sp.strings) { counterLine(progA1, bar, 4, counterGain(lay, I0)); counterLine(progA2, bar + 4, 4, counterGain(lay, I0)); }
-        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, -5) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 2, 0.9));
+        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, -N) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 2, 0.9));
       } else if (name === 'B') {
         bars = 8;
         playMelody(phraseB1, bar, sp.melodyB || sp.melody, I0, false, name, userB ? null : progB1);
         playMelody(phraseB2, bar + 4, sp.melodyB || sp.melody, I0, false, name, userB ? null : progB2);
         /* B opens thinner (half rhythm) and fills back in for its second phrase */
         accompany(progB1, bar, 4, I0, false, { bed: lay.bed, rhythm: 0.5, perc: 0.6, color: 1 }); accompany(progB2, bar + 4, 4, I0, isLast, lay);
-        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, sp.bass === 'bagpipe' ? -5 : -2) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 2, 0.8));
+        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, sp.bass === 'bagpipe' ? -N : -U(2)) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 2, 0.8));
       } else if (name === 'C') {
         /* development: the head of the theme climbs in sequence, then the head of B comes down to the tonic;
            the lead is doubled an octave below by the second instrument */
@@ -721,14 +1036,14 @@ function makeMusic(sfx) {
         if (!headB.length) headB = headA;
         var up = [], down = [];
         [0, 1, 2].forEach(function (k) { up = up.concat(shiftNotes(headA, k * B, k)); });
-        up.push({ b: 3 * B, d: B, deg: cadence(mBase + 2, false) });
+        up.push({ b: 3 * B, d: B, deg: cadence(mBase + U(2), false) });
         [0, 1, 2].forEach(function (k) { down = down.concat(shiftNotes(headB, k * B, -k)); });
         down.push({ b: 3 * B, d: B, deg: cadence(mBase, true) });
         playMelody(up, bar, sp.melody, I0, true, name, progB1);
         playMelody(down, bar + 4, sp.melody, I0, true, name, progA2);
         if (sp.melodyB && sp.melodyB !== sp.melody) {
-          playMelody(shiftNotes(up, 0, -5), bar, sp.melodyB, I0, false, name, progB1, 0.55);
-          playMelody(shiftNotes(down, 0, -5), bar + 4, sp.melodyB, I0, false, name, progA2, 0.55);
+          playMelody(shiftNotes(up, 0, -N), bar, sp.melodyB, I0, false, name, progB1, 0.55);
+          playMelody(shiftNotes(down, 0, -N), bar + 4, sp.melodyB, I0, false, name, progA2, 0.55);
         }
         accompany(progB1, bar, 4, I0, false, lay); accompany(progA2, bar + 4, 4, I0, isLast, lay);
         if (sp.dark) tritone(bar, bars, 0.3);
@@ -736,7 +1051,7 @@ function makeMusic(sfx) {
       } else if (name === 'brk') {
         /* breakdown: half the theme's head, slowed, on the second voice over the strings alone */
         bars = 4;
-        var slow = motifA.map(function (n) { return { b: n.b * 2, d: n.d * 2, deg: n.deg + 5 }; }).filter(function (n) { return n.b < PH; });
+        var slow = motifA.map(function (n) { return { b: n.b * 2, d: n.d * 2, deg: n.deg + N }; }).filter(function (n) { return n.b < PH; });
         if (slow.length) slow[slow.length - 1].d = Math.max(slow[slow.length - 1].d, PH - slow[slow.length - 1].b);
         playMelody(slow, bar, sp.melodyB || sp.melody, I0, false, name, progA1);
         accompany(progA1, bar, bars, I0, false, lay, battleLike ? texture : 'none');
@@ -751,11 +1066,15 @@ function makeMusic(sfx) {
         }
         playMelody(aug, bar, sp.melody, I0, false, name, userA ? null : progA2);
         accompany(progA2, bar, bars, I0 * 0.7, false, lay);
-        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, -5) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 3, 0.7));
-        if (sp.sparkle) add(at((bar + bars - 1) * B), I.chime(hz(midi(sp, 15)), 1));
+        if (sp.bass === 'drone' || sp.bass === 'bagpipe') add(at(bar * B), (sp.bass === 'bagpipe' ? I.bagpipe : I.drone)(hz(midi(sp, -N) - (sp.bass === 'bagpipe' ? 12 : 0)), bars * barLen + 3, 0.7));
+        if (sp.sparkle) add(at((bar + bars - 1) * B), I.chime(hz(midi(sp, U(15))), 1));
       }
-      /* gong marks the big arrivals, not every section */
-      if (name !== 'outro' && name !== 'free' && name !== 'brk' && (name === 'C' || (!sp.dark && ((battleLike && (si === 0 || name === 'B')) || I0 > 0.85)))) add(at(start * B), I.gong(0.5 + 0.4 * I0, -3));
+      /* gong (a crash cymbal on a drum kit) marks the big arrivals, not every section */
+      var arrival = name !== 'outro' && name !== 'free' && name !== 'brk' && (name === 'C' || (!sp.dark && ((battleLike && (si === 0 || name === 'B')) || I0 > 0.85)));
+      var kitPerc = sp.perc === 'kit' || sp.perc === 'kitlight' || sp.perc === 'chip';
+      if (kitPerc) { if ((arrival || name === 'B' || (name === 'A' && si > 1)) && sp.perc !== 'kitlight') add(at(start * B), sp.perc === 'chip' ? I.chipcrash(0.6 + 0.4 * I0) : I.crash(0.55 + 0.4 * I0)); }
+      else if (sp.perc === 'timpani') { if (arrival || name === 'C') add(at(start * B), I.crash(0.35 + 0.35 * I0)); }
+      else if (arrival && hx.n === 5) add(at(start * B), I.gong(0.5 + 0.4 * I0, -3));
       sections.push({ name: name, startBar: start, bars: bars, intensity: I0 });
       bar += bars;
     });
@@ -904,7 +1223,7 @@ function makeMusic(sfx) {
   }
 
   /* ---------- stingers ---------- */
-  var SP0 = { mode: 'gong', root: 50 }, SPY = { mode: 'yu', root: 45 }, SPH = { mode: 'gong', root: 62 };
+  var SPC = { mode: 'gong', root: 60, scale: 'diatonic' }, SP0 = { mode: 'gong', root: 50 }, SPY = { mode: 'yu', root: 45 }, SPH = { mode: 'gong', root: 62 };
   var STINGERS = {
     victory: function () {
       var ev = [{ t: 0, p: I.drum('drum-edge-loud', 0.8, -1) }];
@@ -942,6 +1261,31 @@ function makeMusic(sfx) {
       [0, 2, 4, 5, 7, 9].forEach(function (d, i) { ev.push({ t: 0.3 + i * 0.11, p: I.guqin(hz(midi(SP0, d + 5)), 1.2, 0.7) }); });
       ev.push({ t: 1.05, p: I.flute(hz(midi(SP0, 12)), 2.2, 0.9) });
       return ev;
+    },
+    /* orchestral fanfare: trumpet call over a timpani roll, landing on a full brass chord with a cymbal */
+    fanfare: function () {
+      var ev = [{ t: 0, p: I.timpani(hz(43), 0.7, true, 1.1) }], R = 58;
+      [[0, 0.16, 0], [0.18, 0.16, 0], [0.36, 0.16, 0], [0.54, 0.5, 5]].forEach(function (x) { ev.push({ t: x[0] + 0.5, p: I.trumpet(hz(R + 7 + x[2]), x[1], 0.9) }); });
+      ev.push({ t: 1.1, p: I.brass([hz(R - 12), hz(R + 4), hz(R + 7), hz(R + 12)], 2.2, 1) }, { t: 1.1, p: I.trumpet(hz(R + 12 + 4), 2.2, 1) },
+        { t: 1.1, p: I.timpani(hz(46), 1, false) }, { t: 1.1, p: I.crash(0.6) });
+      return ev;
+    },
+    /* 8-bit: a quick rising major arpeggio that lands on a held tonic chord */
+    chipWin: function () {
+      var ev = [], q = 0.09;
+      [0, 2, 4, 7, 9, 11].forEach(function (d, i) { ev.push({ t: i * q, p: I.chip(hz(midi(SPC, d)), q * 0.9, 0.9) }); });
+      [[7, 1], [9, 0.8], [11, 0.8]].forEach(function (x) { ev.push({ t: 6 * q, p: I.chip(hz(midi(SPC, x[0] + 3)), 0.9, x[1] * 0.7) }); });
+      ev.push({ t: 6 * q, p: I.chipbass(hz(SPC.root - 12), 0.9, 1) }, { t: 6 * q, p: I.chipcrash(0.7) });
+      return ev;
+    },
+    /* 8-bit: three falling notes, the last one sagging flat */
+    chipLose: function () {
+      var ev = [];
+      [[67, 0], [66, 0.28], [65, 0.56]].forEach(function (x) { ev.push({ t: x[1], p: I.chip(hz(x[0]), 0.25, 0.8) }); });
+      var last = I.chip(hz(64), 1.1, 0.8);
+      last.layers[0].freqEnd = hz(62); last.layers[0].slideTime = 1;
+      ev.push({ t: 0.84, p: last }, { t: 0.84, p: I.chipbass(hz(40), 1.1, 0.6) });
+      return ev;
     }
   };
   function playStinger(name, opts) {
@@ -973,7 +1317,7 @@ function makeMusic(sfx) {
     moods: Object.keys(PRESETS), stingers: Object.keys(STINGERS), modes: Object.keys(MODES),
     preset: function (name) { return spec({ preset: name }); },
     tempo: function (mood) { return (PRESETS[mood] || PRESETS.calm).tempo; },
-    compose: compose, instruments: I, midiOf: midi, chordTones: chordTones, modeTable: MODES,
+    compose: compose, instruments: I, orchestra: ORCH, midiOf: midi, chordTones: chordTones, modeTable: MODES,
     start: start, stop: stop, playing: function () { return live ? (live.sp.preset || 'custom') : null; },
     volume: function (v) { if (live) live.bus.out.gain.setTargetAtTime(v, sfx.context().currentTime, 0.15); },
     bus: bus,

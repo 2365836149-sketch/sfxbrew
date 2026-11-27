@@ -4,3 +4,4 @@ node_modules/
 *.zip
 skills-dist/
 skills/game-audio-director/
+soundfonts/

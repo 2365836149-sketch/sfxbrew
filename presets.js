@@ -27,10 +27,17 @@
     'page-turn': { length: 8.75, slot: 1.25, takes: 7 }, 'typewriter': { length: 4.55, slot: 0.35, takes: 13 }, 'chest-open': { length: 11.1, slot: 3.7, takes: 3 },
     'monster-growl': { length: 12.8, slot: 3.2, takes: 4 },
     /* 可循环的环境声：每段 5 秒，首尾已经交叉淡化过，从段首开始播放 */
-    'campfire': { length: 10.4, slot: 5.2, takes: 2, loop: 5 }, 'stream': { length: 10.4, slot: 5.2, takes: 2, loop: 5 }
+    'campfire': { length: 10.4, slot: 5.2, takes: 2, loop: 5 }, 'stream': { length: 10.4, slot: 5.2, takes: 2, loop: 5 },
+    /* 微采样瞬态图集（零延迟起音，配合合成引擎使用） */
+    'impact-hits': { length: 5.6, slot: 0.7, takes: 8 },
+    'whoosh-cuts': { length: 4.8, slot: 0.6, takes: 8 },
+    'magic-textures': { length: 5.6, slot: 0.7, takes: 8 },
+    'ui-tactile': { length: 3.2, slot: 0.4, takes: 8 }
   };
   /* 取多段素材的第 k 段：跳过每段开头的静音，播放到这一段结束 */
   const take = (name, k, o) => { const m = SAMPLES[name]; return S(name, Object.assign({ offset: k * m.slot + 0.035, hold: m.slot - 0.2, decay: 0.12 }, o)); };
+  /* 微采样瞬态：已经裁剪到起音点，从段首直接触发 */
+  const micro = (name, k, o) => { const m = SAMPLES[name]; return S(name, Object.assign({ offset: k * m.slot, hold: Math.max(0.05, m.slot - 0.12), decay: 0.08 }, o)); };
   /* 环境声的一段：淡入淡出各 0.3 秒，总长约等于一段 */
   const loopTake = (name, k, o) => { const m = SAMPLES[name]; return S(name, Object.assign({ offset: k * m.slot, attack: 0.3, hold: m.loop - 0.6, decay: 0.3 }, o)); };
   /* 播放一段素材的音层：默认整段自然播放完（hold 撑到素材结尾，最后 0.15 秒淡出） */
@@ -52,14 +59,14 @@
     /* 剑气 / 挥剑：刀身划过耳边 = 粉红噪声的窄带，中心频率先升后降（多普勒，cutoffPeak），
        音量先涨后落；加一点刀刃的哨音（同样先升后降）、低频的风压，大多数变体最后有金属余鸣。 */
     { id: 'swordQi', group: 'east', gen: () => {
-      const a = r(0.07, 0.14), d = r(0.18, 0.3), peak = r(3500, 6000);
+      const a = r(0.05, 0.1), d = r(0.16, 0.26), peak = r(4200, 6800);
       const layers = [
-        L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: r(600, 900), cutoffPeak: peak, cutoffEnd: r(500, 800), q: r(1.8, 3.5), attack: a, decay: d, vol: 1 }),
-        L({ type: 'tone', wave: 'sine', freq: r(500, 800), freqPeak: r(1500, 2500), freqEnd: r(400, 700), attack: a, decay: d * 0.8, vol: r(0.03, 0.08) }),
-        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 300, cutoffPeak: 900, cutoffEnd: 250, attack: a, decay: d, vol: 0.35 })
+        micro('whoosh-cuts', ri(0, 7), { pitch: r(-2, 3), vol: 0.85 }),
+        L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: r(700, 1000), cutoffPeak: peak, cutoffEnd: r(450, 750), q: r(2.0, 3.8), attack: a, decay: d, vol: 0.65 }),
+        L({ type: 'tone', wave: 'sine', freq: r(160, 220), freqPeak: r(320, 460), freqEnd: r(65, 95), attack: a * 0.7, decay: d * 0.9, vol: 0.25 }),
+        L({ type: 'modal', freq: r(1700, 2700), modes: [[1, 0.9, 0.85], [2.32, 0.55, 0.55], [4.18, 0.3, 0.35], [6.7, 0.15, 0.25]], resQ: 18, exciterFreq: r(3200, 5000), exciterDecay: 0.014, exciterVol: 0.4, start: a * 0.8, attack: 0.002, decay: r(0.38, 0.7), vol: r(0.16, 0.24) })
       ];
-      if (chance(0.7)) layers.push(same(L({ type: 'bell', freq: r(1800, 3000), partials: [[1, 1, 1], [2.32, 0.5, 0.6], [4.25, 0.3, 0.4], [6.63, 0.15, 0.3]], start: a * 0.9, attack: 0.002, decay: r(0.4, 0.8), vol: r(0.05, 0.1) })));
-      return P(layers, { reverb: 0.2, gain: 1.6 });
+      return P(layers, { reverb: 0.08, drive: 0.15, gain: 1.05 });
     } },
     /* 古琴：用 Karplus-Strong 弦振动（type 'string'）。三种弹法随机：
        散音（空弦，低沉）、按音带走手音（弹完手指在弦上滑，音高滑动 + 摩擦声）、泛音（轻点弦，空灵像钟）。 */
@@ -109,9 +116,11 @@
       return P([S('gong-1', { pitch: r(-5, 2), hold: r(4, 7), decay: 2.5, vol: 1 })], { reverb: 0.2, gain: 0.72 });
     } },
     { id: 'spell', group: 'east', gen: () => P([
-      L({ type: 'noise', filter: 'bandpass', cutoff: r(300, 600), cutoffEnd: r(3000, 6000), q: r(1, 3), attack: r(0.12, 0.25), decay: r(0.3, 0.5), vol: 0.3 }),
-      same(L({ type: 'bell', freq: penta(ri(15, 19)), attack: 0.003, decay: r(0.7, 1.2), vol: 0.12, rep: ri(4, 7), repGap: r(0.05, 0.1), repStep: pick([1, 2]) }))
-    ], { reverb: 0.45, echo: r(0.15, 0.3), echoTime: r(0.12, 0.22) }) },
+      micro('magic-textures', ri(0, 7), { pitch: r(-2, 4), vol: 0.42 }),
+      L({ type: 'tone', wave: 'sawtooth', unison: 4, detune: 22, freq: r(180, 260), freqEnd: r(360, 520), slideTime: 0.45, filter: 'lowpass', cutoff: r(350, 550), cutoffEnd: r(3200, 4800), sweepTime: 0.4, attack: r(0.1, 0.2), decay: r(0.35, 0.5), vol: 0.22, trem: 0.25, tremRate: 7 }),
+      same(L({ type: 'modal', freq: penta(ri(14, 18)), modes: [[1, 1, 1], [1.5, 0.45, 0.7], [2.76, 0.35, 0.5], [4.07, 0.2, 0.35]], resQ: 14, exciterVol: 0.22, exciterDecay: 0.006, attack: 0.002, decay: r(0.65, 1.1), vol: 0.22, rep: ri(5, 8), repGap: r(0.045, 0.085), repStep: pick([1, 2]), jitter: 0.25, pitchJitter: 0.4 })),
+      L({ type: 'tone', wave: 'sine', freq: r(95, 130), freqEnd: r(190, 260), slideTime: 0.35, attack: 0.06, decay: 0.4, vol: 0.26 })
+    ], { reverb: 0.18, echo: r(0.1, 0.2), echoTime: r(0.12, 0.2), gain: 0.85 }) },
     /* 天雷：近处是几声炸裂（白噪声 + 粉红噪声），远处只有滚雷；滚雷 = 同一声雷经过远近不同的路径
        在随机时刻陆续到达（jitter=1 的低通噪声块，每块截止频率不同）+ 一层摇晃的超低频。 */
     { id: 'thunder', group: 'east', gen: () => {
@@ -133,10 +142,10 @@
     { id: 'breakthrough', group: 'east', gen: () => {
       const d = ri(5, 8);
       return P([
-        same(L({ type: 'bell', freq: penta(d - 7), attack: 0.01, decay: r(4, 6), vol: 0.45 })),
-        L({ type: 'noise', filter: 'lowpass', cutoff: 400, cutoffEnd: 80, attack: 0.01, decay: 1.5, vol: 0.25 }),
-        same(L({ type: 'string', freq: penta(d), bright: 0.45, filter: 'lowpass', cutoff: 3500, cutoffEnd: 1500, start: 0.25, attack: 0.001, decay: 1.6, vol: 0.35, rep: ri(5, 7), repGap: r(0.07, 0.11), repStep: 1 }))
-      ], { reverb: 0.45 });
+        same(L({ type: 'modal', freq: penta(d - 7), modes: [[1, 1, 1], [2.0, 0.5, 0.7], [3.02, 0.25, 0.45]], resQ: 12, exciterVol: 0.35, attack: 0.008, decay: r(3.2, 4.5), vol: 0.5 })),
+        L({ type: 'noise', filter: 'lowpass', cutoff: 380, cutoffEnd: 80, attack: 0.01, decay: 1.2, vol: 0.28 }),
+        same(L({ type: 'string', freq: penta(d), bright: 0.5, filter: 'lowpass', cutoff: 3800, cutoffEnd: 1600, start: 0.22, attack: 0.001, decay: 1.4, vol: 0.38, rep: ri(5, 7), repGap: r(0.065, 0.1), repStep: 1 }))
+      ], { reverb: 0.18, gain: 0.9 });
     } },
     /* 符箓燃烧 / 火焰：真实的火 = 随机时刻爆出的大小不一的噼啪（jitter=1 近似泊松分布）
        + 偶尔几下大的爆裂 + 粉红噪声的"呼呼"火苗声（震音让它忽大忽小）+ 棕色噪声的低沉底噪；
@@ -181,10 +190,10 @@
       ], { reverb: 0.35 });
     } },
     { id: 'qiGather', group: 'east', gen: () => P([
-      L({ type: 'tone', wave: 'sine', freq: r(150, 250), freqEnd: r(700, 1100), attack: r(0.5, 0.9), decay: r(0.2, 0.4), vol: 0.25, vib: r(20, 50), vibRate: r(6, 10) }),
-      L({ type: 'noise', filter: 'bandpass', cutoff: 300, cutoffEnd: 3000, q: 4, attack: 0.6, decay: 0.3, vol: 0.2 }),
-      same(L({ type: 'bell', freq: penta(ri(18, 21)), start: 0.75, attack: 0.002, decay: 1.4, vol: 0.15 }))
-    ], { reverb: 0.4 }) },
+      L({ type: 'tone', wave: 'sawtooth', unison: 3, detune: 16, freq: r(150, 240), freqEnd: r(650, 980), filter: 'lowpass', cutoff: 400, cutoffEnd: 2600, attack: r(0.45, 0.8), decay: r(0.2, 0.35), vol: 0.22, vib: r(18, 40), vibRate: r(6, 9) }),
+      L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: 320, cutoffEnd: 2800, q: 3.5, attack: 0.55, decay: 0.28, vol: 0.22 }),
+      same(L({ type: 'modal', freq: penta(ri(18, 21)), modes: [[1, 1, 1], [2.76, 0.4, 0.55], [5.4, 0.2, 0.3]], resQ: 14, exciterVol: 0.25, start: 0.7, attack: 0.002, decay: 1.1, vol: 0.25 }))
+    ], { reverb: 0.16, gain: 0.9 }) },
 
     /* 琵琶：明亮的弦（bright 高），三种弹法：单弹、轮指（快速重复同一音）、扫弦（几乎同时的和弦） */
     { id: 'pipa', group: 'east', gen: () => {
@@ -211,13 +220,13 @@
       const len = r(1, Math.min(3, SAMPLES[name].length - 0.6));
       return P([S(name, { pitch: slide > 0 ? pitch - slide : pitch, pitchEnd: slide > 0 ? pitch : pitch + (slide < 0 ? slide : 0), slideTime: r(0.15, 0.3), offset: r(0, 0.3), attack: r(0.04, 0.1), hold: len, decay: r(0.3, 0.6), vol: 1 })], { reverb: 0.3, gain: 0.85 });
     } },
-    /* 木鱼：木头的分音（短、不和谐）+ 敲击的"咔"，偶尔连敲两三下 */
+    /* 木鱼：空心木腔的圆润共振（强基音 + 空腔泛音，软木槌轻敲，避免干瘪硬敲声） */
     { id: 'woodfish', group: 'east', gen: () => {
-      const f = r(450, 950), n = pick([1, 1, 2, 3]), gap = r(0.18, 0.3);
+      const f = r(340, 620), n = pick([1, 1, 2, 3]), gap = r(0.18, 0.3);
       return P([
-        same(L({ type: 'bell', freq: f, partials: [[1, 1, 1], [1.58, 0.45, 0.6], [2.42, 0.2, 0.4]], attack: 0.0008, decay: r(0.08, 0.16), vol: 0.8, rep: n, repGap: gap, repStep: 0 })),
-        L({ type: 'noise', filter: 'bandpass', cutoff: r(2000, 3500), cutoffEnd: 2000, q: 2, attack: 0.0005, decay: 0.01, vol: 0.5, rep: n, repGap: gap })
-      ], { reverb: 0.18 });
+        same(L({ type: 'modal', freq: f, modes: [[1, 1, 1], [1.56, 0.35, 0.45], [2.35, 0.15, 0.25]], resQ: 22, exciterFreq: f * 1.4, exciterDecay: 0.005, exciterVol: 0.22, attack: 0.001, decay: r(0.11, 0.17), vol: 0.85, rep: n, repGap: gap, repStep: 0 })),
+        L({ type: 'tone', wave: 'sine', freq: f * 1.05, freqEnd: f, slideTime: 0.02, attack: 0.001, decay: r(0.1, 0.16), vol: 0.45, rep: n, repGap: gap, repStep: 0 })
+      ], { reverb: 0.09, gain: 0.9 });
     } },
     /* 战鼓（真实录音）：中国大鼓（dagu）的鼓心、鼓边、鼓框单击录音，由引擎编成节奏。
        每一下都是一记重击，鼓声自然延续 2~3 秒，前后重叠就"绵延不绝"；降调 1~4 个半音让鼓更大更沉。
@@ -253,103 +262,97 @@
        思路：起音瞬态（极短噪声，"咔"）+ 主体（音高在几十毫秒内快速滑落，才有冲击感）+ 尾巴。
        少用裸方波，多用 FM（金属、木头、玻璃质感）和叠音失谐（更厚）。偶尔带一点 8-bit 降位作为复古变体。 */
     { id: 'coin', group: 'general', gen: () => {
-      const f = r(1000, 1500), step = pick([5, 7]), gap = r(0.06, 0.09);
+      const f = r(1050, 1500), step = pick([5, 7]), gap = r(0.06, 0.085);
       return P([
-        same(L({ type: 'fm', freq: f, fmRatio: pick([1.41, 2.76, 3.5]), fmIndex: r(1.5, 3), fmDecay: 0.08, attack: 0.001, decay: r(0.3, 0.5), vol: 0.45, rep: 2, repGap: gap, repStep: step, scale: 'chromatic' })),
-        same(L({ type: 'tone', freq: f * 2, attack: 0.001, decay: 0.2, vol: 0.1, rep: 2, repGap: gap, repStep: step, scale: 'chromatic' })),
-        L({ type: 'noise', filter: 'highpass', cutoff: 6000, cutoffEnd: 6000, attack: 0.0005, decay: 0.012, vol: 0.35, rep: 2, repGap: gap })
-      ], { reverb: 0.12, crush: chance(0.15) ? ri(6, 8) : 0 });
+        same(L({ type: 'modal', freq: f, modes: [[1, 1, 1], [2.41, 0.45, 0.6], [4.15, 0.2, 0.35]], resQ: 18, exciterFreq: f * 2.5, exciterDecay: 0.005, exciterVol: 0.4, attack: 0.0008, decay: r(0.28, 0.45), vol: 0.55, rep: 2, repGap: gap, repStep: step, scale: 'chromatic' })),
+        same(L({ type: 'fm', freq: f, fmRatio: 2, fmIndex: r(1.2, 2.2), fmDecay: 0.06, attack: 0.001, decay: r(0.22, 0.36), vol: 0.25, rep: 2, repGap: gap, repStep: step, scale: 'chromatic' }))
+      ], { reverb: 0.05, crush: chance(0.15) ? ri(6, 8) : 0, gain: 0.9 });
     } },
     { id: 'pickup', group: 'general', gen: () => {
-      const f = r(500, 800);
+      const f = r(520, 820);
       return P([
-        L({ type: 'tone', wave: 'triangle', unison: 2, detune: 8, freq: f, freqEnd: f * r(1.8, 2.4), slideTime: r(0.05, 0.09), attack: 0.002, decay: r(0.15, 0.25), vol: 0.5 }),
-        same(L({ type: 'fm', freq: f * 3, fmRatio: 2, fmIndex: 1, fmDecay: 0.05, start: 0.04, attack: 0.001, decay: 0.2, vol: 0.12 })),
-        L({ type: 'noise', filter: 'highpass', cutoff: 5000, cutoffEnd: 5000, attack: 0.0005, decay: 0.01, vol: 0.25 })
-      ], { reverb: 0.1, crush: chance(0.15) ? ri(6, 8) : 0 });
+        L({ type: 'tone', wave: 'triangle', unison: 2, detune: 8, freq: f, freqEnd: f * r(1.8, 2.4), slideTime: r(0.05, 0.085), attack: 0.0015, decay: r(0.14, 0.22), vol: 0.5 }),
+        same(L({ type: 'modal', freq: f * 2.5, modes: [[1, 1, 1], [2.2, 0.4, 0.5]], resQ: 14, exciterVol: 0.3, start: 0.035, attack: 0.001, decay: 0.18, vol: 0.28 }))
+      ], { reverb: 0.05, crush: chance(0.15) ? ri(6, 8) : 0, gain: 0.9 });
     } },
     { id: 'click', group: 'general', gen: () => {
-      const f = r(700, 1400);
+      const f = r(750, 1500);
       return P([
-        L({ type: 'noise', filter: 'bandpass', cutoff: r(2000, 4500), cutoffEnd: r(2000, 4500), q: r(1.5, 4), attack: 0.0005, decay: r(0.008, 0.018), vol: 0.9 }),
-        L({ type: 'fm', freq: f, freqEnd: f * 0.6, slideTime: 0.015, fmRatio: r(1.5, 3.2), fmIndex: r(1, 3), fmDecay: 0.01, attack: 0.0005, decay: r(0.02, 0.05), vol: 0.5 })
-      ]);
+        micro('ui-tactile', ri(0, 7), { pitch: r(-2, 3), hold: 0.08, decay: 0.04, vol: 0.75 }),
+        L({ type: 'modal', freq: f, modes: [[1, 1, 1], [2.1, 0.5, 0.5], [3.4, 0.25, 0.3]], resQ: 12, exciterFreq: r(2200, 4200), exciterDecay: 0.004, exciterVol: 0.55, attack: 0.0005, decay: r(0.014, 0.028), vol: 0.55 }),
+        L({ type: 'tone', freq: 180, freqEnd: 65, slideTime: 0.01, attack: 0.0005, decay: 0.014, vol: 0.35 })
+      ], { gain: 0.95 });
     } },
     { id: 'confirm', group: 'general', gen: () => P([
-      same(L({ type: 'fm', freq: r(600, 850), fmRatio: pick([1, 2]), fmIndex: r(1, 2), fmDecay: 0.15, attack: 0.002, decay: r(0.25, 0.4), vol: 0.4, rep: 2, repGap: r(0.07, 0.1), repStep: pick([4, 5, 7]), scale: 'chromatic' })),
-      L({ type: 'noise', filter: 'highpass', cutoff: 4000, cutoffEnd: 4000, attack: 0.0005, decay: 0.01, vol: 0.15 })
-    ], { reverb: 0.15 }) },
+      same(L({ type: 'modal', freq: r(580, 820), modes: [[1, 1, 1], [2, 0.35, 0.5], [3.98, 0.15, 0.25]], resQ: 10, exciterVol: 0.25, exciterDecay: 0.005, attack: 0.0015, decay: r(0.22, 0.35), vol: 0.5, rep: 2, repGap: r(0.07, 0.095), repStep: pick([4, 5, 7]), scale: 'chromatic' })),
+      same(L({ type: 'fm', freq: r(580, 820), fmRatio: 1, fmIndex: 0.8, fmDecay: 0.1, attack: 0.002, decay: 0.22, vol: 0.18, rep: 2, repGap: 0.08, repStep: 5, scale: 'chromatic' }))
+    ], { reverb: 0.07, gain: 0.9 }) },
     { id: 'error', group: 'general', gen: () => {
-      const f = r(180, 260), gap = r(0.13, 0.17), step = pick([0, -1, -2]);
+      const f = r(170, 240), gap = r(0.12, 0.16), step = pick([0, -1, -2]);
       return P([
-        same(L({ type: 'tone', wave: 'triangle', unison: 3, detune: r(15, 30), freq: f, filter: 'lowpass', cutoff: 1600, cutoffEnd: 700, attack: 0.003, decay: r(0.15, 0.22), vol: 0.3, rep: 2, repGap: gap, repStep: step, scale: 'chromatic' })),
-        same(L({ type: 'tone', freq: f / 2, attack: 0.003, decay: 0.18, vol: 0.15, rep: 2, repGap: gap, repStep: step, scale: 'chromatic' }))
-      ]);
+        same(L({ type: 'tone', wave: 'sawtooth', unison: 3, detune: r(16, 28), freq: f, filter: 'lowpass', cutoff: 1500, cutoffEnd: 480, attack: 0.002, decay: r(0.13, 0.19), vol: 0.35, rep: 2, repGap: gap, repStep: step, scale: 'chromatic' })),
+        same(L({ type: 'tone', freq: f / 2, attack: 0.002, decay: 0.16, vol: 0.25, rep: 2, repGap: gap, repStep: step, scale: 'chromatic' }))
+      ], { reverb: 0.02, drive: 0.15, gain: 0.9 });
     } },
     { id: 'jump', group: 'general', gen: () => {
-      const f = r(160, 280);
+      const f = r(160, 270);
       return P([
-        L({ type: 'tone', wave: 'triangle', unison: 2, detune: 10, freq: f, freqEnd: f * r(2, 2.8), slideTime: r(0.08, 0.14), filter: 'lowpass', cutoff: 2500, cutoffEnd: 2500, attack: 0.003, decay: r(0.18, 0.26), vol: 0.55 }),
-        L({ type: 'noise', filter: 'bandpass', cutoff: 500, cutoffEnd: 2500, sweepTime: 0.12, q: 1.2, attack: 0.02, decay: 0.15, vol: 0.3 }),
-        L({ type: 'noise', filter: 'highpass', cutoff: 2000, cutoffEnd: 2000, attack: 0.0005, decay: 0.012, vol: 0.2 })
-      ], { crush: chance(0.15) ? ri(6, 8) : 0 });
+        L({ type: 'tone', wave: 'triangle', unison: 2, detune: 10, freq: f, freqEnd: f * r(2, 2.7), slideTime: r(0.07, 0.12), filter: 'lowpass', cutoff: 2600, cutoffEnd: 2600, attack: 0.002, decay: r(0.16, 0.23), vol: 0.55 }),
+        L({ type: 'modal', freq: f * 1.5, modes: [[1, 0.8, 0.5], [2.2, 0.3, 0.3]], resQ: 8, exciterVol: 0.4, exciterDecay: 0.006, attack: 0.001, decay: 0.04, vol: 0.3 }),
+        L({ type: 'noise', filter: 'bandpass', cutoff: 600, cutoffEnd: 2400, sweepTime: 0.11, q: 1.2, attack: 0.015, decay: 0.12, vol: 0.25 })
+      ], { reverb: 0.03, crush: chance(0.15) ? ri(6, 8) : 0, gain: 0.9 });
     } },
     { id: 'hit', group: 'general', gen: () => P([
-      L({ type: 'noise', filter: 'highpass', cutoff: r(2000, 4000), cutoffEnd: 2000, attack: 0.0005, decay: r(0.01, 0.02), vol: 0.9 }),
-      L({ type: 'tone', freq: r(160, 240), freqEnd: r(45, 60), slideTime: r(0.03, 0.06), attack: 0.001, decay: r(0.12, 0.2), vol: 0.95 }),
-      L({ type: 'noise', filter: 'lowpass', cutoff: 5000, cutoffEnd: 400, sweepTime: 0.08, attack: 0.001, decay: r(0.08, 0.15), vol: 0.6 })
-    ], { drive: r(0.35, 0.6), reverb: 0.08 }) },
-    /* 爆炸：爆炸瞬间的冲击（极短白噪声）+ 往下沉的超低频"咚" + 棕色噪声的主体轰鸣（截止频率慢慢降下）
-       + 中频的"轰" + 随机时刻落下的碎片（jitter + pitchJitter）+ 摇晃的长尾巴。不加失真，靠层次出力度。 */
+      micro('impact-hits', ri(0, 7), { pitch: r(-3, 2), vol: 0.75 }),
+      L({ type: 'modal', freq: r(480, 860), modes: [[1, 1, 1], [1.92, 0.6, 0.5], [3.14, 0.35, 0.3]], resQ: 10, exciterFreq: r(1800, 3400), exciterDecay: 0.007, exciterVol: 0.65, attack: 0.0005, decay: r(0.035, 0.06), vol: 0.5 }),
+      L({ type: 'tone', freq: r(180, 260), freqEnd: r(42, 58), slideTime: r(0.025, 0.045), attack: 0.0008, hold: 0.012, decay: r(0.11, 0.18), vol: 0.85 })
+    ], { drive: r(0.2, 0.38), reverb: 0.03, gain: 0.9 }) },
+    /* 爆炸：真实撞击底噪 + 火花噼啪 + 超低频下潜 + 棕色噪声火球轰鸣 + 碎片。 */
     { id: 'explosion', group: 'general', gen: () => {
-      /* 爆炸：剧烈 = 响度撑得住（hold 让主体在最响处停留）+ 失真带来的"撕裂"泛音 + 足够长的尾巴。
-         冲击（白噪声爆音）→ 往下沉的超低频重拳 → 棕色噪声主体（满频带开始，慢慢变闷）
-         → 中频的"轰"→ 随机落下的碎片 → 摇晃的余震。40% 的变体是连环爆炸。 */
       const chain = chance(0.4), n = chain ? ri(2, 3) : 1, gap = r(0.25, 0.5);
       const C = { rep: n, repGap: gap, jitter: chain ? 0.3 : 0, repGain: chain ? 0.8 : 1 };
       return P([
-        L(Object.assign({ type: 'noise', attack: 0.0005, hold: 0.012, decay: 0.05, vol: 1 }, C)),
-        L(Object.assign({ type: 'tone', freq: r(110, 140), freqEnd: r(30, 38), slideTime: 0.16, attack: 0.001, hold: 0.06, decay: r(0.8, 1.1), vol: 1 }, C)),
-        L(Object.assign({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: r(5000, 8000), cutoffEnd: 90, sweepTime: r(0.8, 1.4), attack: 0.002, hold: r(0.15, 0.3), decay: r(1.8, 2.8), vol: 1 }, C)),
-        L(Object.assign({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: 700, cutoffEnd: 160, q: 0.5, attack: 0.003, hold: 0.1, decay: r(1, 1.5), vol: 0.8 }, C)),
-        L({ type: 'noise', filter: 'bandpass', cutoff: r(2000, 4000), cutoffEnd: 2000, q: 2, start: r(0.15, 0.3), attack: 0.0005, decay: r(0.005, 0.02), vol: 0.7, rep: ri(20, 40), repGap: r(0.04, 0.07), jitter: 1, pitchJitter: 12 }),
-        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 160, cutoffEnd: 110, start: 0.2, attack: 0.3, decay: r(2.5, 3.5), vol: 0.7, trem: 0.45, tremRate: r(1, 2) })
-      ], { reverb: 0.3, drive: 0.5, gain: 0.32 });
+        micro('impact-hits', ri(0, 7), Object.assign({ pitch: r(-7, -3), vol: 0.85 }, C)),
+        micro('magic-textures', ri(0, 7), Object.assign({ pitch: r(-6, -2), start: 0.04, vol: 0.45 }, C)),
+        L(Object.assign({ type: 'tone', freq: r(115, 145), freqEnd: r(28, 36), slideTime: 0.14, attack: 0.001, hold: 0.05, decay: r(0.85, 1.2), vol: 0.95 }, C)),
+        L(Object.assign({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: r(4500, 7500), cutoffEnd: 85, sweepTime: r(0.7, 1.3), attack: 0.002, hold: r(0.14, 0.28), decay: r(1.8, 2.6), vol: 0.9 }, C)),
+        L(Object.assign({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: 650, cutoffEnd: 140, q: 0.6, attack: 0.003, hold: 0.08, decay: r(0.9, 1.4), vol: 0.7 }, C)),
+        L({ type: 'modal', freq: r(900, 1800), modes: [[1, 0.8, 0.6], [2.1, 0.5, 0.4]], resQ: 8, exciterVol: 0.65, exciterDecay: 0.008, start: r(0.12, 0.25), attack: 0.0005, decay: r(0.015, 0.04), vol: 0.45, rep: ri(14, 24), repGap: r(0.045, 0.08), jitter: 1, pitchJitter: 12 })
+      ], { reverb: 0.1, drive: 0.3, gain: 0.55 });
     } },
-    /* 激光 / 能量枪：科幻电影里的"咻"本质上是一段极快下落的啁啾（chirp），几条几乎重合的啁啾叠在一起
-       （微小的随机音高差）产生"弹簧"般的金属感，加一点短回声。 */
+    /* 激光 / 能量枪：电火花起音 + FM 啁啾 + 锯齿波下潜。 */
     { id: 'laser', group: 'general', gen: () => {
-      const f0 = r(2500, 4500), f1 = r(150, 350), st = r(0.08, 0.15);
+      const f0 = r(2400, 4200), f1 = r(140, 320), st = r(0.07, 0.13);
       return P([
-        L({ type: 'tone', wave: 'sine', freq: f0, freqEnd: f1, slideTime: st, attack: 0.001, decay: r(0.15, 0.25), vol: 0.5, rep: 3, repGap: r(0.003, 0.008), jitter: 0.3, pitchJitter: 1.5 }),
-        L({ type: 'tone', wave: 'sawtooth', freq: f0 * 0.5, freqEnd: f1 * 0.5, slideTime: st, filter: 'lowpass', cutoff: 3000, cutoffEnd: 500, attack: 0.001, decay: 0.15, vol: 0.12 }),
-        L({ type: 'noise', filter: 'highpass', cutoff: 5000, cutoffEnd: 5000, attack: 0.0005, decay: 0.02, vol: 0.3 })
-      ], { reverb: 0.12, echo: 0.2, echoTime: r(0.07, 0.11) });
+        micro('magic-textures', ri(0, 5), { pitch: r(2, 7), hold: 0.12, decay: 0.05, vol: 0.35 }),
+        L({ type: 'fm', freq: f0, freqEnd: f1, slideTime: st, fmRatio: 1.41, fmIndex: 2.2, fmDecay: st * 0.8, attack: 0.0008, decay: r(0.13, 0.21), vol: 0.5, rep: 3, repGap: r(0.003, 0.007), jitter: 0.25, pitchJitter: 1.5 }),
+        L({ type: 'tone', wave: 'sawtooth', freq: f0 * 0.5, freqEnd: f1 * 0.5, slideTime: st, filter: 'lowpass', cutoff: 3200, cutoffEnd: 450, attack: 0.001, decay: 0.14, vol: 0.2 })
+      ], { reverb: 0.04, echo: 0.1, echoTime: r(0.06, 0.09), gain: 0.9 });
     } },
     { id: 'powerUp', group: 'general', gen: () => chance(0.5)
       ? P([
-        same(L({ type: 'fm', unison: 2, detune: 10, freq: r(300, 450), fmRatio: 1, fmIndex: 1, fmDecay: 0.08, attack: 0.002, decay: 0.15, vol: 0.35, rep: 6, repGap: r(0.045, 0.06), repStep: 1, scale: 'penta' })),
-        same(L({ type: 'bell', freq: penta(ri(20, 22)), start: 0.32, attack: 0.002, decay: 1.2, vol: 0.12 }))
-      ], { reverb: 0.2 })
+        same(L({ type: 'fm', unison: 2, detune: 10, freq: r(300, 450), fmRatio: 1, fmIndex: 1.1, fmDecay: 0.08, attack: 0.002, decay: 0.15, vol: 0.38, rep: 6, repGap: r(0.045, 0.06), repStep: 1, scale: 'penta' })),
+        same(L({ type: 'modal', freq: penta(ri(20, 22)), modes: [[1, 1, 1], [2.76, 0.4, 0.5]], resQ: 14, exciterVol: 0.2, start: 0.3, attack: 0.002, decay: 0.9, vol: 0.22 }))
+      ], { reverb: 0.1, gain: 0.9 })
       : P([
-        L({ type: 'tone', wave: 'sawtooth', unison: 3, detune: 20, freq: r(200, 300), freqEnd: r(650, 900), slideTime: 0.5, filter: 'lowpass', cutoff: 400, cutoffEnd: 5000, sweepTime: 0.5, attack: 0.4, decay: 0.3, vol: 0.35 }),
-        L({ type: 'noise', filter: 'bandpass', cutoff: 400, cutoffEnd: 5000, q: 3, attack: 0.45, decay: 0.2, vol: 0.2 })
-      ], { reverb: 0.2 }) },
+        L({ type: 'tone', wave: 'sawtooth', unison: 3, detune: 20, freq: r(200, 300), freqEnd: r(650, 900), slideTime: 0.48, filter: 'lowpass', cutoff: 400, cutoffEnd: 5000, sweepTime: 0.48, attack: 0.35, decay: 0.25, vol: 0.35 }),
+        L({ type: 'noise', filter: 'bandpass', cutoff: 400, cutoffEnd: 5000, q: 2.5, attack: 0.4, decay: 0.2, vol: 0.2 })
+      ], { reverb: 0.1, gain: 0.9 }) },
     { id: 'levelUp', group: 'general', gen: () => {
       const d = ri(12, 15);
       return P([
-        same(L({ type: 'fm', freq: penta(d), fmRatio: 1, fmIndex: 1.5, fmDecay: 0.12, attack: 0.002, decay: 0.5, vol: 0.4, rep: 4, repGap: r(0.08, 0.11), repStep: 2 })),
-        same(L({ type: 'tone', wave: 'triangle', unison: 3, detune: 15, freq: penta(d + 5), start: 0.35, attack: 0.05, decay: 1, vol: 0.18 })),
-        same(L({ type: 'bell', freq: penta(d + 10), start: 0.36, attack: 0.002, decay: 1.4, vol: 0.12 }))
-      ], { reverb: 0.3 });
+        same(L({ type: 'fm', freq: penta(d), fmRatio: 1, fmIndex: 1.4, fmDecay: 0.12, attack: 0.002, decay: 0.45, vol: 0.42, rep: 4, repGap: r(0.075, 0.1), repStep: 2 })),
+        same(L({ type: 'tone', wave: 'triangle', unison: 3, detune: 15, freq: penta(d + 5), start: 0.33, attack: 0.04, decay: 0.85, vol: 0.22 })),
+        same(L({ type: 'modal', freq: penta(d + 10), modes: [[1, 1, 1], [2.76, 0.4, 0.55], [5.4, 0.2, 0.3]], resQ: 14, exciterVol: 0.25, start: 0.34, attack: 0.002, decay: 1.0, vol: 0.22 }))
+      ], { reverb: 0.12, gain: 0.9 });
     } },
-    /* 挥动：两层空气声都"先升后降"（多普勒）：粉红噪声带通是主体，棕色噪声低通是风压。 */
+    /* 挥动：真实破空声 + 粉红噪声多普勒带通。 */
     { id: 'whoosh', group: 'general', gen: () => {
-      const a = r(0.1, 0.22), d = r(0.18, 0.32);
+      const a = r(0.08, 0.18), d = r(0.16, 0.28);
       return P([
-        L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: r(300, 500), cutoffPeak: r(1500, 3500), cutoffEnd: r(250, 400), q: r(1, 2), attack: a, decay: d, vol: 1 }),
-        L({ type: 'noise', color: 'brown', filter: 'lowpass', cutoff: 200, cutoffPeak: 700, cutoffEnd: 180, attack: a, decay: d, vol: 0.4 })
-      ], { reverb: 0.08, gain: 1.5 });
+        micro('whoosh-cuts', ri(0, 7), { pitch: r(-3, 2), vol: 0.85 }),
+        L({ type: 'noise', color: 'pink', filter: 'bandpass', cutoff: r(300, 500), cutoffPeak: r(1500, 3500), cutoffEnd: r(250, 400), q: r(1, 2), attack: a, decay: d, vol: 0.65 })
+      ], { reverb: 0.04, gain: 1.1 });
     } },
 
     /* ================= 第一批扩充（2026-11）：战斗 / 角色 / 环境 / 界面 ================= */

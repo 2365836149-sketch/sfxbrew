@@ -77,7 +77,7 @@ npx sfxbrew music primitive --seed 7 --out music/stone-age.wav
 npx sfxbrew stinger guiltChild --out music/guilt-child.wav
 ```
 
-Moods: `calm`, `battle`, `mystery`, `sad` (Eastern), `primitive` (bone flute, hummed drone, log drums, sticks, shaker), `tribal` (clay ocarina, bamboo flute, plucked zither, frame drum), `medieval` (dorian fiddle and shawm, lute, bagpipe drone, tambourine). Stingers: `victory`, `defeat`, `battleStart`, `treasure`, `breakthrough`, and three quiet 2-3 s ones for dark moments: `guiltCannibal`, `guiltChild`, `grief`. MCP tool: `generate_music`.
+Moods: `calm`, `battle`, `mystery`, `sad` (Eastern), `primitive` (bone flute, hummed drone, log drums, sticks, shaker), `tribal` (clay ocarina, bamboo flute, plucked zither, frame drum), `medieval` (dorian fiddle and shawm, lute, bagpipe drone, tambourine), and Western ones with seven-note melodies and V–I harmony: `chiptune` and `chipBoss` (8-bit square leads, fast arpeggios, triangle bass, noise drums), `adventure` (violins, nylon guitar, strings, light kit), `action` (distorted guitar, power chords, electric bass, drum kit), `acoustic` (nylon and steel-string guitars, flute, brushes), plus orchestral ones on CC0 recordings from VSCO 2 CE: `fantasy` (flute, oboe, horn, harp, strings, timpani), `epic` (horns, trumpets, brass stabs, cello spiccato, timpani), `piano` (solo upright piano over strings), `pastoral` (clarinet, oboe, flute, harp). Stingers: `victory`, `defeat`, `battleStart`, `treasure`, `breakthrough`, and three quiet 2-3 s ones for dark moments: `guiltCannibal`, `guiltChild`, `grief`, plus 8-bit `chipWin` and `chipLose` and an orchestral `fanfare`. MCP tool: `generate_music`.
 
 ## Sound packs
 
@@ -99,4 +99,4 @@ Tweak any sound with sliders and export WAV / JS in the [web editor](https://sfx
 
 Code: MIT. Generated sounds: yours, free for any use.
 
-A few presets (war drum, lightning, gong, erhu) use short CC0 recordings from Freesound, listed with their recordists in [samples/CREDITS.md](samples/CREDITS.md).
+A few presets (war drum, lightning, gong, erhu) and the music engine's recorded instruments (strings, brass, woodwinds, harp, piano, timpani) use short CC0 recordings from Freesound and VSCO 2 CE, listed with their recordists in [samples/CREDITS.md](samples/CREDITS.md).

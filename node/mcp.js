@@ -149,21 +149,59 @@ server.registerTool('generate_music', {
     'Also renders short stingers instead when "stinger" is given: ' + Object.entries(lib.STINGER_META).map(([k, d]) => k + ' (' + d + ')').join('; ') + '.',
   inputSchema: {
     mood: z.enum(Object.keys(lib.MUSIC_META)).optional().describe('Music style for a loop'),
+    prompt: z.string().optional().describe('Natural language description in Chinese or English (e.g. "B站科技评测，直接高潮30秒" or "治愈系Vlog，三拍子，钢琴和木吉他，不要鼓")'),
     stinger: z.enum(Object.keys(lib.STINGER_META)).optional().describe('Render this short stinger instead of a loop'),
     out_path: z.string().describe('WAV file to write, e.g. "assets/music/town.wav". With count > 1, files get -01, -02 ... suffixes.'),
     count: z.number().int().min(1).max(10).optional().describe('Number of different pieces (default 1)'),
-    seed: z.number().int().optional().describe('Seed for a reproducible piece; piece i uses seed + i')
+    seed: z.number().int().optional().describe('Seed for a reproducible piece; piece i uses seed + i'),
+    instruments: z.record(z.string(), z.union([z.string(), z.number(), z.null(), z.boolean()])).optional().describe('Override or disable SoundFont instruments per role (melody, counter, pad, accomp, bass, drums), e.g. {"melody": "koto", "counter": "flute", "drums": null}'),
+    groove: z.enum(['boombap', 'fourOnFloor', 'waltz', 'march', 'trap', 'bossa', 'ambient']).optional().describe('Freeform rhythm groove independent of mood'),
+    scale: z.enum(['major', 'minor', 'penta', 'pentaMinor', 'dorian', 'phrygian', 'blues', 'harmonicMinor', 'miyako']).optional().describe('Musical scale for freeform composition'),
+    chord_mood: z.enum(['bright', 'chill', 'epic', 'dark', 'jazzy']).optional().describe('Chord progression mood'),
+    chords: z.array(z.string()).optional().describe('Custom chord progression by chord names, e.g. ["Am", "F", "C", "G"] or ["Dm7", "G7", "Cmaj7", "A7"]'),
+    structure: z.array(z.enum(['intro', 'A', 'A2', 'B', 'C', 'breakdown', 'outro'])).optional().describe('Custom section order (4 bars per section), e.g. ["intro", "A", "breakdown", "C", "outro"]'),
+    arc: z.enum(['steady', 'build', 'drop', 'wave']).optional().describe('Dynamic energy curve across sections: steady (even), build (gradual rise), drop (punchy start + breakdown), wave (gentle rise and fall)'),
+    intensity: z.array(z.number().min(0.2).max(1)).optional().describe('Custom energy level (0.2-1.0) per section, e.g. [0.7, 0.85, 0.65, 0.92]'),
+    hook_only: z.boolean().optional().describe('Start directly at the chorus/hook (8 bars, ideal for 15-30s short videos)'),
+    tempo: z.number().min(40).max(200).optional().describe('Custom BPM tempo'),
+    meter: z.union([z.literal(3), z.literal(4)]).optional().describe('Time signature beats per bar (3 or 4)'),
+    stems_dir: z.string().optional().describe('Directory to write individual track stem WAVs (melody.wav, pad.wav, accomp.wav, bass.wav, drums.wav) when using SoundFont moods or tracks'),
+    tracks: z.array(z.record(z.string(), z.any())).optional().describe('Custom multi-track MIDI note array for SoundFont rendering')
   },
   annotations: { destructiveHint: false }
-}, async ({ mood, stinger, out_path, count, seed }) => {
+}, async ({ mood, prompt, stinger, out_path, count, seed, instruments, groove, scale, chord_mood, chords, structure, arc, intensity, hook_only, tempo, meter, stems_dir, tracks }) => {
   try {
     checkExt(out_path, '.wav');
-    if (!mood && !stinger) throw new Error('give a mood or a stinger');
+    if (!mood && !prompt && !stinger && !tracks && !groove && !scale && !chords) throw new Error('give a mood, prompt, stinger, custom chords/groove/scale, or custom tracks');
     const n = stinger ? 1 : count || 1, pieces = [];
     for (let i = 0; i < n; i++) {
       const file = n === 1 ? out_path : out_path.replace(/\.wav$/i, '-' + String(i + 1).padStart(2, '0') + '.wav');
-      const r = stinger ? await lib.renderStinger(stinger) : await lib.renderMusic(mood, { seed: seed == null ? null : seed + i });
-      pieces.push({ file: lib.writeFile(file, r.bytes), seconds: +r.seconds.toFixed(2), seed: r.seed, loop: !stinger });
+      const r = stinger ? await lib.renderStinger(stinger) : await lib.renderMusic(mood, {
+        seed: seed == null ? null : seed + i,
+        prompt,
+        instruments,
+        groove,
+        scale,
+        chordMood: chord_mood,
+        chords,
+        structure,
+        arc,
+        intensity,
+        hookOnly: hook_only,
+        tempo,
+        meter,
+        tracks,
+        stems: !!stems_dir
+      });
+      const item = { file: lib.writeFile(file, r.bytes), seconds: +r.seconds.toFixed(2), seed: r.seed, loop: !stinger };
+      if (stems_dir && r.stems) {
+        item.stems = r.stems.map(s => ({
+          name: s.name,
+          instrument: s.instrument,
+          file: lib.writeFile(path.join(stems_dir, (n > 1 ? 'p' + (i + 1) + '-' : '') + s.name + '.wav'), s.bytes)
+        }));
+      }
+      pieces.push(item);
     }
     return ok({ mood, stinger, pieces });
   } catch (e) { return fail(e.message); }

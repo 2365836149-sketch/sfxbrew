@@ -1,20 +1,21 @@
 ---
 name: sfxbrew
-description: Generate royalty-free game sound effects (coins, clicks, jumps, hits, explosions, sword slashes, footsteps, guqin, gongs, war drums, rain and more) locally with the free SFX Brew engine, as WAV files or a dependency-free JavaScript snippet. Use when the user asks for sound effects, SFX, audio feedback or "make it sound better" in a game or interactive app.
-summary: Add free, commercially usable sound effects to any game straight from your coding agent.
-version: 1.1.0
-tags: [game-development, audio, sound-effects, gamedev, web-audio]
-keywords: [sound effects, sfx, game audio, wav, procedural audio, web audio, mcp, xianxia, wuxia, retro]
+description: Generate royalty-free game sound effects (coins, clicks, jumps, hits, explosions, sword slashes, footsteps, guqin, gongs, war drums, rain and more) locally with the free SFX Brew engine, as WAV files or a dependency-free JavaScript snippet, plus looping background music and short stingers. Use when the user asks for sound effects, SFX, background music, a victory or game-over jingle, audio feedback or "make it sound better" in a game or interactive app.
+summary: Add free, commercially usable sound effects and background music to any game straight from your coding agent.
+version: 1.2.0
+tags: [game-development, audio, sound-effects, game-music, gamedev, web-audio]
+keywords: [sound effects, sfx, game audio, game music, background music, music loop, stinger, wav, procedural audio, web audio, mcp, xianxia, wuxia, retro, medieval]
 use_cases:
   - Add a coin, jump and hit sound to a browser game
   - Generate five sword-slash variations and let the user pick one
   - Replace placeholder beeps with consistent UI sounds
+  - Add a looping town theme and a victory stinger to an RPG
 docs_url: https://sfxbrew.com/llms.txt
 ---
 
-# SFX Brew: sound effects for games
+# SFX Brew: sound effects and music for games
 
-SFX Brew is a free, open-source sound effect engine (https://sfxbrew.com, MIT code). It synthesizes sounds locally from 45 presets; realistic ones (footsteps, sword clashes, arrows, war drums, campfire, monsters and a few more) build on short CC0 recordings. Generated sounds are free for commercial use with no attribution required.
+SFX Brew is a free, open-source sound effect engine (https://sfxbrew.com, MIT code). It synthesizes sounds locally from 45 presets; realistic ones (footsteps, sword clashes, arrows, war drums, campfire, monsters and a few more) build on short CC0 recordings. It also composes background music loops and short stingers locally (see Music below). Generated sounds and music are free for commercial use with no attribution required.
 
 ## Before you start: setup and network use
 
@@ -25,8 +26,8 @@ Pick ONE way to run it. Tell the user what you are about to install and get a ye
    claude mcp add sfxbrew -- npx -y sfxbrew mcp
    ```
    Other MCP clients use the command `npx` with args `["-y", "sfxbrew", "mcp"]`.
-   Tools: `list_presets`, `generate_sfx`, `render_patch`, `get_js_code`, `export_pack`.
-2. **CLI (no MCP needed):** `npx sfxbrew <preset> --out assets/sfx/<name>.wav`
+   Tools: `list_presets`, `generate_sfx`, `render_patch`, `get_js_code`, `export_pack`, `generate_music`.
+2. **CLI (no MCP needed):** `npx sfxbrew <preset> --out assets/sfx/<name>.wav`, and for music `npx sfxbrew music <mood> --out assets/music/<name>.wav`
 
 Network use, stated up front: `npx` downloads the `sfxbrew` npm package (a few MB, including the CC0 recordings) once. Rendering then runs offline. The only other network access is that exported JavaScript for recording-based presets loads small MP3 files from https://sfxbrew.com/samples/ at runtime (they can be self-hosted, see below). Nothing from the user's machine is sent anywhere.
 
@@ -59,6 +60,32 @@ Ambience and sustained sounds (`rain`, `wind`, `campfire`, `stream`, `caveDrip`,
 
 `export_pack` (CLI: `npx sfxbrew pack <preset> --count 8 --out .`) writes a folder with WAV variations or loops plus `godot/<name>.tres` (an AudioStreamRandomizer), `unity/SfxBrewPlayer.cs` and a plain Web Audio player. Use it when the project uses one of those engines.
 
+## Music
+
+`generate_music` composes and renders background music locally as a seamless stereo WAV loop: one full piece per seed (intro, theme, contrast, theme, outro), roughly 1-2.5 minutes, with a loop point in the WAV. Every seed is a different piece in the same style. It needs `mood` or `stinger`, plus `out_path` (a `.wav` file). Optional: `count` (1-10 different pieces, files get `-01`, `-02` ... suffixes; piece i uses `seed + i`) and `seed` (reproduce a piece). Rendering a piece takes up to a minute of CPU time, so allow a few minutes for calls with `count` > 1.
+
+| Mood | Style | Use for |
+|---|---|---|
+| `calm` | Guqin and bamboo flute over strings | Exploration, villages, menus |
+| `battle` | Pipa, spiccato low strings, big war drums | Combat, bosses |
+| `mystery` | Sparse flute and guqin over held strings, wooden fish | Caves, ruins, night |
+| `sad` | Slow erhu lament over strings and guqin | Loss, farewells, sad story beats |
+| `primitive` | Bone flute, hummed drone, log drums, clapping sticks, shaker | Cavemen, tribal camps, prehistory |
+| `tribal` | Clay ocarina (xun), bamboo flute, plucked zither, frame and log drums | Farming villages, early civilisation |
+| `medieval` | Dorian fiddle and shawm, lute, bagpipe drone, frame drum, tambourine | Towns, taverns, markets, castles |
+
+Stingers are short one-shots (no loop, `count` is ignored): `victory` (win, quest complete), `defeat` (loss, game over), `battleStart` (a fight begins), `treasure` (rare item), `breakthrough` (level up, realm breakthrough), and three quiet 2-3 s ones for dark story moments: `guiltCannibal`, `guiltChild`, `grief` (someone close has died).
+
+CLI equivalents:
+```
+npx sfxbrew music list                                       # moods and stingers
+npx sfxbrew music medieval --count 3 --out assets/music/town.wav
+npx sfxbrew music primitive --seed 7 --out assets/music/stone-age.wav
+npx sfxbrew stinger victory --out assets/music/victory.wav
+```
+
+Tips: render 2-3 pieces of the main theme and let the user pick; play loops on a music bus well below the sound effects; duck or stop the loop when a stinger plays. Record the seeds like you do for sound effects.
+
 ## Tweaking a sound
 
 Every result includes a `patch` (JSON). To adjust, change values and call `render_patch`. Useful edits:
@@ -77,4 +104,4 @@ If the user does not want runtime requests to sfxbrew.com, copy the needed `.mp3
 
 ## License note to pass on
 
-Sounds generated with SFX Brew are free for commercial use without attribution. The few CC0 recordings are credited at https://sfxbrew.com/samples/CREDITS.md.
+Sounds and music generated with SFX Brew are free for commercial use without attribution. The few CC0 recordings are credited at https://sfxbrew.com/samples/CREDITS.md.

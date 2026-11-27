@@ -34,12 +34,16 @@
   const chordDegs = r => [r, r + 2, r + 3];
   /* 每个五声调式对应的七声音阶（和 music.js 里的一致） */
   const SCALE7 = { gong: [0, 2, 4, 5, 7, 9, 11], zhi: [0, 2, 4, 5, 7, 9, 10], shang: [0, 2, 3, 5, 7, 8, 10], yu: [0, 2, 3, 5, 7, 8, 10], jue: [0, 1, 3, 5, 7, 8, 10], miyako: [0, 1, 3, 5, 7, 8, 10] };
-  const isDiatonic = p => p.harmony === 'diatonic' || p.harmony === 'dark';
+  const isDiatonic = p => p.harmony === 'diatonic' || p.harmony === 'dark' || p.harmony === 'functional';
+  /* 和声小调：小调里的 V 级升高三音，变成大三和弦 */
+  const raisedV = (p, r) => p.harmony === 'functional' && p.mode !== 'gong' && p.mode !== 'zhi' && ((r % 7) + 7) % 7 === 4;
   /* 和弦音（MIDI，根音位置，密集排列，根音在主音所在的八度） */
   function chordMidi(p, r) {
     if (!isDiatonic(p)) return chordDegs(r).map(d => degMidi(p, d));
     const s7 = SCALE7[p.mode] || SCALE7.gong;
-    return [0, 2, 4].map(k => { const i = r + k; return p.root + s7[((i % 7) + 7) % 7] + 12 * Math.floor(i / 7); });
+    const t = [0, 2, 4].map(k => { const i = r + k; return p.root + s7[((i % 7) + 7) % 7] + 12 * Math.floor(i / 7); });
+    if (raisedV(p, r)) t[1] += 1;
+    return t;
   }
   /* 和弦性质：'' 大三、'm' 小三、'dim' 减三；五声叠置和弦没有性质 */
   function chordQuality(p, r) {
@@ -77,6 +81,19 @@
           const idx = Math.max(0, Math.min(up.length - 1, a < 4 ? a : 8 - a));
           notes.push({ t: b0 + a * step, d: 2, p: up[idx], v: (a === 0 ? 0.62 : 0.45) * (0.6 + 0.5 * I0) + (r() - 0.5) * 0.06 });
         }
+      } else if (style === 'fast') {
+        /* 8-bit 快速琶音：和弦音按十六分音符循环（安静时八分） */
+        const cyc = [tones[0], tones[1], tones[2], tones[0] + 12], st = I0 >= 0.5 ? 0.25 : 0.5;
+        for (let a = 0; a < 4 / st; a++) notes.push({ t: b0 + a * st, d: st * 0.8, p: cyc[a % 4], v: (a % 4 === 0 ? 0.6 : 0.48) * (0.6 + 0.4 * I0) });
+      } else if (style === 'chug') {
+        /* 强力和弦闷音：八分音符压在根音上，重音在 1 和 2 拍后半；最强时第一拍放开 */
+        const m = foldInto(tones[0] - 12, 40, 52);
+        if (I0 < 0.5) notes.push({ t: b0, d: 2, p: m, v: 0.6 });
+        else for (let a = 0; a < 8; a++) notes.push({ t: b0 + a * 0.5, d: a === 0 && I0 > 0.85 ? 1 : 0.25, p: m, v: (a === 0 || a === 3 ? 0.85 : 0.6) * (0.6 + 0.4 * I0) });
+      } else if (style === 'stab') {
+        /* 铜管：平静时整小节长和弦，激烈时 1 拍、2 拍后半、4 拍短促重音 */
+        const hits = I0 < 0.7 ? [[0, 4]] : [[0, 0.7], [1.5, 0.7], [3, 0.7]];
+        hits.forEach(([t, d]) => tones.forEach(m => notes.push({ t: b0 + t, d, p: foldInto(m, 48, 67), v: (0.55 + 0.35 * I0) })));
       } else if (style === 'strum') {
         const hits = I0 < 0.6 ? [0, 2] : [0, 1.5, 2, 3];
         hits.forEach((t, i) => tones.forEach((m, j) => notes.push({ t: b0 + t + j * 0.04, d: 1, p: m, v: (i === 0 ? 0.85 : 0.6) * (0.5 + 0.5 * I0) })));
@@ -93,7 +110,14 @@
       const I0 = intensityAt(bar);
       if (style === 'drone') { if (bar % 4 === 0) notes.push({ t: bar * 4, d: 16, p: p.root - 24, v: 0.7 + 0.2 * I0 }); }
       else if (style === 'cello') { if (bar % 2 === 0) notes.push({ t: bar * 4, d: Math.min(2, bars - bar) * 4, p: foldInto((pedal ? p.root : chordMidi(p, root)[0]) - 12, 36, 55), v: 0.55 + 0.4 * I0 }); }
-      else [0, 2].forEach(t => notes.push({ t: bar * 4 + t, d: 1.8, p: chordMidi(p, root)[0] - 24, v: 0.6 + 0.35 * I0 }));
+      else if (style === 'chipbass' || style === 'ebass') {
+        /* 推进的八分音符根音（8-bit 低音跳八度，电贝斯小节末走到五度）；安静时四分 */
+        const m = foldInto(chordMidi(p, root)[0] - 12, 33, 52), eighths = I0 >= 0.6, n = eighths ? 8 : 4, st = eighths ? 0.5 : 1;
+        for (let a = 0; a < n; a++) {
+          const off = style === 'chipbass' ? (a % 2 && eighths ? 12 : 0) : (a === n - 1 && eighths ? 7 : 0);
+          notes.push({ t: bar * 4 + a * st, d: st * 0.9, p: m + off, v: Math.min(1, (a % (eighths ? 4 : 2) === 0 ? 0.85 : 0.65) * (0.6 + 0.4 * I0)) });
+        }
+      } else [0, 2].forEach(t => notes.push({ t: bar * 4 + t, d: 1.8, p: chordMidi(p, root)[0] - 24, v: 0.6 + 0.35 * I0 }));
     });
     return notes;
   }
@@ -136,7 +160,21 @@
       const I0 = intensityAt(bar), L = (0.45 + 0.55 * o.loudness) * (0.6 + 0.4 * I0), b0 = bar * 4, cx = o.complexity * (0.5 + 0.5 * I0);
       const hit = (t, p, v) => notes.push({ t: b0 + t, d: 0.5, p, v: Math.min(1, v) });
       const fill = (bar + 1) % 4 === 0 && cx > 0.35;
-      if (kit === 'battle') {
+      if (kit === 'kit' || kit === 'kitlight' || kit === 'chip') {
+        /* 西洋鼓组 / 8-bit：底鼓 1、3 拍，军鼓 2、4 拍，踩镲八分（轻鼓组四分）；每 4 小节最后两拍加花 */
+        const light = kit === 'kitlight';
+        hit(0, 36, L);
+        if (!light || I0 > 0.45) hit(2, 36, L * 0.85);
+        if (I0 > 0.7 && !light) hit(2.5, 36, L * 0.6);
+        [1, 3].forEach(b => { if (!(fill && b >= 2)) hit(b, 38, L * (light ? 0.55 : 0.9)); });
+        const hs = light ? 1 : 0.5;
+        for (let x = 0; x < 4 / hs; x++) {
+          const b = x * hs;
+          if (fill && b >= 2) break;
+          hit(b, !light && I0 > 0.6 && b === 3.5 ? 46 : 42, L * (x % 2 ? 0.5 : 0.72) * (light ? 0.7 : 1));
+        }
+        if (fill) for (let q = 0; q < 4; q++) hit(2 + q * 0.5, kit === 'kit' ? [50, 50, 45, 45][q] : 38, L * (0.6 + q * 0.1));
+      } else if (kit === 'battle') {
         hit(0, 36, L);
         if (cx > 0.25) hit(1.5, 35, L * 0.7);
         if (!fill) { hit(2, 38, L * 0.9); if (cx > 0.4) hit(3, 35, L * 0.75); if (cx > 0.6) hit(3.5, 35, L * 0.6); }
@@ -152,7 +190,7 @@
         if (cx > 0.75) { hit(1, 76, L * 0.4); hit(3, 76, L * 0.4); }
       }
     }
-    (sectionStarts || []).forEach(s => { if (s.intensity > 0.7 || kit === 'battle') notes.push({ t: s.bar * 4, d: 4, p: 49, v: 0.55 + 0.4 * s.intensity }); });
+    if (kit !== 'kitlight') (sectionStarts || []).forEach(s => { if (s.intensity > 0.7 || kit === 'battle' || kit === 'kit' || kit === 'chip') notes.push({ t: s.bar * 4, d: 4, p: 49, v: 0.55 + 0.4 * s.intensity }); });
     return notes;
   }
 
@@ -163,10 +201,15 @@
       .filter(r => r.notes.length);
   }
 
-  const ACC_STYLE = { guqin: ['arpeggio', 'guqin'], pipa: ['strum', 'pipa'], pad: ['pad', 'pad'] };
+  const ACC_STYLE = { guqin: ['arpeggio', 'guqin'], pipa: ['strum', 'pipa'], pad: ['pad', 'pad'],
+    guitar: ['arp', 'nylon'], steel: ['strum', 'steel'], chip: ['fast', 'chip'], power: ['chug', 'power'],
+    harp: ['arp', 'harp'], piano: ['arp', 'piano'], brass: ['stab', 'brass'] };
+  /* 引擎里的低音 / 打击乐写法 → 工作室乐器 */
+  const BASS_INST = { drone: 'drone', chipbass: 'chipbass', ebass: 'ebass' };
+  const KIT_INST = { kit: 'kit', kitlight: 'kit', chip: 'chipdrums' };
   const NAMES = {
-    zh: { melody: '主奏', melodyB: '副奏', accomp: '伴奏', bass: '低音', drums: '打击乐', chime: '点缀', strings: '弦乐铺底', cello: '大提琴低音', spic: '低弦跳弓' },
-    en: { melody: 'Lead', melodyB: 'Second lead', accomp: 'Accompaniment', bass: 'Bass', drums: 'Percussion', chime: 'Sparkles', strings: 'String bed', cello: 'Cello bass', spic: 'Low strings' }
+    zh: { melody: '主奏', melodyB: '副奏', accomp: '伴奏', bass: '低音', drums: '打击乐', chime: '点缀', strings: '弦乐铺底', cello: '大提琴低音', spic: '低弦跳弓', timpani: '定音鼓' },
+    en: { melody: 'Lead', melodyB: 'Second lead', accomp: 'Accompaniment', bass: 'Bass', drums: 'Percussion', chime: 'Sparkles', strings: 'String bed', cello: 'Cello bass', spic: 'Low strings', timpani: 'Timpani' }
   };
 
   /* 从《长生劫》配乐搬来的编曲（原曲里的三拍子在这里改成四拍，工作室的时间线固定 4 拍一小节）。
@@ -195,7 +238,9 @@
     const p = P.newProject();
     Object.assign(p, { title: '', tempo: spec.tempo, root: spec.root, mode: P.MODES[spec.mode] ? spec.mode : 'gong', bars: piece.bars });
     /* 和声：引擎默认用七声音阶三和弦（chords7 是七声级数）；harmony = 'penta' 时是五声叠置和弦 */
-    p.harmony = piece.chords7 ? (spec.harmony === 'dark' ? 'dark' : 'diatonic') : 'penta';
+    p.harmony = piece.chords7 ? (spec.harmony === 'dark' || spec.harmony === 'functional' ? spec.harmony : 'diatonic') : 'penta';
+    /* 七声旋律（西洋曲风）会用到五声以外的音，不锁五声 */
+    if (spec.scale === 'diatonic') p.scaleLock = false;
     const roots = piece.chords7 || piece.chords;
     p.loop = { on: false, start: 0, end: piece.bars * 4 };
     p.sections = piece.sections.map(s => ({ bar: s.startBar, bars: s.bars, name: s.name, intensity: s.intensity }));
@@ -222,7 +267,7 @@
       return t;
     };
     /* 主奏 / 副奏：作曲引擎的旋律按乐器分轨（主题由主奏乐器呈示，对比段和变奏换别的乐器） */
-    const toNote = m => ({ t: m.bar * 4 + m.beat, d: m.beats, p: degMidi(p, m.deg), v: Math.min(1, 0.75 + 0.2 * intensityAt(m.bar)) });
+    const toNote = m => ({ t: m.bar * 4 + m.beat, d: m.beats, p: m.midi != null ? m.midi : degMidi(p, m.deg), v: Math.min(1, 0.75 + 0.2 * intensityAt(m.bar)) });
     const byInst = {};
     piece.melody.forEach(m => { const k = m.inst || spec.melody; (byInst[k] = byInst[k] || []).push(toNote(m)); });
     const leadInst = byInst[spec.melody] ? spec.melody : Object.keys(byInst)[0];
@@ -239,15 +284,25 @@
     if (spec.strings) addTrack('strings', N.strings, stringBed(p, chordsByBar, intensityAt, spec.strings), { volume: 0.7 });
     /* 低音 */
     if (spec.bass === 'cello') addTrack('cello', N.cello, bassLine(p, chordsByBar, 'cello', intensityAt, spec.pedal), { volume: 0.75, smart: { style: 'cello' } });
-    else if (spec.bass && spec.bass !== 'none') addTrack(spec.bass === 'drone' ? 'drone' : 'bass', N.bass, bassLine(p, chordsByBar, spec.bass, intensityAt), { volume: 0.7, smart: { style: spec.bass } });
+    else if (spec.bass && spec.bass !== 'none') addTrack(BASS_INST[spec.bass] || 'bass', N.bass, bassLine(p, chordsByBar, spec.bass, intensityAt), { volume: 0.7, smart: { style: spec.bass } });
     /* 低弦跳弓：固定音型（战斗）或心跳（深宫） */
     let low = [];
     if (spec.ostinato === 'spic') low = low.concat(ostinato(p, chordsByBar, intensityAt, { grind: spec.ostinatoPat === 'grind', pedal: spec.pedal }).filter(rhythmOn).map(soften));
     if (tex === 'pulse') low = low.concat(pulse(p, chordsByBar, intensityAt).filter(rhythmOn));
     if (low.length) addTrack('spic', N.spic, low.sort((a, b) => a.t - b.t), { volume: 0.7 });
-    if (spec.perc && spec.perc !== 'none') {
+    if (spec.perc === 'timpani') {
+      /* 定音鼓：和弦根音，平静时几小节一下，激烈时带五度的节奏型，段落最后一小节滚奏进下一段 */
+      const notes = [], ends = new Set(p.sections.map(sc => sc.bar + sc.bars - 1));
+      chordsByBar.forEach((root, bar) => {
+        const I0 = intensityAt(bar), m = foldInto(chordMidi(p, root)[0], 40, 52), v = Math.min(1, 0.5 + 0.45 * I0);
+        if (ends.has(bar) && I0 > 0.35) notes.push({ t: bar * 4 + 2, d: 2, p: m, v: v * 0.8 });
+        else if (I0 >= 0.75) [[0, 0, 1], [2, 0, 0.7], [3.5, 7, 0.55]].forEach(([t, st, a]) => notes.push({ t: bar * 4 + t, d: 0.5, p: m + st, v: v * a }));
+        else if (bar % (I0 < 0.5 ? 4 : 2) === 0) notes.push({ t: bar * 4, d: 0.5, p: m, v: v * 0.75 });
+      });
+      addTrack('timpani', N.timpani, notes, { volume: 0.75 });
+    } else if (spec.perc && spec.perc !== 'none') {
       const drummer = { kit: spec.perc, complexity: spec.perc === 'battle' ? (spec.dark ? 0.45 : 0.7) : 0.4, loudness: spec.perc === 'battle' ? 0.8 : 0.5, seed: spec.seed };
-      addTrack('drums', N.drums, drumPattern(spec.perc, piece.bars, intensityAt, drummer, p.sections).filter(rhythmOn).map(soften), { volume: 0.75, drummer });
+      addTrack(KIT_INST[spec.perc] || 'drums', N.drums, drumPattern(spec.perc, piece.bars, intensityAt, drummer, p.sections).filter(rhythmOn).map(soften), { volume: 0.75, drummer });
     }
     if (spec.sparkle) {
       const notes = [];

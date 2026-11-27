@@ -27,7 +27,7 @@
       drums = c.inst.kind === 'drums';
       const used = new Set(c.r.notes.map(n => n.p));
       if (drums) {
-        rows = app.insts.DRUM_KIT.map(k => k.p);
+        rows = app.insts.kitOf(c.inst).map(k => k.p);
         used.forEach(p => { if (!rows.includes(p)) rows.push(p); });
         rowH = 26;
       } else {
@@ -69,7 +69,7 @@
     function reset() { selN.clear(); shownRegion = null; drag = null; }
 
     function rowLabel(c, m) {
-      if (drums) { const k = app.insts.DRUM_KIT.find(x => x.p === m); return k ? (app.LANG === 'zh' ? k.zh : k.en) : app.noteName(m); }
+      if (drums) { const k = app.insts.kitOf(c.inst).find(x => x.p === m); return k ? (app.LANG === 'zh' ? k.zh : k.en) : app.noteName(m); }
       const rel = (((m - (c.p.root - GONG[c.p.mode])) % 12) + 12) % 12;
       return app.noteName(m) + (app.LANG === 'zh' && JIANPU[rel] && P.inScale(c.p, m) ? '  ' + JIANPU[rel] : '');
     }

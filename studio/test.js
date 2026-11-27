@@ -53,6 +53,20 @@ const stats = ch => { let pk = 0, nan = 0, ss = 0; for (const v of ch) { if (isN
   assert.strictEqual(sk.harmony, 'dark'); assert.strictEqual(sk.mode, 'miyako');
   assert.ok(['strings', 'cello', 'spic'].every(i => sk.tracks.some(t => t.instrument === i)), 'skirmish has string bed, cello bass and spiccato');
   assert.strictEqual(P.sanitize({ tracks: [] }).harmony, 'penta', 'old projects default to pentatonic harmony');
+  /* 西洋曲风：七声旋律、和声小调的 V 级是大三和弦、旋律里出现导音 */
+  assert.deepStrictEqual(S.chordMidi({ root: 45, mode: 'yu', harmony: 'functional' }, 4), [52, 56, 59], 'V in A harmonic minor = E G# B');
+  const boss8 = music.compose({ preset: 'chipBoss', seed: 2 }, 0), pcs = new Set(boss8.melody.map(m => (((m.midi - 45) % 12) + 12) % 12));
+  assert.ok(pcs.has(11) && pcs.size >= 6, 'chipBoss melody uses seven-note minor with a leading tone: ' + [...pcs]);
+  assert.ok(new Set(music.compose({ preset: 'calm', seed: 2 }, 0).melody.map(m => (((m.midi - 50) % 12) + 12) % 12)).size <= 5, 'Eastern moods stay pentatonic');
+  const chip = S.fromMood(music, 'chiptune', 3, 'en');
+  assert.ok(['chip', 'chipbass', 'chipdrums'].every(i => chip.tracks.some(t => t.instrument === i)) && chip.scaleLock === false, 'chiptune has 8-bit lead, bass and drums, scale lock off');
+  /* 管弦乐器：采样按乐器分组，文件都在；史诗战斗有圆号、铜管组、定音鼓 */
+  for (const id of ['horn', 'trumpet', 'trombone', 'orchflute', 'oboe', 'clarinet', 'harp', 'piano', 'timpani']) {
+    const names = insts.samplesFor(id);
+    assert.ok(names.length >= 3 && names.every(n => fs.existsSync(path.join(__dirname, '..', 'samples', n + '.mp3'))), id + ' samples exist');
+  }
+  const ep = S.fromMood(music, 'epic', 3, 'en');
+  assert.ok(['horn', 'brass', 'timpani', 'spic'].every(i => ep.tracks.some(t => t.instrument === i)), 'epic has horn, brass, timpani and spiccato');
 
   /* 4. 四种情绪 + 七套编曲都能生成并渲染 */
   for (const mood of [...music.moods, ...Object.keys(S.STYLES)]) {

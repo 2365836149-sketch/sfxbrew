@@ -15,6 +15,8 @@ const { PRESETS, mutate, SAMPLES } = require('../presets.js');
 const CATALOG = require('../catalog.js');
 const EXPORT = require('../export.js');
 const makeMusic = require('../music.js');
+const band = require('./band.js');
+const promptCompiler = require('./prompt.js');
 
 /* 原生音频模块用到时才加载：精简版 Linux 没装 ALSA(libasound2) 时，
    MCP 服务和 list_presets 照常可用，只有渲染 WAV 时才报出清楚的错误 */
@@ -51,7 +53,35 @@ const MUSIC_META = {
   sad: 'Slow erhu lament over strings and guqin. Loss, farewells, sad story beats.',
   primitive: 'Stone age: bone flute over a hummed drone, log drums, clapping sticks and a shaker. Cavemen, tribal camps, prehistory.',
   tribal: 'Early village: clay ocarina (xun) and bamboo flute, plucked zither, frame and log drums, low hum. Farming villages, early civilisation.',
-  medieval: 'Medieval folk tune in dorian: fiddle and shawm, lute, bagpipe drone, frame drum and tambourine. Towns, taverns, markets, castles.'
+  medieval: 'Medieval folk tune in dorian: fiddle and shawm, lute, bagpipe drone, frame drum and tambourine. Towns, taverns, markets, castles.',
+  chiptune: '8-bit overworld theme in a major key: square-wave lead, fast arpeggios, triangle bass, noise drums. Retro platformers, title screens.',
+  chipBoss: '8-bit boss or dungeon theme in harmonic minor: fast square leads, driving bass and busy noise drums. Retro boss fights, dungeons.',
+  adventure: 'Western adventure: violins over picked nylon guitar and a string bed, light drum kit, major key. Exploration, overworld, fantasy towns.',
+  action: 'Rock action: distorted lead guitar, palm-muted power chords, electric bass, full drum kit, harmonic minor. Combat, chases, racing.',
+  acoustic: 'Warm acoustic: nylon guitar and flute over strummed steel-string guitar, soft bass, brushes. Campfires, farms, cozy and life-sim games.',
+  fantasy: 'Fantasy orchestral: flute, oboe and horn over harp and strings, timpani at the big moments, major key. Kingdoms, overworld, RPG towns.',
+  epic: 'Epic orchestral battle: horns and trumpets over driving cello spiccato, brass stabs and timpani, harmonic minor. Boss fights, sieges, trailers.',
+  piano: 'Reflective solo piano over soft strings, minor key. Menus, memories, sad or quiet story moments.',
+  pastoral: 'Pastoral woodwinds: clarinet, oboe and flute over rolled harp chords and light strings, major key. Villages, farms, peaceful meadows.',
+  lofi: band.STYLES.lofi.desc,
+  synthwave: band.STYLES.synthwave.desc,
+  jrpg: band.STYLES.jrpg.desc,
+  dungeon: band.STYLES.dungeon.desc,
+  guochao: band.STYLES.guochao.desc,
+  bossanova: band.STYLES.bossanova.desc,
+  cyberpunk: band.STYLES.cyberpunk.desc,
+  tavern: band.STYLES.tavern.desc,
+  noir: band.STYLES.noir.desc,
+  ambientSpace: band.STYLES.ambientSpace.desc,
+  tropical: band.STYLES.tropical.desc,
+  wuxiaHero: band.STYLES.wuxiaHero.desc,
+  vlogChill: band.STYLES.vlogChill.desc,
+  techReview: band.STYLES.techReview.desc,
+  funnyMeme: band.STYLES.funnyMeme.desc,
+  suspenseTalk: band.STYLES.suspenseTalk.desc,
+  casualPuzzle: band.STYLES.casualPuzzle.desc,
+  gachaLobby: band.STYLES.gachaLobby.desc,
+  random: band.RANDOM_DESC
 };
 const STINGER_META = {
   victory: 'Bright drum hit, pipa run and bell. Win, quest complete.',
@@ -61,13 +91,26 @@ const STINGER_META = {
   breakthrough: 'Low bell, rising guqin and flute. Level up, realm breakthrough.',
   guiltCannibal: 'About 2 s, quiet: an erhu note sags down over a low hum. A dark deed (eating your own kind).',
   guiltChild: 'About 2 s, quiet: two ocarina notes a semitone apart. A terrible deed (harming a child).',
-  grief: 'About 2.5 s, quiet: a low hum with two guqin notes. Someone close has died.'
+  grief: 'About 2.5 s, quiet: a low hum with two guqin notes. Someone close has died.',
+  chipWin: '8-bit: rising square-wave arpeggio onto a held major chord. Level clear, win (retro games).',
+  chipLose: '8-bit: three falling notes, the last sagging flat. Life lost, game over (retro games).',
+  fanfare: 'Orchestral: trumpet call over a timpani roll, landing on a full brass chord with a cymbal. Victory, royal entrance, quest complete.'
 };
 
 /** 一段配乐：渲染一首完整曲子，尾巴折回开头，得到无缝循环的双声道 WAV */
 async function renderMusic(mood, opt) {
   opt = opt || {};
-  if (!MUSIC_META[mood]) throw new Error('Unknown mood "' + mood + '". Available: ' + Object.keys(MUSIC_META).join(', '));
+  if (opt.prompt) {
+    const compiled = promptCompiler.compilePrompt(opt.prompt);
+    const mergedInst = Object.assign({}, compiled.instruments || {}, opt.instruments || {});
+    opt = Object.assign({}, compiled, opt, Object.keys(mergedInst).length ? { instruments: mergedInst } : {});
+    if (!mood && compiled.preset) mood = compiled.preset;
+  }
+  if (!opt.tracks && !opt.groove && !opt.scale && !opt.chords && !opt.prompt && !MUSIC_META[mood]) throw new Error('Unknown mood "' + mood + '". Available: ' + Object.keys(MUSIC_META).join(', '));
+  if (band.STYLES[mood] || mood === 'random' || opt.tracks || opt.instruments || opt.stems || opt.groove || opt.scale || opt.tempo || opt.chordMood || opt.chords || opt.structure || opt.prompt || opt.hookOnly) {
+    const r = await band.renderBand(mood || 'vlogChill', opt);
+    return { bytes: r.bytes, seconds: r.seconds, seed: r.seed, bars: r.bars, stems: r.stems, tracks: r.tracks };
+  }
   loadAudio();
   const seed = opt.seed == null ? newSeed() : opt.seed;
   const r = await MUSIC.renderLoop({ preset: mood, seed }, { sampleRate: opt.sampleRate || 44100, volume: opt.volume });

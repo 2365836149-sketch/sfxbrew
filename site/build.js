@@ -224,7 +224,7 @@ function llmsTxt() {
 - Free game UI sounds: https://sfxbrew.com/packs/game-ui-sound-pack/
 - Make or tweak a sound in the browser: https://sfxbrew.com/editor/
 - Let an AI coding agent add sound effects to a game: the MCP server below
-- Procedural Eastern game music (guqin, pipa, erhu, pentatonic): https://sfxbrew.com/lab/
+- Procedural game music, Eastern (guqin, pipa, erhu, pentatonic) and Western (8-bit, guitars, drum kit): https://sfxbrew.com/lab/
 
 ## Use it from an AI coding agent
 
@@ -249,7 +249,7 @@ ${packs}
 
 ## Music lab
 
-- https://sfxbrew.com/lab/ (Chinese: /zh/lab/): browser music studio for game soundtracks. Multitrack timeline, piano roll, drum grid, per-track mute/solo/volume/pan/reverb, undo, autosave. "Generate from a mood" (calm, battle, mystery, sad) writes a full editable arrangement on the pentatonic scale with guqin, pipa, bamboo flute, erhu, bass, pads, bells and Eastern percussion. Exports whole-song WAV, seamless loop WAV, stems (ZIP) and project JSON.
+- https://sfxbrew.com/lab/ (Chinese: /zh/lab/): browser music studio for game soundtracks. Multitrack timeline, piano roll, drum grid, per-track mute/solo/volume/pan/reverb, undo, autosave. "Generate from a mood" writes a full editable arrangement: Eastern moods (calm, battle, mystery, sad and more) on the pentatonic scale with guqin, pipa, bamboo flute, erhu, strings and Eastern percussion, and Western moods (8-bit overworld and boss, adventure, rock action, campfire acoustic) with seven-note melodies, chiptune voices, synthesized guitars and a drum kit. Exports whole-song WAV, seamless loop WAV, stems (ZIP) and project JSON.
 
 ## Web editor links
 

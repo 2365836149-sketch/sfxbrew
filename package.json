@@ -1,6 +1,6 @@
 {
   "name": "sfxbrew",
-  "version": "0.1.4",
+  "version": "0.2.1",
   "mcpName": "com.sfxbrew/sfxbrew",
   "description": "Procedural game sound effects for humans and AI agents: Eastern (wuxia/xianxia) and general SFX, rendered locally to WAV or drop-in JavaScript. CLI + MCP server.",
   "keywords": [
@@ -32,6 +32,10 @@
     "node/lib.js",
     "node/cli.js",
     "node/mcp.js",
+    "node/sf2.js",
+    "node/band.js",
+    "node/neural.js",
+    "node/prompt.js",
     "samples/",
     "README.md",
     "LICENSE"
@@ -43,8 +47,11 @@
     "test": "node node/catalog-test.js && node node/test.js"
   },
   "dependencies": {
+    "@magenta/music": "^1.23.1",
     "@modelcontextprotocol/sdk": "^1.32.2",
     "node-web-audio-api": "^2.2.0",
+    "spessasynth_core": "^4.4.12",
+    "tonal": "^6.12.0",
     "zod": "^4.6.7"
   },
   "homepage": "https://sfxbrew.com/",
