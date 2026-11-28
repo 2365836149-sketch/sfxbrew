@@ -92,8 +92,8 @@ const packUrl = (lang, slug) => PREFIX[lang] + 'packs/' + slug + '/';
 /* ---------------- 全站顶栏（音效库和实验室都用这一份） ---------------- */
 function siteBar(lang, active, altPath) {
   const u = UI[lang];
-  const tabs = [[textSfxUrl(lang), u.navAI, 'ai'], [editorUrl(lang), u.navEditor, 'editor'], [PREFIX[lang] + 'sounds/', u.navLibrary, 'library'], [vfxUrl(lang), u.navVfx, 'vfx'], [PREFIX[lang] + 'lab/', u.navLab, 'lab']]
-    .map(([href, label, key]) => '<a href="' + href + '"' + (key === 'ai' ? ' data-ai' : '') + (key === active ? ' class="on" aria-current="page"' : '') + '>' + esc(label) + '</a>').join('');
+  const tabs = [[editorUrl(lang), u.navEditor, 'editor'], [PREFIX[lang] + 'sounds/', u.navLibrary, 'library'], [vfxUrl(lang), u.navVfx, 'vfx'], [PREFIX[lang] + 'lab/', u.navLab, 'lab']]
+    .map(([href, label, key]) => '<a href="' + href + '"' + (key === active ? ' class="on" aria-current="page"' : '') + '>' + esc(label) + '</a>').join('');
   return `<header class="bar">
   <a class="bar-brand" href="${introUrl(lang)}"><img src="/favicon.svg" alt=""><span>SFX Brew</span></a>
   <nav class="bar-tabs">${tabs}</nav>
@@ -436,12 +436,12 @@ ${cat ? '' : `<details class="more-info"><summary>${esc(u.aboutLib)}</summary><p
 
 /* ---------------- 实验室切换栏（编曲工作室 / 文字生成音效 / 文字作曲，两个实验室页面共用） ---------------- */
 function labNav(lang, active) {
-  const st = STUDIO[lang], t = TEXTSFX[lang];
+  const st = STUDIO[lang];
   const tab = (key, href, label, badge) => (key === active
     ? '<span class="lab-tab on" aria-current="page">' : (href ? '<a class="lab-tab" href="' + href + '">' : '<span class="lab-tab off" aria-disabled="true">')) +
     esc(label) + (badge ? ' <i>' + esc(badge) + '</i>' : '') + (key !== active && href ? '</a>' : '</span>');
   return '<nav class="lab-nav" aria-label="' + esc(UI[lang].navLab) + '">' +
-    tab('studio', PREFIX[lang] + 'lab/', st.expStudio) + tab('sfx', textSfxUrl(lang), t.h, t.beta) + tab('music', null, st.expTextShort, st.soon) + '</nav>';
+    tab('studio', PREFIX[lang] + 'lab/', st.expStudio) + tab('music', null, st.expTextShort, st.soon) + '</nav>';
 }
 
 /* ---------------- 配乐页 = 编曲工作室（满屏工具，说明文字在下面） ---------------- */
@@ -576,57 +576,26 @@ ${analyticsTag()}
   return { file: PREFIX[lang].slice(1) + 'lab/index.html', html };
 }
 
-/* ---------------- 文字生成音效（测试版） ---------------- */
+/* ---------------- 文字生成音效：2026-11-28 起暂停 ----------------
+   AI 生成（sfx-pro 后端）先关掉，只保留引擎生成。地址留着，旧链接和收藏能看到说明。
+   恢复时把 git 历史里原来的 textSfxPage 拿回来（textsfx.js 和 TEXTSFX 文案都还在）。 */
+const PAUSED = {
+  en: { title: 'Text to sound effect is paused | SFX Brew', h: 'Text to sound effect is paused',
+    p: 'AI generation from a text description is switched off for now. Everything else still works and is free: tweak a preset in the editor, grab ready-made sounds from the library, or let your coding agent make them with the MCP server.',
+    credits: 'Bought credits? Email contact@sfxbrew.com and we will sort it out.',
+    links: [['editor', 'Open the editor'], ['library', 'Browse the library'], ['vfx', '2D effects']] },
+  zh: { title: '文字生成音效已暂停 | SFX Brew', h: '文字生成音效已暂停',
+    p: '用文字描述生成音效的 AI 功能暂时关闭了。其他功能照常免费：在音效编辑器里调预设、从音效库拿现成的声音，或者让 AI 编程助手通过 MCP 服务器帮你生成。',
+    credits: '买过点数？请发邮件到 contact@sfxbrew.com，我们会帮你处理。',
+    links: [['editor', '打开音效编辑器'], ['library', '逛逛音效库'], ['vfx', '2D 特效']] }
+};
 function textSfxPage(lang) {
-  const t = TEXTSFX[lang], u = UI[lang], st = STUDIO[lang];
-  const urlPath = textSfxUrl(lang), altPath = textSfxUrl(other(lang));
-  const data = { lang, api: API_BASE, sitekey: TURNSTILE_SITEKEY, i18n: t };
-  const html = `<!doctype html>
-<html lang="${HTML_LANG[lang]}">
-<head>
-${headTags(lang, { title: t.title, description: t.metaDesc, urlPath, altPath })}
-<link rel="stylesheet" href="/style.css">
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
-</head>
-<body>
-${siteBar(lang, 'ai', altPath)}
-<main class="ts">
-  <div class="ts-main">
-    <div class="ts-head"><h1>${esc(t.h)}</h1><span class="ts-beta">${esc(t.beta)}</span></div>
-    <p class="ts-sub">${esc(t.sub)}</p>
-    <p id="ts-offline" class="ts-offline" hidden>${esc(t.offline)}</p>
-    <form id="ts-form" class="ts-form"><input id="ts-q" type="text" maxlength="300" placeholder="${esc(t.ph)}" autocomplete="off" aria-label="${esc(t.h)}"><button id="ts-go" class="btn primary big">${esc(t.go)}</button></form>
-    <div class="ts-ex">${t.examples.map(x => '<button type="button" class="ts-chip">' + esc(x) + '</button>').join('')}</div>
-    <div id="ts-cf" class="ts-cf"></div>
-    <div id="ts-log"></div>
-  </div>
-  <aside class="ts-side" aria-label="${esc(t.acctH)}">
-    <div class="ts-card ts-acct">
-      <p id="ts-who" class="ts-who" hidden></p>
-      <p id="ts-left" class="ts-left"></p>
-      <button type="button" id="ts-login-open" class="btn primary ts-wide" hidden>${esc(t.loginBuy)}</button>
-      <button type="button" id="ts-logout" class="ts-link" hidden>${esc(t.logout)}</button>
-    </div>
-    <p id="ts-paid" class="ts-paid" hidden></p>
-    <form id="ts-login" class="ts-card ts-login" hidden>
-      <p class="ts-card-h">${esc(t.loginH)}</p>
-      <div class="ts-login-row"><input id="ts-email" type="email" maxlength="254" placeholder="${esc(t.emailPh)}" autocomplete="email" aria-label="${esc(t.emailPh)}" required><button id="ts-send" class="btn">${esc(t.sendCode)}</button></div>
-      <div id="ts-code-row" class="ts-login-row" hidden><input id="ts-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="${esc(t.codePh)}" autocomplete="one-time-code" aria-label="${esc(t.codePh)}"><button type="button" id="ts-verify" class="btn primary">${esc(t.verify)}</button></div>
-      <p id="ts-login-msg" class="ts-note"></p>
-      <button type="button" id="ts-login-cancel" class="ts-link">${esc(t.cancel)}</button>
-    </form>
-    <div id="ts-buy" class="ts-card ts-buy" hidden><p class="ts-card-h">${esc(t.buyH)}</p><div id="ts-packs" class="ts-packs"></div><p class="ts-note">${esc(t.acctNote)} ${esc(t.stripeNote)}</p></div>
-    <p class="ts-note">${esc(t.license)} ${esc(t.notice)} <a href="${privacyUrl(lang)}">${esc(t.privacy)}</a></p>
-  </aside>
-</main>
-<footer class="site-foot"><div class="site-foot-in"><b>SFX Brew</b><span>${esc(u.footShort)}</span><span class="site-foot-links"><a href="${PREFIX[lang]}sounds/">${esc(u.navLibrary)}</a><a href="${privacyUrl(lang)}">${esc(PRIVACY[lang].h)}</a><a href="https://github.com/2365836149-sketch/sfxbrew">GitHub</a></span></div></footer>
-<script type="application/json" id="ts-data">${jsonForHtml(data)}</script>
-<script src="/textsfx.js"></script>
-${analyticsTag()}
-</body>
-</html>
-`;
-  return { file: PREFIX[lang].slice(1) + 'lab/sfx/index.html', html };
+  const P = PAUSED[lang], href = { editor: editorUrl(lang), library: PREFIX[lang] + 'sounds/', vfx: vfxUrl(lang) };
+  const body = '<article class="prose"><h1>' + esc(P.h) + '</h1><p>' + esc(P.p) + '</p><p class="home-cta">' +
+    P.links.map(([k, label], i) => '<a class="btn' + (i ? '' : ' primary') + '" href="' + href[k] + '">' + esc(label) + '</a>').join('') + '</p>' +
+    '<p class="muted">' + esc(P.credits) + '</p></article>';
+  return { file: PREFIX[lang].slice(1) + 'lab/sfx/index.html', html: page(lang, { title: P.title, description: P.h, urlPath: textSfxUrl(lang), altPath: textSfxUrl(other(lang)),
+    body, side: 'index', noAds: true, scripts: ' ', active: 'none' }).replace('</head>', '<meta name="robots" content="noindex">\n</head>') };
 }
 
 /* ---------------- 2D 特效（预览 + 下载引擎包） ---------------- */
@@ -732,29 +701,29 @@ function musicRedirect(lang) {
 
 /* ---------------- 隐私政策 ---------------- */
 const PRIVACY = {
-  en: { h: 'Privacy', title: 'Privacy Policy | SFX Brew', desc: 'What SFX Brew stores and collects: no tracking cookies, sounds made in your browser, an optional email sign-in for buying credits.', updated: 'Last updated',
+  en: { h: 'Privacy', title: 'Privacy Policy | SFX Brew', desc: 'What SFX Brew stores and collects: no tracking cookies, and every sound, song and effect is made in your browser.', updated: 'Last updated',
     body: [
-      ['Short version', 'SFX Brew sets no tracking cookies. Sounds and music are generated in your own browser; nothing you make is uploaded to us. The exceptions are the Text to sound effect beta in the Lab and the optional email sign-in for buying credits, both described below.'],
-      ['Text to sound effect (beta)', 'When you use Lab → Text to sound effect, the description you type (and any change you ask for) is sent to our server, which runs on a machine we operate in Germany and is reached through Cloudflare. To interpret it, the text is passed to DeepSeek, an AI service operated in China; please do not type personal information. The server uses your IP address only in memory to enforce rate limits and forgets it within a day. To improve the tool and to train our own sound models, we keep, without your IP address and for up to 2 years: the text you typed, how the AI interpreted it, the settings of the sounds we generated for you (not the audio itself) and what you did with them on the page (playing, downloading, picking one to refine, thumbs up or down). These records are linked only by a random number created when you open the page and discarded when you close it, so separate visits cannot be connected. If you are signed in, we only note that the request was paid, not who made it. The generated audio files are deleted after 2 hours.'],
-      ['Sign-in and credits', 'To buy credits you sign in with your email address: we email you a 6-digit code (sent through Resend, our email provider) and, once you enter it, keep a sign-in token in your browser\'s local storage until you sign out. On our server we store your email address, your credit balance, the Stripe order IDs of your purchases (to handle refunds) and a one-way hash of the sign-in token. Checkout and payment run on Stripe, which acts as the seller (merchant of record) through Stripe Managed Payments and processes your name, email, address and payment details under its own privacy policy; we never see your card details. We use your email address only for signing in and questions about your purchases, never for marketing. To delete your account, email contact@sfxbrew.com from that address.'],
-      ['Bot protection', 'The Text to sound effect page uses Cloudflare Turnstile to block automated abuse. Turnstile checks your browser when you press Generate and does not set advertising or tracking cookies. See the Cloudflare Turnstile privacy addendum.'],
+      ['Short version', 'SFX Brew sets no tracking cookies. Sounds, music and effects are generated in your own browser; nothing you make is uploaded to us. The Text to sound effect beta and the email sign-in for buying credits were paused on 2026-11-28. The sections marked paused describe what they collected while they ran; we keep that data only as described there.'],
+      ['Text to sound effect (beta, paused)', 'When you use Lab → Text to sound effect, the description you type (and any change you ask for) is sent to our server, which runs on a machine we operate in Germany and is reached through Cloudflare. To interpret it, the text is passed to DeepSeek, an AI service operated in China; please do not type personal information. The server uses your IP address only in memory to enforce rate limits and forgets it within a day. To improve the tool and to train our own sound models, we keep, without your IP address and for up to 2 years: the text you typed, how the AI interpreted it, the settings of the sounds we generated for you (not the audio itself) and what you did with them on the page (playing, downloading, picking one to refine, thumbs up or down). These records are linked only by a random number created when you open the page and discarded when you close it, so separate visits cannot be connected. If you are signed in, we only note that the request was paid, not who made it. The generated audio files are deleted after 2 hours.'],
+      ['Sign-in and credits (paused)', 'To buy credits you sign in with your email address: we email you a 6-digit code (sent through Resend, our email provider) and, once you enter it, keep a sign-in token in your browser\'s local storage until you sign out. On our server we store your email address, your credit balance, the Stripe order IDs of your purchases (to handle refunds) and a one-way hash of the sign-in token. Checkout and payment run on Stripe, which acts as the seller (merchant of record) through Stripe Managed Payments and processes your name, email, address and payment details under its own privacy policy; we never see your card details. We use your email address only for signing in and questions about your purchases, never for marketing. To delete your account, email contact@sfxbrew.com from that address.'],
+      ['Bot protection (paused)', 'The Text to sound effect page uses Cloudflare Turnstile to block automated abuse. Turnstile checks your browser when you press Generate and does not set advertising or tracking cookies. See the Cloudflare Turnstile privacy addendum.'],
       ['Stored in your browser', 'A few preferences are saved in your browser\'s local storage so the site remembers them: your language, which sound categories you have open, and your Lab project. They never leave your device, and clearing your browser data removes them.'],
       ['Visitor statistics', 'We use Cloudflare Web Analytics to count page views. It does not use cookies or fingerprinting and does not track you across sites; we only see totals such as how many people visited a page and from which country.'],
       ['Hosting', 'The site is hosted on GitHub Pages. Like any web server, GitHub receives your IP address when you load a page and may keep it in its logs for security. See the GitHub Privacy Statement.'],
-      ['Recordings and fonts', 'A few sounds play short CC0 recordings served from this site. No third-party fonts are loaded; the only third-party embed is Cloudflare Turnstile on the Text to sound effect page.'],
+      ['Recordings and fonts', 'A few sounds play short CC0 recordings served from this site. No third-party fonts or embeds are loaded.'],
       ['Advertising', 'There are no ads on the site right now. If we add them, this page will be updated first and you will be asked for consent before any advertising cookies are used.'],
       ['Contact', 'Questions about this policy or your data: email contact@sfxbrew.com, or open an issue on GitHub (github.com/2365836149-sketch/sfxbrew).']
     ] },
-  zh: { h: '隐私政策', title: '隐私政策 | SFX Brew', desc: 'SFX Brew 存什么、收集什么：没有追踪 cookie，声音都在你的浏览器里生成，购买点数时可选邮箱登录。', updated: '最后更新',
+  zh: { h: '隐私政策', title: '隐私政策 | SFX Brew', desc: 'SFX Brew 存什么、收集什么：没有追踪 cookie，音效、配乐和特效都在你的浏览器里生成。', updated: '最后更新',
     body: [
-      ['简单说', 'SFX Brew 不设置任何追踪 cookie。音效和配乐都在你自己的浏览器里生成，你做的东西不会上传给我们。例外是实验室里的「文字生成音效」测试版，以及购买点数时可选的邮箱登录，见下文。'],
-      ['文字生成音效（测试版）', '使用「实验室 → 文字生成音效」时，你输入的描述（以及修改要求）会发送到我们的服务器。服务器是我们在德国自己运营的一台机器，经 Cloudflare 访问。为了理解描述，这段文字会转交给 DeepSeek（位于中国的 AI 服务），请不要输入个人信息。服务器只在内存里用你的 IP 地址做频率限制，一天之内就会忘掉。为了改进工具、训练我们自己的音效模型，我们会在不记录 IP 地址的情况下保存最多 2 年：你输入的文字、AI 的理解、为你生成的声音参数（不是音频本身），以及你在页面上对它们的操作（播放、下载、选中继续修改、点赞或点踩）。这些记录只用一个随机编号串起来，它在你打开页面时生成、关掉页面就作废，所以不同次的访问无法关联起来。如果你已登录，我们只记“这次是付费请求”，不记是谁。生成的音频文件 2 小时后删除。'],
-      ['登录和点数', '购买点数需要用邮箱登录：我们通过邮件服务商 Resend 给你发一个 6 位验证码，输入后会在你浏览器的本地存储里保存一个登录令牌，直到你退出登录。我们的服务器保存你的邮箱、点数余额、购买对应的 Stripe 订单号（用于处理退款）以及登录令牌的单向哈希。结账和付款在 Stripe 上完成，Stripe 通过 Stripe Managed Payments 作为卖方（Merchant of Record），按它自己的隐私政策处理你的姓名、邮箱、地址和支付信息，我们看不到你的银行卡信息。你的邮箱只用于登录和处理购买相关的问题，不会用来发营销邮件。要删除账户，请用该邮箱发邮件到 contact@sfxbrew.com。'],
-      ['防机器人', '「文字生成音效」页面使用 Cloudflare Turnstile 拦截自动化滥用。它在你点「生成」时检查浏览器环境，不设置广告或追踪 cookie，详见 Cloudflare Turnstile 隐私附录。'],
+      ['简单说', 'SFX Brew 不设置任何追踪 cookie。音效、配乐和特效都在你自己的浏览器里生成，你做的东西不会上传给我们。「文字生成音效」测试版和购买点数用的邮箱登录已于 2026-11-28 暂停。标注「已暂停」的几节说明它们运行期间收集了什么，这些数据只按那里写的方式保存。'],
+      ['文字生成音效（测试版，已暂停）', '使用「实验室 → 文字生成音效」时，你输入的描述（以及修改要求）会发送到我们的服务器。服务器是我们在德国自己运营的一台机器，经 Cloudflare 访问。为了理解描述，这段文字会转交给 DeepSeek（位于中国的 AI 服务），请不要输入个人信息。服务器只在内存里用你的 IP 地址做频率限制，一天之内就会忘掉。为了改进工具、训练我们自己的音效模型，我们会在不记录 IP 地址的情况下保存最多 2 年：你输入的文字、AI 的理解、为你生成的声音参数（不是音频本身），以及你在页面上对它们的操作（播放、下载、选中继续修改、点赞或点踩）。这些记录只用一个随机编号串起来，它在你打开页面时生成、关掉页面就作废，所以不同次的访问无法关联起来。如果你已登录，我们只记“这次是付费请求”，不记是谁。生成的音频文件 2 小时后删除。'],
+      ['登录和点数（已暂停）', '购买点数需要用邮箱登录：我们通过邮件服务商 Resend 给你发一个 6 位验证码，输入后会在你浏览器的本地存储里保存一个登录令牌，直到你退出登录。我们的服务器保存你的邮箱、点数余额、购买对应的 Stripe 订单号（用于处理退款）以及登录令牌的单向哈希。结账和付款在 Stripe 上完成，Stripe 通过 Stripe Managed Payments 作为卖方（Merchant of Record），按它自己的隐私政策处理你的姓名、邮箱、地址和支付信息，我们看不到你的银行卡信息。你的邮箱只用于登录和处理购买相关的问题，不会用来发营销邮件。要删除账户，请用该邮箱发邮件到 contact@sfxbrew.com。'],
+      ['防机器人（已暂停）', '「文字生成音效」页面使用 Cloudflare Turnstile 拦截自动化滥用。它在你点「生成」时检查浏览器环境，不设置广告或追踪 cookie，详见 Cloudflare Turnstile 隐私附录。'],
       ['存在你浏览器里的东西', '为了记住你的设置，网站会在浏览器本地存储里保存几项内容：界面语言、编辑器里展开了哪些分类、实验室的工程。这些不会离开你的设备，清除浏览器数据就会删掉。'],
       ['访问统计', '我们用 Cloudflare Web Analytics 统计页面访问量。它不用 cookie、不做指纹识别，也不跨网站追踪你；我们只能看到总数，比如某个页面有多少人访问、来自哪些国家。'],
       ['托管', '网站托管在 GitHub Pages。和所有网站服务器一样，你打开页面时 GitHub 会收到你的 IP 地址，并可能出于安全原因记录在日志里，详见 GitHub 隐私声明。'],
-      ['录音和字体', '少数音效会播放本站提供的简短 CC0 录音。网站不加载第三方字体；唯一的第三方嵌入是「文字生成音效」页面的 Cloudflare Turnstile。'],
+      ['录音和字体', '少数音效会播放本站提供的简短 CC0 录音。网站不加载任何第三方字体或嵌入内容。'],
       ['广告', '网站目前没有广告。如果以后加广告，会先更新本页，并在使用任何广告 cookie 之前征得你的同意。'],
       ['联系', '对本政策或你的数据有疑问，可以发邮件到 contact@sfxbrew.com，或者在 GitHub 上提 issue（github.com/2365836149-sketch/sfxbrew）。']
     ] }
@@ -794,7 +763,7 @@ LANGS.forEach(lang => {
 for (const dir of ['sounds', 'packs', 'zh', 'music', 'lab', 'privacy', 'vfx']) fs.rmSync(path.join(ROOT, dir), { recursive: true, force: true });
 out.forEach(o => { lib.writeFile(path.join(ROOT, o.file), stampAssets(o.html)); });
 
-const urls = ['/', '/editor/', ...LANGS.flatMap(l => [PREFIX[l] + 'sounds/', ...usedCats().map(c => catUrl(l, c)), PREFIX[l] + 'lab/', textSfxUrl(l), vfxUrl(l), privacyUrl(l), ...Object.keys(SOUNDS).map(id => soundUrl(l, id)), ...Object.keys(PACKS).map(k => packUrl(l, k))]), '/llms.txt'];
+const urls = ['/', '/editor/', ...LANGS.flatMap(l => [PREFIX[l] + 'sounds/', ...usedCats().map(c => catUrl(l, c)), PREFIX[l] + 'lab/', vfxUrl(l), privacyUrl(l), ...Object.keys(SOUNDS).map(id => soundUrl(l, id)), ...Object.keys(PACKS).map(k => packUrl(l, k))]), '/llms.txt'];
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
   urls.map(u => '  <url><loc>' + SITE + u + '</loc><lastmod>' + TODAY + '</lastmod></url>').join('\n') + '\n</urlset>\n');
 
