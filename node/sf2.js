@@ -1,7 +1,7 @@
 /* ============================================================================
-   SFX Brew · SoundFont 多轨乐器渲染器（基于 spessasynth_core + GeneralUser-GS.sf2）
+   SFX Brew · SoundFont 多轨乐器渲染器（基于 spessasynth_core + MuseScore MS Basic.sf3，MIT）
    ----------------------------------------------------------------------------
-   提供 287 种 GM/GS 采样乐器与鼓组，支持多轨合奏与分轨（Stems）离线渲染。
+   提供 309 个 GM/GS 采样乐器与鼓组预设，支持多轨合奏与分轨（Stems）离线渲染。
    ==========================================================================*/
 'use strict';
 
@@ -14,9 +14,15 @@ const { StbVorbis } = require('stb-vorbis');
 const DEFAULT_SF2 = path.join(__dirname, '..', 'soundfonts', 'MS Basic.sf3');
 const FALLBACK_SF2 = path.join(__dirname, '..', 'soundfonts', 'GeneralUser-GS.sf2');
 const CACHE_SF2 = path.join(os.homedir(), '.sfxbrew', 'soundfonts', 'MS Basic.sf3');
+const crypto = require('crypto');
+// 固定到 MuseScore 的某个 commit，保证每个人下到的是同一个文件；下载后校验 SHA-256，不符就丢弃
+const SF2_COMMIT = '527e4cfd49e007cbf75cb6ed24f1037b66e6d305';
+const SF2_SHA256 = '5ea2375e8bd7d8e71def1036978c1621e85b66934169b6a2744b27b9b3c2d99c';
+const SF2_RAW = 'https://raw.githubusercontent.com/musescore/MuseScore/' + SF2_COMMIT + '/share/sound/MS%20Basic.sf3';
 const SF2_URLS = [
-  'https://gh-proxy.com/https://raw.githubusercontent.com/musescore/MuseScore/main/share/sound/MS%20Basic.sf3',
-  'https://raw.githubusercontent.com/musescore/MuseScore/main/share/sound/MS%20Basic.sf3'
+  SF2_RAW,
+  // 第三方镜像只在官方源都失败时使用（例如国内网络），内容同样要过哈希校验
+  'https://gh-proxy.com/' + SF2_RAW
 ];
 
 const ALIASES = {
@@ -114,16 +120,23 @@ async function ensureBank(sf2Path) {
     }
     fs.mkdirSync(path.dirname(p), { recursive: true });
     let downloaded = null, lastErr = null;
+    process.stderr.write('sfxbrew: downloading the MS Basic SoundFont (51 MB, MIT license) to ' + p + ' (first run only)\n');
     for (const url of SF2_URLS) {
       try {
-        const res = await fetch(url, { signal: AbortSignal.timeout(30000) });
+        const res = await fetch(url, { signal: AbortSignal.timeout(120000) });
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        downloaded = Buffer.from(await res.arrayBuffer());
+        const buf = Buffer.from(await res.arrayBuffer());
+        const hash = crypto.createHash('sha256').update(buf).digest('hex');
+        if (hash !== SF2_SHA256) throw new Error('checksum mismatch from ' + new URL(url).host);
+        downloaded = buf;
         break;
       } catch (e) { lastErr = e; }
     }
-    if (!downloaded) throw new Error('Failed to download GeneralUser-GS.sf2: ' + (lastErr && lastErr.message));
-    fs.writeFileSync(p, downloaded);
+    if (!downloaded) throw new Error('Failed to download MS Basic.sf3: ' + (lastErr && lastErr.message) + '. Download it from ' + SF2_RAW + ' and set SFXBREW_SF2 to its path.');
+    // 先写临时文件再改名，下载中断不会留下半截文件
+    const tmp = p + '.part-' + process.pid;
+    fs.writeFileSync(tmp, downloaded);
+    fs.renameSync(tmp, p);
   }
   const buf = fs.readFileSync(p);
   _cachedBank = SoundBankLoader.fromArrayBuffer(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
@@ -135,7 +148,7 @@ function loadBank(sf2Path) {
   const p = resolveSf2Path(sf2Path);
   if (_cachedBank && _cachedPath === p) return _cachedBank;
   if (!fs.existsSync(p)) {
-    throw new Error('SoundFont not found at ' + p + '. Place GeneralUser-GS.sf2 in soundfonts/ or set SFXBREW_SF2.');
+    throw new Error('SoundFont not found at ' + p + '. Place MS Basic.sf3 in soundfonts/ or set SFXBREW_SF2.');
   }
   const buf = fs.readFileSync(p);
   _cachedBank = SoundBankLoader.fromArrayBuffer(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
