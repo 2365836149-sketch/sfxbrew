@@ -8,12 +8,12 @@
     "url": "https://github.com/2365836149-sketch/sfxbrew",
     "source": "github"
   },
-  "version": "0.3.0",
+  "version": "0.4.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "sfxbrew",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "runtimeHint": "npx",
       "packageArguments": [
         {
