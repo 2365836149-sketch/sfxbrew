@@ -85,7 +85,7 @@ function gdSpriteFrames(items) {
       frames.push('{\n"duration": 1.0,\n"texture": SubResource("' + id + '")\n}');
       total++;
     }
-    anims.push('{\n"frames": [' + frames.join(', ') + '],\n"loop": false,\n"name": &"' + it.anim + '",\n"speed": ' + it.r.fps.toFixed(1) + '\n}');
+    anims.push('{\n"frames": [' + frames.join(', ') + '],\n"loop": ' + !!it.r.loop + ',\n"name": &"' + it.anim + '",\n"speed": ' + it.r.fps.toFixed(1) + '\n}');
   });
   return '[gd_resource type="SpriteFrames" load_steps=' + (items.length + total + 1) + ' format=3]\n\n' + exts + '\n\n' + subs + '[resource]\nanimations = [' + anims.join(', ') + ']\n';
 }
@@ -100,7 +100,7 @@ function atlasJson(it) {
   });
   return {
     frames, animations: { [it.base]: keys },
-    meta: { app: 'https://sfxbrew.com', version: '1', image: it.png, format: 'RGBA8888', size: { w: it.r.size * it.r.frames.length, h: it.r.size }, scale: '1', fps: it.r.fps, frameSize: it.r.size, frameCount: it.r.frames.length, style: it.r.style, seed: it.r.seed }
+    meta: { app: 'https://sfxbrew.com', version: '1', image: it.png, format: 'RGBA8888', size: { w: it.r.size * it.r.frames.length, h: it.r.size }, scale: '1', fps: it.r.fps, frameSize: it.r.size, frameCount: it.r.frames.length, style: it.r.style, seed: it.r.seed, loop: !!it.r.loop }
   };
 }
 
@@ -108,7 +108,7 @@ function readme(o) {
   const n = o.items[0].r.frames.length, S = o.items[0].r.size, fps = o.items[0].r.fps;
   const first = o.items[0];
   return `${o.name} — ${o.label}
-${o.items.length} variation${o.items.length > 1 ? 's' : ''}, ${n} frames of ${S}x${S} px at ${fps} fps, ${o.style === 'pixel' ? 'pixel-art style (hard edges, 5 colours)' : 'smooth glow, straight (non-premultiplied) alpha'}.
+${o.items.length} variation${o.items.length > 1 ? 's' : ''}, ${n} frames of ${S}x${S} px at ${fps} fps${first.r.loop ? ', seamless loop' : ''}, ${o.style === 'pixel' ? 'pixel-art style (hard edges, 5 colours)' : 'smooth glow, straight (non-premultiplied) alpha'}.
 Made with SFX Brew — https://sfxbrew.com${o.withSound ? '\nThe matching sound is in wav/.' : ''}
 
 FILES
@@ -119,7 +119,7 @@ FILES
 ${o.withSound ? '  wav/                 sound variations\n' : ''}
 GODOT 4
   Copy this folder into your project. Drag godot/${o.name}.tscn into a scene (or
-  instance it from code); it plays on its own${o.withSound ? ' together with the sound' : ''} and frees itself when done:
+  instance it from code); it plays on its own${o.withSound ? ' together with the sound' : ''}${first.r.loop ? ' and keeps looping until you free it' : ' and frees itself when done'}:
       var fx = preload("res://<folder>/godot/${o.name}.tscn").instantiate()
       fx.position = hit_position
       add_child(fx)

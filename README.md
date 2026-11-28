@@ -38,7 +38,8 @@ Tools:
 | `export_pack` | A game-engine folder: WAV variations or seamless loops + Godot `.tres`, Unity script, web player, README |
 | `process_audio` | Make **any** audio files game-ready: same loudness (LUFS), trim silence, slice at silences, seamless loops, rename, WAV/MP3/OGG, audio sprite |
 | `analyze_audio` | Loudness, peak, length and leading/trailing silence of audio files |
-| `generate_vfx` | A 2D effect (sword qi, spell, hit) as a sprite sheet + Godot scene + Phaser/Pixi atlas, optionally with its matching sound |
+| `generate_vfx` | A 2D effect (a preset, or your own built from layers) as a sprite sheet + Godot scene + Phaser/Pixi atlas, optionally with its matching sound; returns a preview image |
+| `list_vfx_layers` | The 14 layer types, their parameters and ranges, palettes and example patches, for writing your own effect |
 
 Then just ask: *"add a coin sound and a hit sound to my game"*.
 
@@ -79,12 +80,13 @@ About -20 LUFS suits one-shot SFX, -22 to -26 ambience. Very spiky sounds (a sin
 
 ## 2D effects
 
-Effects that match the sounds, drawn in code (no image assets): `swordQi`, `spell`, `hit`, in a smooth glow style or as pixel art. One command writes a folder every common engine can use:
+Effects that match the sounds, drawn in code (no image assets): `swordQi`, `spell`, `hit`, `lightning`, `talisman`, `breakthrough`, `explosion` and the looping `aura`, in a smooth glow style or as pixel art. One command writes a folder every common engine can use:
 
 - `<name>_strip12.png`: the sprite sheet (the `_stripN` name lets GameMaker slice it on import) and `frames/` with one PNG per frame
 - `<name>.json`: TexturePacker-format atlas with an `animations` entry, for Phaser `load.atlas` and PixiJS `AnimatedSprite`
 - `godot/<name>.tres` (SpriteFrames) and `godot/<name>.tscn`, a scene that plays the effect and its sound once and frees itself
 - `wav/` with the matching sound when you pass `--sound`, and a README with Unity, Phaser, PixiJS and GameMaker steps
+- `preview/` (6 frames side by side) and `patch/` (the effect as JSON, to tweak and render again)
 
 ```bash
 npx sfxbrew vfx list
@@ -94,6 +96,26 @@ npx sfxbrew vfx spell --palette "#ffffff,#e0ffe0,#40d080,#105030" --frames 24 --
 ```
 
 Palettes: fire, ice, thunder, dark, holy, poison, blood, jade, or any four colours (core, light, mid, dark).
+
+### Build your own effect from layers
+
+Every preset is a small JSON patch of layers. Write your own and render it the same way (an AI agent can do this through `generate_vfx` with `patch`, reading `list_vfx_layers` first):
+
+```json
+{ "name": "frost-nova", "palette": "ice", "frames": 14, "layers": [
+  { "type": "flash", "radius": 0.15 },
+  { "type": "ring", "radiusTo": 0.46, "count": 2 },
+  { "type": "debris", "shape": "shard", "tint": "#bfe9ff", "count": 12, "gravity": 0.3 },
+  { "type": "glint", "points": 6, "start": 0.1, "end": 0.5 }
+] }
+```
+
+```bash
+npx sfxbrew vfx frost-nova.json --sound hit --variants 3 --mutate 0.3 --out assets/fx
+npx sfxbrew vfx layers          # every layer type and its parameters (--json for ranges and defaults)
+```
+
+Layers: `flash`, `ring`, `glint`, `beam`, `slash`, `bolt`, `trail`, `burst`, `sparks`, `swirl`, `smoke`, `debris`, `sigil`, `shape`. Each one also takes `start`/`end` (when it plays), `x`/`y`, `angle`, `scale`, `color`, `intensity`, `blend`, `ease` and `jitter`. Set `"loop": true` for seamless looping effects such as auras, fire or shields.
 
 ## CLI
 

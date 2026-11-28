@@ -631,10 +631,10 @@ ${analyticsTag()}
 
 /* ---------------- 2D 特效（预览 + 下载引擎包） ---------------- */
 const VFXPAGE = {
-  en: { title: 'Free 2D Game VFX with Matching Sounds: Sword Qi, Spell, Hit | SFX Brew', metaDesc: 'Procedural 2D effects for games, in smooth or pixel-art style, each paired with its sound. Download a ready pack for Godot 4, Unity, Phaser, PixiJS or GameMaker. Free for commercial use.',
+  en: { title: 'Free 2D Game VFX with Matching Sounds: Sword Qi, Lightning, Explosion | SFX Brew', metaDesc: 'Procedural 2D effects for games, in smooth or pixel-art style, each paired with its sound. Download a ready pack for Godot 4, Unity, Phaser, PixiJS or GameMaker. Free for commercial use.',
     h: '2D effects', sub: 'Every effect is drawn by code, not painted, so each seed gives a new take. Pick a style and colours, then download a pack your engine opens directly, with the matching sound inside.',
-    fx: { swordQi: 'A crescent of sword energy that sweeps and fades.', spell: 'A magic circle that gathers, flashes and releases a burst.', hit: 'A sharp impact star with sparks, for punches and blade hits.' },
-    names: { swordQi: 'Sword qi', spell: 'Spell', hit: 'Hit' },
+    fx: { swordQi: 'A crescent of sword energy that sweeps and fades.', spell: 'Light gathers into a ball, then releases a ring and a burst.', hit: 'A sharp impact star with sparks, for punches and blade hits.', lightning: 'A forked bolt strikes the ground with a flash, shockwave and sparks.', talisman: 'A paper talisman lights up a magic circle and bursts into scraps of light.', breakthrough: 'Qi spirals into a ground circle, then a pillar of light breaks through.', explosion: 'A fireball with flying embers, debris and a rising cloud of smoke.', aura: 'A looping ground circle with rising motes, for buffs and cultivation.' },
+    names: { swordQi: 'Sword qi', spell: 'Spell', hit: 'Hit', lightning: 'Lightning', talisman: 'Talisman', breakthrough: 'Breakthrough', explosion: 'Explosion', aura: 'Aura (loop)' },
     play: 'Play', again: 'New take', loop: 'Loop', style: 'Style', hd: 'Smooth', pixel: 'Pixel art', colours: 'Colours', dflt: 'Default', speed: 'Speed', scale: 'Pixel size', bg: 'Preview background',
     bgs: { night: 'Night', grass: 'Grass', stone: 'Stone', paper: 'Paper', check: 'Transparent' },
     themes: { fire: 'Fire', ice: 'Ice', thunder: 'Thunder', dark: 'Shadow', holy: 'Holy', poison: 'Poison', blood: 'Blood', jade: 'Jade' },
@@ -642,10 +642,10 @@ const VFXPAGE = {
     inZip: 'The pack has a sprite sheet, single frames, atlas JSON (Phaser, PixiJS), a Godot 4 scene that plays the effect with its sound and frees itself, 3 sound variations, and a README with steps for Godot, Unity, Phaser, PixiJS and GameMaker.',
     cmdH: 'Same thing from the command line or an AI agent', copy: 'Copy', copied: 'Copied',
     meta: '{n} frames · {fps} fps · {s} px · seed {seed}', license: 'Free for commercial and non-commercial use, no attribution required.' },
-  zh: { title: '免费 2D 游戏特效，带配套音效：剑气、法术、击中 | SFX Brew', metaDesc: '程序生成的 2D 游戏特效，高清或像素风，每个都配好音效。一键下载 Godot 4、Unity、Phaser、PixiJS、GameMaker 能直接用的素材包，可免费商用。',
+  zh: { title: '免费 2D 游戏特效，带配套音效：剑气、雷电、符箓、爆炸 | SFX Brew', metaDesc: '程序生成的 2D 游戏特效，高清或像素风，每个都配好音效。一键下载 Godot 4、Unity、Phaser、PixiJS、GameMaker 能直接用的素材包，可免费商用。',
     h: '2D 特效', sub: '每个特效都是代码画出来的，不是手绘，所以每个种子都是新的一版。选好画风和颜色，下载的素材包引擎能直接打开，同名音效也在里面。',
-    fx: { swordQi: '一道月牙形剑气，扫过去再散开。', spell: '法阵聚气、一闪，再放出一圈冲击。', hit: '带火花的击中星芒，适合拳脚和刀剑命中。' },
-    names: { swordQi: '剑气', spell: '法术', hit: '击中' },
+    fx: { swordQi: '一道月牙形剑气，扫过去再散开。', spell: '灵光汇聚成球，再放出一圈光环和光点。', hit: '带火花的击中星芒，适合拳脚和刀剑命中。', lightning: '分叉的闪电劈到地面，带闪光、冲击波和火花。', talisman: '符纸亮起，点开法阵，然后化作纸屑和光点。', breakthrough: '灵气螺旋汇入地面法阵，一道光柱冲天而起。', explosion: '火球炸开，火星、碎石四溅，升起一团黑烟。', aura: '循环播放的地面法阵和上升的光点，适合增益和修炼状态。' },
+    names: { swordQi: '剑气', spell: '法术', hit: '击中', lightning: '雷电', talisman: '符箓', breakthrough: '突破', explosion: '爆炸', aura: '光环（循环）' },
     play: '播放', again: '换一个', loop: '循环', style: '画风', hd: '高清', pixel: '像素风', colours: '颜色', dflt: '默认', speed: '速度', scale: '像素放大', bg: '预览背景',
     bgs: { night: '夜色', grass: '草地', stone: '石板', paper: '宣纸', check: '透明' },
     themes: { fire: '火', ice: '冰', thunder: '雷', dark: '暗', holy: '圣光', poison: '毒', blood: '血', jade: '玉' },
@@ -654,14 +654,15 @@ const VFXPAGE = {
     cmdH: '用命令行或 AI 助手也能生成同样的东西', copy: '复制', copied: '已复制',
     meta: '{n} 帧 · {fps} fps · {s} 像素 · 种子 {seed}', license: '可免费用于商业和非商业项目，无需署名。' }
 };
-const VFX_LIST = ['swordQi', 'spell', 'hit'];
+const VFXLIB = require('../vfx.js');
+const VFX_LIST = VFXLIB.LIST;
 const VFX_THEMES = { fire: '#ff7a1a', ice: '#6fd6ff', thunder: '#b58cff', dark: '#7e22ce', holy: '#ffd24a', poison: '#5fd13a', blood: '#d61f2c', jade: '#2fbf8f' };
 function vfxPage(lang) {
   const t = VFXPAGE[lang], u = UI[lang];
   const urlPath = vfxUrl(lang), altPath = vfxUrl(other(lang));
   const seg = (attr, items) => items.map(([v, label, extra]) => `<button type="button" class="vx-opt" data-${attr}="${v}" aria-pressed="false">${extra || ''}${esc(label)}</button>`).join('');
   const sounds = {};
-  VFX_LIST.forEach(id => { sounds[id] = Array.from({ length: 6 }, (_, i) => variant(id, i)); });
+  VFX_LIST.forEach(id => { const snd = VFXLIB.EFFECTS[id].sound; if (snd && SOUNDS[snd]) sounds[id] = Array.from({ length: 6 }, (_, i) => variant(snd, i)); });
   const data = { lang, i18n: { meta: t.meta, copied: t.copied }, fx: t.fx, sounds };
   const sw = c => `<i class="vx-sw" style="background:${c}"></i>`;
   const html = `<!doctype html>

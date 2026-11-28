@@ -17,7 +17,7 @@ const lib = require('./lib.js');
   const SLOW = { timeout: 180000 };   // 整首配乐在慢机器上要渲染 40~60 秒，超过 MCP 客户端默认的 60 秒
 
   const tools = (await client.listTools()).tools.map(t => t.name).sort();
-  assert.deepStrictEqual(tools, ['analyze_audio', 'export_pack', 'generate_music', 'generate_sfx', 'generate_vfx', 'get_js_code', 'list_presets', 'process_audio', 'render_patch']);
+  assert.deepStrictEqual(tools, ['analyze_audio', 'export_pack', 'generate_music', 'generate_sfx', 'generate_vfx', 'get_js_code', 'list_presets', 'list_vfx_layers', 'process_audio', 'render_patch']);
 
   const st = json(await client.callTool({ name: 'generate_music', arguments: { stinger: 'guiltChild', out_path: 'music/guilt.wav' } }, undefined, SLOW));
   const sb = fs.readFileSync(st.pieces[0].file);
@@ -129,6 +129,25 @@ const lib = require('./lib.js');
   assert.strictEqual(v1.variants[0].fps, 18, 'fewer frames keep the duration');
   const badPal = await client.callTool({ name: 'generate_vfx', arguments: { effect: 'hit', out_dir: 'fx', palette: ['#fff', '#000', '#111', '#222'] } });
   assert.ok(badPal.isError, 'rejects bad colours');
+
+  /* 图层：自己写 patch、预览图、循环、报错能指出哪一层哪个参数 */
+  const lay = json(await client.callTool({ name: 'list_vfx_layers', arguments: {} }));
+  assert.ok(lay.layers.bolt && lay.layers.sigil && lay.common.start && lay.presets.swordQi.layers.length, 'layer reference');
+  assert.strictEqual(Object.keys(lay.layers).length, 14);
+  const own = await client.callTool({ name: 'generate_vfx', arguments: { out_dir: 'fx', patch: { name: 'frost', palette: 'ice', frames: 10, layers: [{ type: 'flash' }, { type: 'ring', count: 2 }, { type: 'debris', shape: 'shard', tint: '#bfe9ff' }] }, variants: 2, mutate: 0.3, seed: 5, with_sound: 'hit' } });
+  assert.ok(!own.isError, own.content[0].text);
+  const ownJ = JSON.parse(own.content[0].text);
+  assert.ok(own.content[1] && own.content[1].type === 'image' && own.content[1].mimeType === 'image/png', 'preview image returned');
+  assert.ok(fs.existsSync(path.join(ownJ.folder, 'patch/frost-01.vfx.json')) && fs.existsSync(ownJ.variants[1].preview), 'patch + preview written');
+  assert.ok(!fs.readFileSync(ownJ.variants[0].sheet).equals(fs.readFileSync(ownJ.variants[1].sheet)), 'mutated variations differ');
+  const loopFx = json(await client.callTool({ name: 'generate_vfx', arguments: { effect: 'aura', out_dir: 'fx', seed: 1, preview: false } }));
+  assert.strictEqual(loopFx.variants[0].loop, true);
+  assert.ok(fs.readFileSync(path.join(loopFx.folder, 'godot/aura.tres'), 'utf8').includes('"loop": true'), 'loop animation in Godot');
+  const badLayer = await client.callTool({ name: 'generate_vfx', arguments: { out_dir: 'fx', patch: { layers: [{ type: 'ring', radiusTo: 3 }] } } });
+  assert.ok(badLayer.isError && /layers\[0\]\.radiusTo/.test(badLayer.content[0].text), 'error names the layer and parameter');
+  const badType = await client.callTool({ name: 'generate_vfx', arguments: { out_dir: 'fx', patch: { layers: [{ type: 'fireball' }] } } });
+  assert.ok(badType.isError && /Layer types: flash/.test(badType.content[0].text), 'error lists layer types');
+  for (const k of ['lightning', 'talisman', 'breakthrough', 'explosion']) assert.ok(!(await client.callTool({ name: 'generate_vfx', arguments: { effect: k, out_dir: 'fx', seed: 2, with_sound: true, preview: false } })).isError, k);
 
   await client.close();
   fs.rmSync(dir, { recursive: true, force: true });

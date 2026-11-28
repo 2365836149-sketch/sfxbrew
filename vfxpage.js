@@ -57,13 +57,14 @@
     if (st.style === 'pixel') c += ' --style pixel' + (st.scale > 1 ? ' --scale ' + st.scale : '');
     if (st.palette) c += ' --palette ' + st.palette;
     if (st.speed !== 1) c += ' --speed ' + st.speed;
-    c += ' --seed ' + st.seed + (st.sound ? ' --sound' : '') + ' --out assets/vfx/';
+    c += ' --seed ' + st.seed + (st.sound && D.sounds[st.fx] ? ' --sound' : '') + ' --out assets/vfx/';
     return c;
   }
   function draw(now) {
     BG[st.bg](g, S);
     let k = Math.floor(frames.length * 0.35);
-    if (t0 != null) {
+    if (R.loop) k = Math.floor(now / 1000 * R.fps) % frames.length;   /* 循环特效一直在播 */
+    else if (t0 != null) {
       const f = Math.floor((now - t0) / 1000 * R.fps);
       if (f >= frames.length + Math.round(R.fps * 0.4)) { if (st.loop) { t0 = now; fire(); k = 0; } else { t0 = null; } }
       else k = f < frames.length ? f : -1;

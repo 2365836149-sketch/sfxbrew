@@ -24,8 +24,10 @@ Usage:
                                          loop, rename, convert, audio sprite (see below)
   sfxbrew analyze <files|folders...>     loudness (LUFS), peak, length, silence at start/end
   sfxbrew vfx list                       list 2D effects and colour palettes
-  sfxbrew vfx <effect> [options]         2D effect as sprite sheet + frames + Godot/Phaser/Pixi/
-                                         GameMaker files, optionally with the matching sound
+  sfxbrew vfx <effect|file.json> [opts]  2D effect as sprite sheet + frames + Godot/Phaser/Pixi/
+                                         GameMaker files, optionally with the matching sound;
+                                         a .json file is your own effect built from layers
+  sfxbrew vfx layers [--json]            the layer types and their parameters
   sfxbrew mcp                            run the MCP server (stdio)
 
 Options:
@@ -60,6 +62,7 @@ Effect options:
   --palette <name>     fire, ice, thunder, dark, holy, poison, blood, jade, or 4 colours
                        "#ffffff,#bff4ff,#4fd2ff,#1a5cff" (core, light, mid, dark)
   --variants <n>       several variations (different particles) in one pack
+  --mutate <0-1>       with --variants: also tweak the layer parameters of each variation
   --scale <n>          pixel style: enlarge n times with hard edges
   --sound [preset]     add the matching sound (same name, or the preset you give)
 
@@ -144,20 +147,32 @@ async function main() {
     const name = o._[1];
     if (!name || name === 'list') {
       console.log('\nEffects (sfxbrew vfx <effect>)');
-      V.LIST.forEach(k => console.log('  ' + k.padEnd(10) + V.EFFECTS[k].label + '  (' + V.EFFECTS[k].frames + ' frames)'));
+      V.LIST.forEach(k => console.log('  ' + k.padEnd(13) + V.EFFECTS[k].label + '  (' + V.EFFECTS[k].patch.frames + ' frames' + (V.EFFECTS[k].patch.loop ? ', loop' : '') + ')'));
+      console.log('\nYour own effect: sfxbrew vfx my-effect.json   (layers: sfxbrew vfx layers)');
       console.log('\nPalettes (--palette)\n  ' + Object.keys(V.THEMES).join(', '));
+      return;
+    }
+    if (name === 'layers') {
+      const d = V.describe();
+      if (o.json) { console.log(JSON.stringify(d, null, 2)); return; }
+      console.log('\n' + d.coordinates + '\n');
+      Object.entries(d.layers).forEach(([k, L]) => console.log('  ' + k.padEnd(8) + L.doc + '\n' + ' '.repeat(10) + Object.keys(L.params).join(', ')));
+      console.log('\nEvery layer also takes: ' + Object.keys(d.common).join(', ') + '\nFull reference with ranges: sfxbrew vfx layers --json');
       return;
     }
     const num = k => o[k] != null && o[k] !== true ? parseFloat(o[k]) : undefined;
     const pal = typeof o.palette === 'string' && o.palette.includes('#') ? o.palette.split(',').map(x => x.trim()) : o.palette;
+    let patch = null, effect = name;
+    if (/\.json$/i.test(name)) { patch = JSON.parse(require('fs').readFileSync(name, 'utf8')); effect = patch.name || path.basename(name).replace(/(\.vfx)?\.json$/i, ''); }
     const r = await require('./vfx-export.js').exportVfx({
-      effect: name, outDir: o.out || '.', style: o.style, size: num('size'), frames: num('frames'), seed: num('seed'),
+      effect, patch, outDir: o.out || '.', style: o.style, size: num('size'), frames: num('frames'), seed: num('seed'), mutate: num('mutate'),
       variants: num('variants'), palette: pal === true ? undefined : pal, speed: num('speed'), scale: num('scale'), withSound: o.sound
     });
     if (o.json) { console.log(JSON.stringify(r, null, 2)); return; }
+    const nm = path.basename(r.folder).replace(/^sfxbrew-vfx-/, '');
     console.log(path.relative('.', r.folder) + '/');
-    r.variants.forEach(v => console.log('  ' + path.relative(r.folder, v.sheet) + '  (' + v.frames + ' frames, ' + v.size + ' px, ' + v.fps + ' fps, seed ' + v.seed + ')'));
-    console.log('  godot/' + name + '.tscn, ' + r.variants.map(v => path.basename(v.atlas)).join(', ') + ', frames/' + (r.sound.length ? ', wav/ (' + r.sound.length + ' sounds)' : '') + ', README.txt');
+    r.variants.forEach(v => console.log('  ' + path.relative(r.folder, v.sheet) + '  (' + v.frames + ' frames, ' + v.size + ' px, ' + v.fps + ' fps' + (v.loop ? ', loop' : '') + ', seed ' + v.seed + ')'));
+    console.log('  godot/' + nm + '.tscn, ' + r.variants.map(v => path.basename(v.atlas)).join(', ') + ', frames/, preview/, patch/' + (r.sound.length ? ', wav/ (' + r.sound.length + ' sounds)' : '') + ', README.txt');
     return;
   }
 
