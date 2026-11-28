@@ -355,11 +355,13 @@ async function composeBand(styleId, opt) {
   const progB = customProg || progs[1];
   let phraseA1 = null, phraseA2 = null, phraseB = null;
   if (opt.neural !== false) {
+    const nOpt = { live: opt.neural === 'live' };
     try {
-      phraseA1 = await neural.sampleNeuralPhrase4(progA, root, scaleArr, meter, 0.85);
-      phraseA2 = await neural.sampleNeuralPhrase4(progA, root, scaleArr, meter, 0.9);
-      phraseB = await neural.sampleNeuralPhrase4(progB, root, scaleArr, meter, 0.95);
-    } catch (_) {
+      phraseA1 = await neural.sampleNeuralPhrase4(progA, root, scaleArr, meter, groove, rMel, nOpt);
+      phraseA2 = await neural.sampleNeuralPhrase4(progA, root, scaleArr, meter, groove, rMel, nOpt);
+      phraseB = await neural.sampleNeuralPhrase4(progB, root, scaleArr, meter, groove, rMel, nOpt);
+    } catch (e) {
+      if (!composeBand._warned) { composeBand._warned = true; process.stderr.write('sfxbrew: neural melody unavailable, using rule melody (' + e.message + ')\n'); }
       phraseA1 = null;
     }
   }
