@@ -582,18 +582,15 @@ ${analyticsTag()}
 const PAUSED = {
   en: { title: 'Text to sound effect is paused | SFX Brew', h: 'Text to sound effect is paused',
     p: 'AI generation from a text description is switched off for now. Everything else still works and is free: tweak a preset in the editor, grab ready-made sounds from the library, or let your coding agent make them with the MCP server.',
-    credits: 'Bought credits? Email contact@sfxbrew.com and we will sort it out.',
     links: [['editor', 'Open the editor'], ['library', 'Browse the library'], ['vfx', '2D effects']] },
   zh: { title: '文字生成音效已暂停 | SFX Brew', h: '文字生成音效已暂停',
     p: '用文字描述生成音效的 AI 功能暂时关闭了。其他功能照常免费：在音效编辑器里调预设、从音效库拿现成的声音，或者让 AI 编程助手通过 MCP 服务器帮你生成。',
-    credits: '买过点数？请发邮件到 contact@sfxbrew.com，我们会帮你处理。',
     links: [['editor', '打开音效编辑器'], ['library', '逛逛音效库'], ['vfx', '2D 特效']] }
 };
 function textSfxPage(lang) {
   const P = PAUSED[lang], href = { editor: editorUrl(lang), library: PREFIX[lang] + 'sounds/', vfx: vfxUrl(lang) };
   const body = '<article class="prose"><h1>' + esc(P.h) + '</h1><p>' + esc(P.p) + '</p><p class="home-cta">' +
-    P.links.map(([k, label], i) => '<a class="btn' + (i ? '' : ' primary') + '" href="' + href[k] + '">' + esc(label) + '</a>').join('') + '</p>' +
-    '<p class="muted">' + esc(P.credits) + '</p></article>';
+    P.links.map(([k, label], i) => '<a class="btn' + (i ? '' : ' primary') + '" href="' + href[k] + '">' + esc(label) + '</a>').join('') + '</p>' + '</article>';
   return { file: PREFIX[lang].slice(1) + 'lab/sfx/index.html', html: page(lang, { title: P.title, description: P.h, urlPath: textSfxUrl(lang), altPath: textSfxUrl(other(lang)),
     body, side: 'index', noAds: true, scripts: ' ', active: 'none' }).replace('</head>', '<meta name="robots" content="noindex">\n</head>') };
 }
