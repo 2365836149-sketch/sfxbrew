@@ -2,7 +2,7 @@
 name: sfxbrew
 description: Generate royalty-free game sound effects (coins, clicks, jumps, hits, explosions, sword slashes, footsteps, guqin, gongs, war drums, rain and more) locally with the free SFX Brew engine, as WAV files or a dependency-free JavaScript snippet, plus looping background music and short stingers. Use when the user asks for sound effects, SFX, background music, a victory or game-over jingle, audio feedback or "make it sound better" in a game or interactive app.
 summary: Add free, commercially usable sound effects and background music to any game straight from your coding agent.
-version: 1.4.0
+version: 1.5.0
 tags: [game-development, audio, sound-effects, game-music, gamedev, web-audio]
 keywords: [sound effects, sfx, game audio, game music, background music, music loop, stinger, wav, procedural audio, web audio, mcp, xianxia, wuxia, retro, medieval]
 use_cases:
@@ -77,6 +77,9 @@ Ambience and sustained sounds (`rain`, `wind`, `campfire`, `stream`, `caveDrip`,
 - `style: "pixel"` for pixel-art games (48 px, hard edges; `scale` 2-4 enlarges with nearest neighbour), otherwise smooth 128 px glow.
 - `palette`: `fire`, `ice`, `thunder`, `dark`, `holy`, `poison`, `blood`, `jade`, or 4 hex colours (core, light, mid, dark) to match the game.
 - `variants` gives several takes in one SpriteFrames (one animation each); `seed` reproduces one. People can preview and download the same packs at https://sfxbrew.com/vfx/ .
+- Presets: `swordQi`, `spell`, `hit`, `lightning`, `talisman`, `breakthrough`, `explosion`, `aura` (loop).
+
+**Custom effects.** When no preset fits, compose one: call `list_vfx_layers` once, then `generate_vfx` with `patch: { frames, fps, loop, palette, layers: [...] }`. Layers stack (later ones draw on top) and each plays from `start` to `end` on a 0-1 timeline. Typical recipes: impact = flash + glint + sparks; explosion = flash + burst + ring + smoke + debris; charge-up = swirl + flash (ease "in"), then a release ring; aura = sigil (squash 0.4) + swirl with `"loop": true`. Coordinates: x, y from -1 to 1 (0 = centre), sizes are fractions of the frame width. The result includes a preview image: look at it and adjust (too dim → intensity, clipped at the edge → smaller radius/speed, too busy → fewer particles). Invalid parameters come back as errors naming the layer and the allowed range. `mutate: 0.2-0.4` with `variants` gives clearly different takes.
 
 ## Music
 

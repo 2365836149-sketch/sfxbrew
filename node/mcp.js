@@ -4,7 +4,7 @@
    ----------------------------------------------------------------------------
    给 Claude Code / Cursor 等 agent 用：
      claude mcp add sfxbrew -- npx -y sfxbrew mcp
-   工具：list_presets / generate_sfx / render_patch / get_js_code / export_pack / generate_music / process_audio / analyze_audio / generate_vfx
+   工具：list_presets / generate_sfx / render_patch / get_js_code / export_pack / generate_music / process_audio / analyze_audio / generate_vfx / list_vfx_layers
    ★ 只写 .wav / .js 文件，防止 agent 传错路径把别的文件覆盖掉。
    ==========================================================================*/
 'use strict';
@@ -271,30 +271,47 @@ server.registerTool('analyze_audio', {
 const VFX = require('../vfx.js');
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 
+server.registerTool('list_vfx_layers', {
+  title: 'List 2D effect layers',
+  description: 'Everything needed to write your own effect for generate_vfx: the coordinate system, the patch fields, the parameters shared by every layer, ' +
+    'each layer type (' + Object.keys(VFX.LAYERS).join(', ') + ') with its parameters, ranges and defaults, the colour palettes, and the built-in presets as example patches. ' +
+    'Read it once before writing a patch.',
+  inputSchema: {},
+  annotations: { readOnlyHint: true }
+}, async () => ok(VFX.describe()));
+
 server.registerTool('generate_vfx', {
   title: 'Generate a 2D effect (sprite sheet)',
-  description: 'Render a procedural 2D visual effect (' + VFX.LIST.map(k => k + ': ' + VFX.EFFECTS[k].label).join('; ') + ') as transparent PNG frames and write a ready-to-use folder: ' +
+  description: 'Render a 2D visual effect as transparent PNG frames and write a ready-to-use folder: ' +
     'a sprite sheet (<name>_strip<N>.png, GameMaker auto-slices it), single frames, a TexturePacker-format atlas JSON (Phaser load.atlas, PixiJS Assets.load), ' +
-    'Godot 4 SpriteFrames .tres plus a .tscn scene that plays the effect and its sound and frees itself, and a README with Unity/Phaser/Pixi/GameMaker steps. ' +
-    'with_sound adds the matching SFX Brew sound (same name) as WAV variations. Free for commercial use.',
+    'Godot 4 SpriteFrames .tres plus a .tscn scene that plays the effect and its sound (one-shots free themselves, loops keep playing), the patch JSON, and a README with Unity/Phaser/Pixi/GameMaker steps. ' +
+    'Either pick a preset (' + VFX.LIST.map(k => k + ': ' + VFX.EFFECTS[k].label).join('; ') + ') or compose your own effect from layers with `patch` (see list_vfx_layers). ' +
+    'The result includes a preview image of 6 frames so you can check the look and adjust the patch. with_sound adds a matching SFX Brew sound as WAV variations. Free for commercial use.',
   inputSchema: {
-    effect: z.enum(VFX.LIST).describe('Effect name'),
-    out_dir: z.string().describe('Folder to write into, e.g. "assets/fx"; files go to <out_dir>/sfxbrew-vfx-<effect>/'),
+    effect: z.string().optional().describe('Preset name (' + VFX.LIST.join(', ') + '); with a patch it is just the file name'),
+    patch: z.record(z.any()).optional().describe('Your own effect: { "frames": 12, "fps": 24, "loop": false, "palette": "fire", "layers": [ { "type": "flash" }, { "type": "sparks", "count": 20 } ] }. See list_vfx_layers.'),
+    out_dir: z.string().describe('Folder to write into, e.g. "assets/fx"; files go to <out_dir>/sfxbrew-vfx-<name>/'),
     style: z.enum(['hd', 'pixel']).optional().describe('hd = smooth glow (default 128 px), pixel = pixel art (default 48 px, 5 colours, hard edges)'),
     size: z.number().int().min(8).max(512).optional().describe('Frame width/height in px'),
-    frames: z.number().int().min(2).max(60).optional().describe('Number of frames (duration stays the same)'),
+    frames: z.number().int().min(2).max(120).optional().describe('Number of frames (duration stays the same)'),
     speed: z.number().min(0.25).max(4).optional().describe('Playback speed multiplier (changes fps)'),
-    palette: z.union([z.enum(Object.keys(VFX.THEMES)), z.array(hexColor).length(4)]).optional().describe('Colour theme name or 4 colours [core, light, mid, dark]; default is the effect\'s own colours'),
-    variants: z.number().int().min(1).max(10).optional().describe('Number of variations (different particles); the Godot scene picks one at random each play'),
+    palette: z.union([z.enum(Object.keys(VFX.THEMES)), z.array(hexColor).length(4)]).optional().describe('Colour theme name or 4 colours [core, light, mid, dark]; overrides the effect\'s own colours'),
+    variants: z.number().int().min(1).max(10).optional().describe('Number of variations; the Godot scene picks one at random each play'),
+    mutate: z.number().min(0).max(1).optional().describe('0-1: each variation also randomly tweaks the numeric layer parameters by this much (bigger differences than a new seed)'),
     seed: z.number().int().optional().describe('Seed for a reproducible result; variant i uses seed + i'),
     scale: z.number().int().min(1).max(8).optional().describe('Pixel style only: enlarge by this factor with hard edges'),
-    with_sound: z.union([z.boolean(), z.enum(presetIds)]).optional().describe('true = add the sound preset with the same name; or a preset id to pair a different sound')
+    with_sound: z.union([z.boolean(), z.enum(presetIds)]).optional().describe('true = add the paired sound (the preset\'s own, or patch.sound); or a sound preset id'),
+    preview: z.boolean().optional().describe('Return the preview image in the result (default true)')
   },
   annotations: { destructiveHint: false }
 }, async (a) => {
   try {
-    const r = await require('./vfx-export.js').exportVfx({ effect: a.effect, outDir: a.out_dir, style: a.style, size: a.size, frames: a.frames, speed: a.speed, palette: a.palette, variants: a.variants, seed: a.seed, scale: a.scale, withSound: a.with_sound });
-    return ok({ folder: r.folder, variants: r.variants, sound: r.sound, godot_scene: path.join(r.folder, 'godot', a.effect + '.tscn'), readme: path.join(r.folder, 'README.txt') });
+    if (!a.effect && !a.patch) throw new Error('give either effect (a preset name) or patch (your own layers, see list_vfx_layers)');
+    const r = await require('./vfx-export.js').exportVfx({ effect: a.effect, patch: a.patch, outDir: a.out_dir, style: a.style, size: a.size, frames: a.frames, speed: a.speed, palette: a.palette, variants: a.variants, mutate: a.mutate, seed: a.seed, scale: a.scale, withSound: a.with_sound });
+    const name = path.basename(r.folder).replace(/^sfxbrew-vfx-/, '');
+    const res = ok({ folder: r.folder, variants: r.variants, sound: r.sound, godot_scene: path.join(r.folder, 'godot', name + '.tscn'), readme: path.join(r.folder, 'README.txt'), patch: r.patch });
+    if (a.preview !== false) res.content.push({ type: 'image', mimeType: 'image/png', data: require('fs').readFileSync(r.variants[0].preview).toString('base64') });
+    return res;
   } catch (e) { return fail(e.message); }
 });
 
