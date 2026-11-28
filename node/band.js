@@ -13,6 +13,7 @@
 const { Note, Chord } = require('tonal');
 const sf2 = require('./sf2.js');
 const neural = require('./neural.js');
+const drums = require('./drums.js');
 
 /* 解析自定义和弦名数组（如 ['Dm7', 'G7', 'Cmaj7', 'A7']）为相对 root 的半音偏移 */
 function parseChordProg(chordNames, root) {
@@ -345,23 +346,33 @@ async function composeBand(styleId, opt) {
   const beat = 60 / tempo;
   const inst = Object.assign({}, base.instruments, opt.instruments || {});
   const jit = () => (r() - 0.5) * 0.025 * humanize;
+  // 主旋律用独立的随机数流：旋律音符数量变化（如开关 MusicVAE）不会牵动其他声部的抖动
+  const rMel = rng((seed ^ 0x5bd1e995) | 0);
+  const jitMel = () => (rMel() - 0.5) * 0.025 * humanize;
   const sw = b => (swing && Math.abs((b % 1) - 0.5) < 0.05) ? swing * beat : 0;
 
   const progA = customProg || progs[0];
   const progB = customProg || progs[1];
   let phraseA1 = null, phraseA2 = null, phraseB = null;
   if (opt.neural !== false) {
+    const nOpt = { live: opt.neural === 'live' };
     try {
-      phraseA1 = await neural.sampleNeuralPhrase4(progA, root, scaleArr, meter, 0.85);
-      phraseA2 = await neural.sampleNeuralPhrase4(progA, root, scaleArr, meter, 0.9);
-      phraseB = await neural.sampleNeuralPhrase4(progB, root, scaleArr, meter, 0.95);
-    } catch (_) {
+      phraseA1 = await neural.sampleNeuralPhrase4(progA, root, scaleArr, meter, groove, rMel, nOpt);
+      phraseA2 = await neural.sampleNeuralPhrase4(progA, root, scaleArr, meter, groove, rMel, nOpt);
+      phraseB = await neural.sampleNeuralPhrase4(progB, root, scaleArr, meter, groove, rMel, nOpt);
+    } catch (e) {
+      if (!composeBand._warned) { composeBand._warned = true; process.stderr.write('sfxbrew: neural melody unavailable, using rule melody (' + e.message + ')\n'); }
       phraseA1 = null;
     }
   }
-  if (!phraseA1 || !phraseA1.length) phraseA1 = makePhrase4(r, progA, root, scaleArr, meter, groove, false);
-  if (!phraseA2 || !phraseA2.length) phraseA2 = makePhrase4(r, progA, root, scaleArr, meter, groove, true);
-  if (!phraseB || !phraseB.length) phraseB = makePhrase4(r, progB, root, scaleArr, meter, groove, false);
+  // 规则旋律总是生成一遍（即使用了神经旋律），让随机数序列保持一致：
+  // 同一个 seed 下，开不开 MusicVAE 只改变主旋律，伴奏、鼓和人性化抖动完全相同
+  const ruleA1 = makePhrase4(r, progA, root, scaleArr, meter, groove, false);
+  const ruleA2 = makePhrase4(r, progA, root, scaleArr, meter, groove, true);
+  const ruleB = makePhrase4(r, progB, root, scaleArr, meter, groove, false);
+  if (!phraseA1 || !phraseA1.length) phraseA1 = ruleA1;
+  if (!phraseA2 || !phraseA2.length) phraseA2 = ruleA2;
+  if (!phraseB || !phraseB.length) phraseB = ruleB;
 
   const padNotes = [], accompNotes = [], melodyNotes = [], counterNotes = [], bassNotes = [], drumNotes = [];
   let prevVoicing = null;
@@ -476,8 +487,11 @@ async function composeBand(styleId, opt) {
       drumNotes.push({ time: tBar + 2 * beat + jit(), dur: 0.1, midi: 42, vel: 0.48 * energy });
     } else if (groove === 'march') {
       [0, 2].forEach(p => drumNotes.push({ time: tBar + p * beat, dur: 0.25, midi: 36, vel: 0.95 * energy }));
-      drumNotes.push({ time: tBar + 3 * beat, dur: 0.15, midi: 38, vel: 0.8 * energy });
-      [3.33, 3.66].forEach(p => drumNotes.push({ time: tBar + p * beat, dur: 0.12, midi: 38, vel: 0.68 * energy }));
+      // 加花小节由下方的过门接管最后一拍，避免军鼓三连音和 16 分过门叠在一起
+      if (!isFill) {
+        drumNotes.push({ time: tBar + 3 * beat, dur: 0.15, midi: 38, vel: 0.8 * energy });
+        [1 / 3, 2 / 3].forEach(p => drumNotes.push({ time: tBar + (3 + p) * beat, dur: 0.12, midi: 38, vel: 0.68 * energy }));
+      }
     } else if (groove === 'ambient') {
       if (bar % 2 === 0) drumNotes.push({ time: tBar, dur: 0.8, midi: 49, vel: 0.42 * energy });
     } else {
@@ -494,13 +508,16 @@ async function composeBand(styleId, opt) {
         if (hit) drumNotes.push({ time: tBar + step * 0.25 * beat + jit(), dur: 0.06, midi: 70, vel: 0.28 * energy });
       });
     }
-    if (isFill && groove !== 'waltz' && groove !== 'ambient') {
+    if (hasDrums && isFill && groove !== 'waltz' && groove !== 'ambient') {
       const fBase = tBar + (meter - 1) * beat;
-      [0, 0.25, 0.5, 0.75].forEach((sub, ti) => drumNotes.push({
-        time: fBase + sub * beat, dur: 0.12, midi: [48, 45, 43, 38][ti], vel: (0.7 + ti * 0.07) * energy
+      // 进行曲用三连音过门，和它每小节的军鼓三连音同一种律动
+      const subs = groove === 'march' ? [0, 1 / 3, 2 / 3] : [0, 0.25, 0.5, 0.75];
+      const toms = groove === 'march' ? [48, 45, 38] : [48, 45, 43, 38];
+      subs.forEach((sub, ti) => drumNotes.push({
+        time: fBase + sub * beat, dur: 0.12, midi: toms[ti], vel: (0.7 + ti * 0.07) * energy, fill: true
       }));
     }
-    if (bar % 4 === 0 && bar > 0 && groove !== 'ambient') drumNotes.push({ time: tBar, dur: 0.7, midi: 49, vel: 0.72 * energy });
+    if (hasDrums && bar % 4 === 0 && bar > 0 && groove !== 'ambient') drumNotes.push({ time: tBar, dur: 0.7, midi: 49, vel: 0.72 * energy });
 
     // 5. Melody & optional Counter-melody
     if (inst.melody) {
@@ -510,7 +527,7 @@ async function composeBand(styleId, opt) {
       barNotes.forEach((n, ni) => {
         const shift = (secName === 'A2' || secName === 'C') ? 12 : 0;
         const midiNote = n.midi + shift;
-        const tNote = tBar + n.beat * beat + sw(n.beat) + jit();
+        const tNote = tBar + n.beat * beat + sw(n.beat) + jitMel();
         const isPhraseEnd = (barInPhrase === 3 && ni === barNotes.length - 1);
         if (groove === 'trap' && ni === 0 && bar % 2 === 0 && inst.melody === 'koto') {
           melodyNotes.push({ time: Math.max(0, tNote - 0.11), dur: 0.07, midi: midiNote - 5, vel: 0.55 * energy });
@@ -522,7 +539,7 @@ async function composeBand(styleId, opt) {
           dur: n.dur * beat * (isPhraseEnd ? 0.82 : 1.02),
           midi: midiNote,
           scoop: n.dur >= 1.0 && ni === 0 && barInPhrase % 2 === 0,
-          vel: Math.min(1, (0.76 + (r() - 0.5) * 0.12) * energy * dyn)
+          vel: Math.min(1, (0.76 + (rMel() - 0.5) * 0.12) * energy * dyn)
         });
       });
     }
@@ -544,10 +561,14 @@ async function composeBand(styleId, opt) {
   if (inst.melody) tracks.push({ name: 'melody', instrument: inst.melody, pan: 0.2, volume: 0.9, reverb: reverb * 0.9, expressive: true, legato: LEGATO_INSTS.has(inst.melody), notes: melodyNotes });
   if (inst.counter && counterNotes.length) tracks.push({ name: 'counter', instrument: inst.counter, pan: -0.35, volume: 0.72, reverb: reverb * 0.95, expressive: true, notes: counterNotes });
   if (inst.bass) tracks.push({ name: 'bass', instrument: inst.bass, pan: 0, volume: 0.88, reverb: 0.08, notes: bassNotes });
-  if (inst.drums) tracks.push({ name: 'drums', instrument: inst.drums, pan: 0, volume: 0.9, reverb: 0.18, notes: drumNotes });
+  // 所有鼓点生成完后统一仲裁冲突（见 drums.js），以后新增律动也自动受保护
+  const cleanDrums = drums.resolveDrums(drumNotes, { beat, meter }).notes;
+  if (inst.drums) tracks.push({ name: 'drums', instrument: inst.drums, pan: 0, volume: 0.9, reverb: 0.18, notes: cleanDrums });
 
   return {
     seed,
+    beat,
+    meter,
     bars,
     duration: bars * meter * beat,
     tracks
