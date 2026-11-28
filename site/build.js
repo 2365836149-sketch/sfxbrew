@@ -226,13 +226,13 @@ function llmsTxt() {
 - Make or tweak a sound in the browser: https://sfxbrew.com/editor/
 - Let an AI coding agent add sound effects to a game: the MCP server below
 - Procedural game music, Eastern (guqin, pipa, erhu, pentatonic) and Western (8-bit, guitars, drum kit): https://sfxbrew.com/lab/
-- Free 2D game effects (sword qi, spell, hit) with matching sounds, as a pack for Godot 4, Unity, Phaser, PixiJS or GameMaker: https://sfxbrew.com/vfx/
+- Free 2D game effects (sword qi, spell, hit, lightning, talisman, breakthrough, explosion, looping aura) with matching sounds, as a pack for Godot 4, Unity, Phaser, PixiJS or GameMaker: https://sfxbrew.com/vfx/
 
 ## Use it from an AI coding agent
 
 - MCP server (local, stdio, no network): \`npx -y sfxbrew mcp\` (older form \`npx -y -p sfxbrew sfxbrew-mcp\` also works). Listed in the official MCP Registry as \`com.sfxbrew/sfxbrew\`.
   - Claude Code: \`claude mcp add sfxbrew -- npx -y sfxbrew mcp\`
-  - Tools: \`list_presets\`, \`generate_sfx\` (writes WAV files, returns seeds and patch JSON), \`render_patch\` (custom patch to WAV), \`get_js_code\` (one JS snippet with playX() functions), \`process_audio\` / \`analyze_audio\` (clean up any existing audio: loudness, trim, slice, seamless loops, sprites), \`generate_vfx\` (2D effect sprite sheets with Godot/Phaser/Unity files and the matching sound)
+  - Tools: \`list_presets\`, \`generate_sfx\` (writes WAV files, returns seeds and patch JSON), \`render_patch\` (custom patch to WAV), \`get_js_code\` (one JS snippet with playX() functions), \`process_audio\` / \`analyze_audio\` (clean up any existing audio: loudness, trim, slice, seamless loops, sprites), \`list_vfx_layers\` / \`generate_vfx\` (2D effect sprite sheets from a preset or your own JSON patch of 14 layer types, with Godot/Phaser/Unity files, the matching sound and a preview image)
 - CLI: \`npx sfxbrew <preset> --out assets/sfx/name.wav [--count n] [--seed n] [--js src/sfx.js]\`; \`npx sfxbrew list\`
 - npm package: https://www.npmjs.com/package/sfxbrew
 - Agent skill (SKILL.md): https://github.com/2365836149-sketch/sfxbrew/tree/main/skills/sfxbrew , also on Agensi: https://www.agensi.io/skills/sfx-brew-game-sound-effects
